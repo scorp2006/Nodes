@@ -12,6 +12,7 @@ Runs against its own FalkorDB (same image digest, port 6390), so a running batch
      (c) no function's version went above 1 (a successful claim bumps it, so >1 means it was claimed twice).
 
   .venv-cb/Scripts/python verify/scale_test.py > results/verify/scale_test.txt
+  .venv-cb/Scripts/python verify/scale_test.py --nodes > results/verify/scale_test_nodes.txt   # step 3 against nodes/server.py
 """
 import asyncio
 import random
@@ -113,6 +114,14 @@ from falkordb import FalkorDB
 import coop_tools as ct
 ct.build_server(FalkorDB(host="localhost", port={PORT_DB}), "graph").run("streamable-http", host="127.0.0.1", port={PORT_SRV})
 """
+NODES_SERVER = f"""
+import sys; sys.path.insert(0, r"{HERE.parent}")
+from pathlib import Path
+from nodes import server
+server.run("{GRAPH}", Path(r"{HERE.parent}"), db_port={PORT_DB}, port={PORT_SRV}, web_port={PORT_SRV + 1})
+"""
+NODES = "--nodes" in sys.argv
+STATUS = "status" if NODES else "coordination_status"
 
 
 async def agent(i, pool, rounds, lat, won):
@@ -133,21 +142,22 @@ async def agent(i, pool, rounds, lat, won):
                     if first != "nothing new":
                         won.setdefault(me, set()).update(first.split(", "))
                     t0 = time.perf_counter()
-                    await s.call_tool("coordination_status", {})
-                    lat["coordination_status"].append(time.perf_counter() - t0)
+                    await s.call_tool(STATUS, {})
+                    lat[STATUS].append(time.perf_counter() - t0)
 
 
 def concurrency(g, names):
     rng = random.Random(2)
     pool = rng.sample(names, 300)
-    proc = subprocess.Popen([sys.executable, "-c", SERVER], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen([sys.executable, "-c", NODES_SERVER if NODES else SERVER], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         time.sleep(5)
-        print("\nconcurrency (real tool server, one MCP session per agent, 10 rounds of claim + coordination_status):")
+        print(f"\nconcurrency ({'nodes/server.py' if NODES else 'coop/coop_tools.py'}, one MCP session per agent, "
+              f"10 rounds of claim + {STATUS}):")
         for n in (10, 50, 100):
             g.query("MATCH (f:Function) SET f.claimed_by = NULL, f.version = 0")
             g.query("MATCH (a:Agent) DETACH DELETE a")
-            lat, won = {"claim": [], "coordination_status": []}, {}
+            lat, won = {"claim": [], STATUS: []}, {}
 
             async def run():
                 await asyncio.gather(*(agent(i, pool, 10, lat, won) for i in range(n)))
@@ -155,7 +165,7 @@ def concurrency(g, names):
             t0 = time.perf_counter()
             asyncio.run(run())
             wall = time.perf_counter() - t0
-            calls = len(lat["claim"]) + len(lat["coordination_status"])
+            calls = len(lat["claim"]) + len(lat[STATUS])
             # (a) disjoint winners, (b) DB agrees, (c) nothing claimed twice
             seen, dup = {}, 0
             for a, fs in won.items():
@@ -179,5 +189,8 @@ def concurrency(g, names):
 
 if __name__ == "__main__":
     g, names = build()
-    conflicts(g, names)
+    if NODES:  # the index nodes.core.load_repo creates (the graph here is built by world_graph.load)
+        g.query("CREATE INDEX FOR (f:Function) ON (f.claimed_by)")
+    else:
+        conflicts(g, names)
     concurrency(g, names)

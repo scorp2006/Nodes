@@ -1,0 +1,20 @@
+stdlib: C:\Users\Sri Vihas\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\Lib  (Python 3.12.11)
+files parsed 690, skipped (not UTF-8 Python) 0
+parser stats: {'files': 628, 'functions': 15128, 'call_edges': 9532, 'call_sites_resolved': 11426, 'call_sites_unresolved': 26926}
+graph: 15713 nodes, 24617 edges
+parse 6.8 s, load into FalkorDB 0.6 s
+GRAPH.MEMORY USAGE: ['total_graph_sz_mb', 5, 'label_matrices_sz_mb', 0, 'relation_matrices_sz_mb', 0, 'amortized_node_block_sz_mb', 0, 'amortized_node_attributes_by_label_sz_mb', ['Function', 1, 'File', 0, 'Agent', 0], 'amortized_unlabeled_nodes_attributes_sz_mb', 0, 'amortized_edge_block_sz_mb', 0, 'amortized_edge_attributes_by_type_sz_mb', ['CONTAINS', 0, 'CALLS', 0], 'indices_sz_mb', 2]
+
+concurrency (nodes/server.py, one MCP session per agent, 10 rounds of claim + status):
+  N= 10: 200 calls in 4.7 s = 42 calls/s
+         claim                p50    77.6 ms   p99  2223.2 ms   (n=100)
+         status               p50    90.9 ms   p99  2154.0 ms   (n=100)
+         pool functions claimed 249/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0
+  N= 50: 1000 calls in 8.4 s = 119 calls/s
+         claim                p50   252.2 ms   p99  2336.9 ms   (n=500)
+         status               p50   262.2 ms   p99  2349.6 ms   (n=500)
+         pool functions claimed 300/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0
+  N=100: 2000 calls in 16.0 s = 125 calls/s
+         claim                p50   629.0 ms   p99  1969.5 ms   (n=1000)
+         status               p50   616.5 ms   p99   970.3 ms   (n=1000)
+         pool functions claimed 300/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0
