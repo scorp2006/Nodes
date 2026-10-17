@@ -30,8 +30,9 @@ def flatten(messages: list[dict[str, str]]) -> tuple[str, str]:
 
 
 class ClaudeCLIClient:
-    def __init__(self, model: str, allowed_tools: str = "", timeout: int = 300, retries: int = 3):
+    def __init__(self, model: str, allowed_tools: str = "", timeout: int = 300, retries: int = 3, effort: str | None = None):
         self.model_name = model
+        self.effort = effort  # Claude Code --effort; None keeps the CLI default (as in test1)
         self.allowed_tools = allowed_tools
         # HiddenBench only hands us messages, so an agent is identified by its
         # system prompt (unique per agent: it holds that agent's facts).
@@ -52,6 +53,8 @@ class ClaudeCLIClient:
         cmd = ["claude", "-p", "--setting-sources", "", "--disable-slash-commands",
                "--system-prompt", system, "--tools", "", "--strict-mcp-config",
                "--no-session-persistence", "--output-format", "json", "--model", self.model_name]
+        if self.effort:
+            cmd += ["--effort", self.effort]
         mcp_config = self.mcp_for_system.get(system)
         if mcp_config:
             cmd += ["--mcp-config", mcp_config, "--allowedTools", self.allowed_tools]

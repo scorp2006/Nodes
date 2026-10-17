@@ -114,7 +114,7 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
     seed = _scenario_seed(args.seed, task_index, dup)
     extra = EXTRA[args.condition]
     tools = TOOLS.get(args.condition, [])
-    client = ClaudeCLIClient(args.model, allowed_tools=" ".join(f"mcp__board__{t}" for t in tools))
+    client = ClaudeCLIClient(args.model, effort=args.effort, allowed_tools=" ".join(f"mcp__board__{t}" for t in tools))
     work = out_dir / "work" / args.condition / f"t{task.id}_d{dup}"
     graph = None
     try:
@@ -173,6 +173,7 @@ def main():
     ap.add_argument("--out", required=True, help="batch folder, e.g. runs/dev1")
     ap.add_argument("--profile", default="hidden", choices=["hidden", "full"])
     ap.add_argument("--model", default="claude-haiku-5-5")
+    ap.add_argument("--effort", choices=["low", "medium", "high"], help="Claude Code --effort (default: CLI default)")
     ap.add_argument("--rounds", type=int, default=15)
     ap.add_argument("--duplications", type=int, default=1)
     ap.add_argument("--seed", type=int, default=2026)
