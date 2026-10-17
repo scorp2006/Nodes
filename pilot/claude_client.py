@@ -28,11 +28,12 @@ def flatten(messages: list[dict[str, str]]) -> tuple[str, str]:
 
 
 class ClaudeCLIClient:
-    def __init__(self, model: str, mcp_config: str | None = None, allowed_tools: str = "",
-                 timeout: int = 300, retries: int = 2):
+    def __init__(self, model: str, allowed_tools: str = "", timeout: int = 300, retries: int = 2):
         self.model_name = model
-        self.mcp_config = mcp_config
         self.allowed_tools = allowed_tools
+        # HiddenBench only hands us messages, so an agent is identified by its
+        # system prompt (unique per agent: it holds that agent's facts).
+        self.mcp_for_system: dict[str, str] = {}
         self.timeout = timeout
         self.retries = retries
         self.calls: list[dict] = []
@@ -44,8 +45,9 @@ class ClaudeCLIClient:
         cmd = ["claude", "-p", "--setting-sources", "", "--disable-slash-commands",
                "--system-prompt", system, "--tools", "", "--strict-mcp-config",
                "--no-session-persistence", "--output-format", "json", "--model", self.model_name]
-        if self.mcp_config:
-            cmd += ["--mcp-config", self.mcp_config, "--allowedTools", self.allowed_tools]
+        mcp_config = self.mcp_for_system.get(system)
+        if mcp_config:
+            cmd += ["--mcp-config", mcp_config, "--allowedTools", self.allowed_tools]
         if schema:
             cmd += ["--json-schema", json.dumps(schema)]
         last_err = ""
@@ -67,6 +69,7 @@ class ClaudeCLIClient:
                     "cost_usd": out.get("total_cost_usd", 0.0),
                     "duration_ms": out.get("duration_ms"),
                     "num_turns": out.get("num_turns"),
+                    "tools_attached": mcp_config is not None,
                 })
             return out
         raise RuntimeError(f"claude -p failed after {self.retries + 1} attempts: {last_err}")
