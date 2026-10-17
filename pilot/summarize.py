@@ -1,6 +1,7 @@
-"""Summarize a batch folder: accuracy per condition, paired comparison vs baseline, cost.
+"""Summarize a batch folder: accuracy per condition, pre-registered paired comparisons, cost.
 
   python pilot/summarize.py runs/dev1
+  python pilot/summarize.py runs/test1 --exclude t1_d0 t2_d0 t3_d0
 """
 from __future__ import annotations
 
@@ -58,14 +59,15 @@ PAIRS = [
 ]
 
 
-def summarize(batch: Path) -> str:
-    data = load(batch)
+def summarize(batch: Path, exclude: set[str] = frozenset()) -> str:
+    data = {c: {t: r for t, r in runs.items() if t not in exclude} for c, runs in load(batch).items()}
     # Drop-from-all rule: only tasks finished in every condition are counted anywhere.
     complete = set.intersection(*(set(runs) for runs in data.values()))
     dropped = sorted(set().union(*(set(runs) for runs in data.values())) - complete)
     data = {c: {t: r for t, r in runs.items() if t in complete} for c, runs in data.items()}
 
-    lines = [f"Batch: {batch}", f"Tasks complete in all {len(data)} conditions: {len(complete)}"
+    lines = [f"Batch: {batch}" + (f"  (excluded by plan: {', '.join(sorted(exclude))})" if exclude else ""),
+             f"Tasks complete in all {len(data)} conditions: {len(complete)}"
              + (f" (dropped from every condition: {', '.join(dropped)})" if dropped else ""), ""]
     lines.append(f"{'condition':17} {'runs':>4}  {'group right':>16}  {'95% CI':>13}  "
                  f"{'agents right before->after':>27}  {'list $':>7}")
@@ -117,4 +119,6 @@ def demo() -> None:
 
 if __name__ == "__main__":
     demo()
-    print(summarize(Path(sys.argv[1])))
+    args = sys.argv[1:]
+    excluded = set(args[args.index("--exclude") + 1:]) if "--exclude" in args else set()
+    print(summarize(Path(args[0]), excluded))
