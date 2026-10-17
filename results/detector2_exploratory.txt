@@ -1,0 +1,5 @@
+EXPLORATORY (not pre-registered): is the secondary AUC just 'same function edited'?
+all eligible held-out pairs: n = 84, failures = 45
+  same function edited (binary): AUC 0.840 [95% CI 0.760-0.916], flag precision 0.82 (41.0/50.0), recall 0.91 (41.0/45)
+  d_calls: failures/pairs by distance: 0: 41/50, 1: 0/3, 3: 0/2, 7: 4/29
+  d_calls_state: failures/pairs by distance: 0: 41/50, 1: 0/6, 2: 2/13, 3: 0/2, 7: 2/13
