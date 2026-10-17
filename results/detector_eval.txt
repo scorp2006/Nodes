@@ -19,3 +19,6 @@ Reading: function-level overlap is common (about 3 in 4 pairs) but rarely become
 detector cannot predict textual conflicts. Against "merged tree fails", it beats the base rate by about 8 points,
 but the call-graph extension adds nothing over "same function edited". 28 pairs had a patch that touched no
 function (module-level or non-Python changes), which this method can't see.
+
+RETRACTED (see results/preregistration_detector2.md): ground truth A came from the published Dec-2025 merge
+reports, which used an older union-merge policy. Under the current evaluator the same published patches conflict.
