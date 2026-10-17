@@ -131,7 +131,13 @@ def mark_done(g, agent: str, commit: str) -> int:
 
 
 def conflicts(g, agent: str, limit: int = 10) -> list:
-    return g.ro_query(CONFLICTS, {"me": agent, "limit": limit}).result_set
+    """Overlaps, shortest path only per (teammate, my function, their function)."""
+    seen, out = set(), []
+    for row in g.ro_query(CONFLICTS, {"me": agent, "limit": 4 * limit}).result_set:  # ordered by hops
+        if tuple(row[:3]) not in seen:
+            seen.add(tuple(row[:3]))
+            out.append(row)
+    return out[:limit]
 
 
 def digest(g, agent: str) -> str:
@@ -226,7 +232,8 @@ def state(g) -> dict:
     for a in agents:
         for other, mine, theirs, hops, via in conflicts(g, a["id"], limit=5):
             if a["id"] < other:
-                paths.append({"a": a["id"], "b": other, "mine": mine, "theirs": theirs, "hops": hops, "via": via})
+                paths.append({"a": a["id"], "b": other, "mine": mine, "theirs": theirs, "hops": hops,
+                              "via": via[:-2]})  # drop the Step and Agent at the end of the path
     board = [{"agent": a, "text": t, "source": s, "checked": c} for a, t, s, c in facts(g)]
     size = g.ro_query("MATCH (f:Function) RETURN count(f)").result_set[0][0]
     return {"agents": agents, "conflicts": paths, "facts": board, "functions": size}

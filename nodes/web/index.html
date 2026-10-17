@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nodes live</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6e6e73;--line:#e3e3e0;--ok:#1f8a4c;--warn:#b25000;--bad:#c62828;--accent:#3b5bdb}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--card:#1c1c1f;--ink:#f2f2f2;--mute:#9a9aa0;--line:#2c2c30;--ok:#4cc38a;--warn:#ffb057;--bad:#ff6b6b;--accent:#8ea2ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+header{padding:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h1{font-size:20px;margin:0}
+.mute{color:var(--mute);font-size:13px}
+main{display:grid;gap:12px;padding:0 16px 24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+.agent{border-top:1px solid var(--line);padding:8px 0}.agent:first-of-type{border-top:0}
+.name{font-weight:600}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font:12px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.own{border-color:var(--accent);color:var(--accent)}
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:6px 0 2px}
+.arrow{color:var(--mute)}
+.hops{font-weight:600;color:var(--warn)}.hops.zero{color:var(--bad)}
+.fact{border-top:1px solid var(--line);padding:8px 0}.fact:first-of-type{border-top:0}
+.tag{font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px}
+.yes{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.no{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
+.empty{color:var(--mute);font-style:italic}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Nodes <span class="mute">live team graph</span></h1>
+  <span class="mute" id="meta">connecting…</span>
+</header>
+<main>
+  <section><h2>Agents, plans and claims</h2><div id="agents"></div></section>
+  <section><h2>Conflict paths</h2><div id="conflicts"></div></section>
+  <section><h2>Board: source-checked facts</h2><div id="facts"></div></section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const chips = (xs, cls = "") => xs.length ? `<div class="chips">${xs.map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join("")}</div>` : "";
+function render(s) {
+  $("meta").textContent = `${s.agents.length} agents · ${s.functions} functions · updated ${new Date().toLocaleTimeString()}`;
+  $("agents").innerHTML = s.agents.map(a => `<div class="agent">
+      <span class="name">${esc(a.id)}</span>${a.commit ? ` <span class="tag yes">done ${esc(a.commit.slice(0, 10))}</span>` : ""}
+      <div class="mute">plans</div>${chips(a.plan) || '<div class="empty">no plan yet</div>'}
+      ${a.owns.length ? `<div class="mute">owns</div>${chips(a.owns, "own")}` : ""}</div>`).join("")
+    || '<div class="empty">No agent has connected yet.</div>';
+  $("conflicts").innerHTML = s.conflicts.map(c => `<div class="agent">
+      <span class="name">${esc(c.a)}</span> vs <span class="name">${esc(c.b)}</span>:
+      <span class="hops ${c.hops ? "" : "zero"}">${c.hops ? c.hops + " call(s) apart" : "same function"}</span>
+      <div class="path">${c.via.map(esc).map(v => `<code class="chip">${v}</code>`).join('<span class="arrow">→</span>')}</div></div>`).join("")
+    || '<div class="empty">No overlapping plans within 3 calls.</div>';
+  $("facts").innerHTML = s.facts.map(f => `<div class="fact">
+      <span class="tag ${f.checked ? "yes" : "no"}">${f.checked ? "source-checked" : "not checked"}</span>
+      <span class="name">${esc(f.agent)}</span> <span class="mute">${esc(f.source)}</span><div>${esc(f.text)}</div></div>`).join("")
+    || '<div class="empty">The board is empty.</div>';
+}
+async function tick() {
+  try { render(await (await fetch("/api/state")).json()); }
+  catch (e) { $("meta").textContent = "server not reachable, retrying…"; }
+  setTimeout(tick, 1500);
+}
+tick();
+</script>
+</body>
+</html>

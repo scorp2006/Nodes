@@ -1,0 +1,969 @@
+{
+ "task": "t7_d0",
+ "graph": {
+  "scenario": "graetz_et_al_1998",
+  "correct_answer": "Starlight Incorporated",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Starlight Incorporated",
+    "rationale": "Franklin Enterprises fails at least four criteria: (a) truck fit, (c) 90-minute recovery and redeployment, (i) past performance, and (j) manufacturing capacity. Cape Industries fails at least four: (b) 30-minute sweep, (f) 10-pound weight limit, (g) 1,000-hour reliability, and (h) the $7M cost cap. Starlight's only known failures are (a) and (c), and it meets (e) and (h), so it has the fewest confirmed failures and is the best choice on the available information."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Cape Industries",
+    "rationale": "Cape has the most confirmed passes (c, d, e, i, j), and its known failures are reliability (g) and cost (h). Franklin fails four known criteria (a, b, i, j), and Starlight fails two air-vehicle criteria (a, c). Cape's unknowns (a, b, f) could still pass, so it is the strongest remaining candidate, though its cost failure is a serious concern."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Starlight Incorporated",
+    "rationale": "Each proposal has at least one known failure, so none is a clean match. Starlight fails only two known criteria, (a) and (c), against three for Cape Industries ((b), (f), (g)) and four for Franklin Enterprises ((b), (c), (i), (j)). Starlight's remaining criteria are unknown to me, so it is the only option that could still satisfy the most requirements."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Starlight Incorporated",
+    "rationale": "Starlight's known failures are only (a) truck fit and (c) 90-minute recovery, which Franklin also fails, while Franklin additionally fails (i) past performance and (j) manufacturing capacity. Cape fails four criteria (b, f, g, h), including cost. Starlight's remaining criteria are unknown, not failed, so it is the strongest candidate on the available evidence."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Starlight Incorporated",
+    "rationale": "Franklin fails (a), (c), (i), and (j), and Cape fails (b), (f), (g), and (h), so neither can meet all ten criteria. Starlight's only confirmed failures are (a) and (c), and its other criteria are still unknown, so it is the only option that could meet all ten."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Cape Industries",
+    "rationale": "Franklin is out with four confirmed failures (a, b, i, j). Starlight and Cape each have two confirmed failures (Starlight: a, c; Cape: g, h), but Cape has five confirmed passes (c, d, e, i, j) to Starlight's two (g, j). The claim that Cape fails (b) and (f) comes from Fact 1, which is Franklin's briefing, so those criteria are unknown for Cape."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Starlight Incorporated",
+    "rationale": "Starlight has the fewest confirmed failures: (a) and (c), with its other known criteria passing and the rest unknown. Cape fails (b), (f), and (g), and Franklin fails (b), (c), (i), and (j), so both are ruled out by more failures."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Starlight Incorporated",
+    "rationale": "Franklin fails (a), (c), (i), and (j), and Cape fails (b), (f), (g), and (h), so neither can meet all ten criteria. Starlight's only confirmed failures are (a) and (c), with its other criteria unknown, so it is the only option that could still meet all ten. Three other participants have also converged on it."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "Starlight is the best choice. Franklin and Cape each have four confirmed failures, while Starlight has only two (a and c), and its other criteria are unknown, so it is the only one that could still meet all ten."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Starlight has confirmed failures on (a) and (c), so it can't meet all ten criteria either, and Cape's two known failures (g, h) are no worse than Starlight's, while Cape has five confirmed passes to Starlight's two. I've posted my facts 1\u20134 to the board so everyone can check these failures and passes against their own briefings."
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I still vote Starlight Incorporated. Starlight has two confirmed failures, (a) and (c), while Cape has three, (b), (f), and (g), so Starlight is the least-failed option. Person 2's count is off: Cape's (h) is blank, not a failure, so Cape's known failures are (b), (f), and (g)."
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "Starlight is still the only option that can meet all ten criteria: it has two confirmed failures, (a) and (c), while Franklin and Cape each have four. My briefing shows Cape's (h) as N, not blank, so Cape's failures are (b), (f), (g), and (h), but that doesn't change the outcome."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "Starlight remains the only option that can still meet all ten criteria. My briefing shows Franklin failing (a), (c), (i), and (j), and Cape failing (b), (f), (g), and (h), so neither can be the best choice."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Starlight fails (a) and (c), so it can't meet all ten criteria either, and Cape's two confirmed failures (g, h) are no worse, while Cape has five confirmed passes to Starlight's two. Facts 1\u20134 are already on the board, so everyone can check these counts."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I still vote Starlight Incorporated. Starlight has two confirmed failures, (a) and (c), while Cape has three, (b), (f), and (g), and Franklin has four, (b), (c), (i), and (j). My briefing has no entry for Cape's (h), so I'm not counting it as a failure."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "Starlight remains the best choice. It fails only (a) and (c), which Franklin also fails, while Franklin additionally fails (i) and (j). Starlight's remaining criteria are unknown, so it is the only option that could still meet all ten."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "I still choose Starlight Incorporated. It has only two confirmed failures, (a) and (c), against four each for Franklin and Cape, and its remaining criteria are still unknown, so it's the only option that could meet all ten."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Facts 1\u20134 are on the board, and they show Starlight failing (a) and (c) while Cape fails only (g) and (h), with five confirmed passes to Starlight's two. Person 3's claim that Cape fails (b) and (f) isn't in any posted fact, so I'd treat those as unknown until someone posts a source."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I still vote Starlight Incorporated. It has two confirmed failures, (a) and (c), while Cape has at least three, (b), (f), and (g), and Franklin has four. Cape's (h) is blank in my briefing, so I'm not counting it."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "Starlight remains the only option that could meet all ten criteria. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's known failures are only (a) and (c), with the rest unknown."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "Starlight remains my choice. Fact 1 shows Cape failing (b), (f), (g), and (h), not just (g) and (h) as Person 2 said, so Cape has four confirmed failures to Starlight's two, and Starlight is the only option that could still meet all ten criteria."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Fact 1 is Franklin's briefing, not Cape's, so Cape's confirmed failures are only (g) and (h), while Starlight fails (a) and (c). Cape also has five confirmed passes (c, d, e, i, j) to Starlight's two (g, j)."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I still vote **Starlight Incorporated**. My briefing shows Starlight failing only (a) and (c), against three confirmed failures for Cape ((b), (f), (g)) and four for Franklin ((b), (c), (i), (j)). Cape's (h) is not in my briefing, so I'm not counting it as a failure, and Franklin's (a) is also unknown to me."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "I still choose Starlight Incorporated. Per Facts 1 and 3, Cape has four confirmed failures ((b), (f), (g), (h)) and Franklin has four ((a), (c), (i), (j)), so neither can meet all ten, while Starlight has only (a) and (c) failed with the rest unknown."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated is the only option not ruled out. Cape fails (b), (f), (g), and (h) (Facts 1 and 3), and Franklin fails (a), (c), (i), and (j) (Facts 1 and 4), so neither can meet all ten criteria. Starlight's known failures are only (a) and (c), with the rest unknown."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Fact 1 is Franklin's briefing, so Cape's failures are only (g) and (h), and its (b) and (f) are unknown, not failed. Starlight fails (a) and (c), so neither can be ruled out from the facts, but Cape has five confirmed passes to Starlight's two."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I still vote Starlight Incorporated. Per Facts 1 and 3, Cape has three confirmed failures, (b), (f), and (g), and Franklin has four, (b), (c), (i), and (j), while Starlight's only confirmed failures are (a) and (c), with its other criteria still unknown."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated remains the only option not ruled out. Per Fact 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I still choose Starlight Incorporated. I've posted Facts 1 and 3 to the board: Cape's failures are (b), (f), (g), and (h), and Franklin's are (a), (c), (i), and (j), so Starlight, with only (a) and (c) failed, is the closest to meeting all ten criteria."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. My facts show Cape failing only (g) and (h) against Starlight's (a) and (c), with five confirmed passes to Starlight's two. Cape's (b) and (f) are unknown to me rather than failed, so the other participants' counts for those are not supported by my briefing."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I still vote **Starlight Incorporated**. My briefing confirms Starlight fails (a) and (c), Cape fails (b), (f), and (g), and Franklin fails (b), (c), (i), and (j), so Starlight has the fewest known failures, though Cape has more confirmed passes."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated is still the only option that can meet all ten criteria. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c), with its other criteria unknown."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "Starlight remains the only option not ruled out. Fact 1 covers all three companies, and it shows Cape failing (b), (f), and (h), while Fact 3 adds (g), so Cape has four confirmed failures. Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c), with the rest unknown."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. In my briefing, Cape fails only (g) and (h), passes (c), (d), (e), (i), and (j), and leaves (a), (b), and (f) unknown, while Starlight fails (a) and (c). Cape has more confirmed passes, and the other participants' claims that Cape fails (b) and (f) aren't supported by my facts."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "I still vote **Starlight Incorporated**. Starlight has two confirmed failures, (a) and (c), against three for Cape ((b), (f), (g)) and four for Franklin ((b), (c), (i), (j)). Person 2's claim that Cape's (b) and (f) are unknown conflicts with Fact 3, which marks both as N."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "Starlight remains the best choice. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c), with the rest still unknown. Fact 1 is labeled Cape Industries, so Person 2's Cape count of two failures doesn't match my briefing."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated. Per Facts 1\u20134, Franklin fails (a), (c), (i), and (j), Cape fails (b), (f), (g), and (h), and Starlight fails only (a) and (c), so it has the fewest confirmed failures. Person 2's claim that Cape fails only (g) and (h) and Person 3's claim that Cape's (h) is blank both conflict with Fact 1."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "I still back Cape Industries. Facts 3 and 4 show Cape failing only (g) and (h), with (a), (b), and (f) unknown, not failed. Starlight fails (a) and (c), and Franklin fails (a), (b), (i), and (j), so Cape has the most confirmed passes (c, d, e, i, j)."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "I still vote **Starlight Incorporated**. My briefing shows Starlight failing only (a) and (c), while Cape fails (b), (f), and (g) and Franklin fails (b), (c), (i), and (j), so Starlight has the fewest confirmed failures."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated remains the only option that could meet all ten criteria. Per Fact 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "I still choose Starlight Incorporated. Cape fails (b), (f), (g), and (h) per Facts 1 and 3, and Franklin fails (a), (c), (i), and (j) per Facts 1 and 4, so only Starlight, with known failures limited to (a) and (c), is not ruled out."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "Correction: Fact 1 is Franklin's briefing, so Cape's (b) and (f) are unknown, not failed. Cape and Starlight each have two confirmed failures (Cape: g, h; Starlight: a, c) and Franklin has four, so the facts don't separate Cape and Starlight, and since three of you have converged on Starlight, I'll go with Starlight to coordinate."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I'm sticking with Starlight Incorporated: it has the fewest confirmed failures (a and c), against three for Cape ((b), (f), (g)) and four for Franklin. Fact 1 is labeled Cape Industries in my briefing, so Cape's (g) failure stands."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated is still the only option that could meet all ten criteria. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated is still the only option not ruled out. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and per Facts 1 and 4, Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I'm switching to Starlight Incorporated. My facts show Cape failing (g) and (h) and Starlight failing (a) and (c), so neither can meet all ten, and the facts don't separate them, but three of you have converged on Starlight and matching it is worth the coordination bonus."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. Cape has three confirmed failures ((b), (f), (g)) and Franklin has four ((b), (c), (i), (j)), so neither can meet all ten, while Starlight's only known failures are (a) and (c) with the rest still unknown."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "I'm sticking with **Starlight Incorporated**. My briefing shows Franklin failing (a), (c), (i), and (j), and Cape failing (b), (f), (g), and (h), so only Starlight, with known failures limited to (a) and (c), is still in contention."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated is the only option not ruled out. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and per Facts 1 and 4, Franklin fails (a), (c), (i), and (j). Starlight's only known failures are (a) and (c), and its remaining criteria are unknown, so it is the only one that could meet all ten."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I'm going with Starlight Incorporated to match the group, though the facts don't separate it from Cape: each fails two criteria (Starlight: a and c; Cape: g and h), and Franklin fails four. Person 3's claim that Cape fails (b) and (f) comes from Fact 1, which is Franklin's briefing, so those are unknown for Cape."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. It has the fewest confirmed failures (a and c), against three for Cape (b, f, g) and four for Franklin (b, c, i, j), and its remaining criteria are still unknown to me."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "I'm sticking with Starlight Incorporated. Per Facts 1 and 3, Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j), so Starlight, with only (a) and (c) failed, is the only option that could still meet all ten criteria."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I still choose Starlight Incorporated. Per Facts 1, 3, and 4, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), so only Starlight, with known failures limited to (a) and (c), could still meet all ten criteria."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I'm sticking with **Starlight Incorporated**. My facts alone don't separate it from Cape, but other participants report Cape failing (b) and (f), which would rule Cape out and leave Starlight as the only option that could meet all ten criteria."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. Cape fails (b), (f), and (g) per Facts 1 and 3, Franklin fails (b), (c), (i), and (j), and Starlight's only known failures are (a) and (c), with the rest unknown."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated is still the only option not ruled out. Per my briefing, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c), with the rest unknown."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated is the only option not ruled out. Cape fails (b), (f), (g), and (h) per Fact 1 and Fact 3, and Franklin fails (a), (c), (i), and (j) per Facts 1 and 4."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I'm switching to Starlight Incorporated. My briefing shows Starlight failing (a) and (c) and Cape failing (g) and (h), so Starlight has no more confirmed failures than Cape, and the group's reports that Cape also fails (b) and (f) would make Cape the weaker choice. I can't verify those reports myself."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. Cape has three confirmed failures ((b), (f), (g)), Franklin has four ((b), (c), (i), (j)), and Starlight has two ((a), (c)) with the rest unknown to me."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated is the only option not ruled out. Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated is still the only option not ruled out. Fact 1 shows Cape failing (b), (f), and (h), and Fact 3 adds (g), so Cape has four confirmed failures. Franklin fails (a), (c), (i), and (j) per Facts 1 and 4, while Starlight's only known failures are (a) and (c)."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I'm switching back to Cape Industries. Fact 1 is Franklin's briefing, so the reports that Cape fails (b) and (f) aren't supported, and Cape has five confirmed passes to Starlight's two, with the same two-failure count."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. Cape fails (b), (f), and (g) per Fact 3 and Fact 1, and Franklin fails (b), (c), (i), and (j), so only Starlight, with known failures limited to (a) and (c), could still meet all ten criteria."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "I'm sticking with Starlight Incorporated: per Facts 1 and 3, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only confirmed failures are (a) and (c), with its other criteria still unknown. I've posted Facts 1, 3, and 4 to the board so everyone can check these against their own briefings."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "Starlight Incorporated. Per Facts 1, 3, and 4, Franklin fails (a), (c), (i), and (j), and Cape fails (b), (f), (g), and (h), which rules both out. Starlight's only known failures are (a) and (c), so it is the only option that could still meet all ten criteria."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I'm backing Cape Industries. By my facts, Cape and Starlight each fail two criteria (Cape: g and h; Starlight: a and c), but Cape has five confirmed passes to Starlight's two, and Fact 1 is labeled Franklin's, so I can't confirm the claims that Cape fails (b) and (f)."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Starlight Incorporated**. Per Facts 1 and 3, Cape fails (b), (f), and (g), and Franklin fails (b), (c), (i), and (j), while Starlight's only confirmed failures are (a) and (c), so it has the fewest known failures."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "Starlight Incorporated is the only option not ruled out. Per my briefing, Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j), while Starlight's only confirmed failures are (a) and (c)."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (e) Y\n- (h) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (c) Y\n- (f) N\n- (h) N\n- (j) Y",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (e) Y\n- (h) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (c) Y\n- (f) N\n- (h) N\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (a) N\n- (b) N\nStarlight Incorporated:\n- (g) Y\n- (j) Y\nCape Industries:\n- (c) Y\n- (d) Y\n- (e) Y\n- (h) N\n- (i) Y\n- (j) Y"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (b) N\nStarlight Incorporated:\n- (g) Y\n- (j) Y\nCape Industries:\n- (c) Y\n- (d) Y\n- (e) Y\n- (h) N\n- (i) Y\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Cape Industries:\n- (g) N",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Franklin Enterprises:\n- (b) N\n- (c) N\nStarlight Incorporated:\n- (b) Y\n- (d) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (d) Y\n- (e) Y\n- (f) N\n- (i) Y\n- (j) Y",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (b) N\n- (c) N\nStarlight Incorporated:\n- (b) Y\n- (d) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (d) Y\n- (e) Y\n- (f) N\n- (i) Y\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n",
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (f) Y\n- (i) Y\nCape Industries:\n- (b) N\n- (c) Y\n- (d) Y\n- (f) N\n- (h) N\n- (i) Y",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (f) Y\n- (i) Y\nCape Industries:\n- (b) N\n- (c) Y\n- (d) Y\n- (f) N\n- (h) N\n- (i) Y"
+    ]
+   }
+  ],
+  "posts": [
+   [
+    "Person 2",
+    "s0"
+   ],
+   [
+    "Person 2",
+    "s1"
+   ],
+   [
+    "Person 2",
+    "s2"
+   ],
+   [
+    "Person 2",
+    "h3"
+   ],
+   [
+    "Person 4",
+    "h2"
+   ],
+   [
+    "Person 4",
+    "s2"
+   ],
+   [
+    "Person 3",
+    "s2"
+   ],
+   [
+    "Person 3",
+    "h0"
+   ],
+   [
+    "Person 1",
+    "h1"
+   ],
+   [
+    "Person 1",
+    "s2"
+   ],
+   [
+    "Person 4",
+    "s1"
+   ]
+  ],
+  "tool_calls": [
+   {
+    "t": 1792265275.2075574,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792265276.873194,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792265277.0130916,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 2
+   },
+   {
+    "t": 1792265277.1696098,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792265277.244462,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 4
+   },
+   {
+    "t": 1792265342.7310057,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792265416.6698813,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792265546.4370496,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792265546.9251807,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792265621.6031985,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792265621.6794634,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792265663.362462,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792265663.4625514,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792266316.4376302,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792266316.5231209,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792266316.6525788,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 4
+   }
+  ],
+  "hidden_holders": {
+   "Person 1": [
+    "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (e) Y\n- (h) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (c) Y\n- (f) N\n- (h) N\n- (j) Y"
+   ],
+   "Person 2": [
+    "Franklin Enterprises:\n- (a) N\n- (b) N\nStarlight Incorporated:\n- (g) Y\n- (j) Y\nCape Industries:\n- (c) Y\n- (d) Y\n- (e) Y\n- (h) N\n- (i) Y\n- (j) Y"
+   ],
+   "Person 3": [
+    "Franklin Enterprises:\n- (b) N\n- (c) N\nStarlight Incorporated:\n- (b) Y\n- (d) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (d) Y\n- (e) Y\n- (f) N\n- (i) Y\n- (j) Y"
+   ],
+   "Person 4": [
+    "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (f) Y\n- (i) Y\nCape Industries:\n- (b) N\n- (c) Y\n- (d) Y\n- (f) N\n- (h) N\n- (i) Y"
+   ]
+  }
+ },
+ "placebo": {
+  "scenario": "graetz_et_al_1998",
+  "correct_answer": "Starlight Incorporated",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Starlight Incorporated",
+    "rationale": "Franklin Enterprises has four documented failures (a, c, i, j) and Cape Industries has four (b, f, g, h), while Starlight's only documented failures are (a) and (c), and it meets (e) and (h). Starlight is the only proposal not ruled out by its known results, so it is the best choice on the available evidence."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Cape Industries",
+    "rationale": "Cape Industries meets five known criteria (c, d, e, i, j) and fails only two (g reliability, h cost), while Franklin Enterprises fails four (a, b, i, j) and Starlight Incorporated fails two (a, c) with only two known passes (g, j). Cape's known record is the strongest, and its unknowns (a, b, f) are not known failures."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Starlight Incorporated",
+    "rationale": "Each proposal has known failures, but Starlight has the fewest (two: (a) truck fit and (c) 90-minute recovery/redeployment), while Cape Industries fails three ((b), (f), (g)) and Franklin Enterprises fails four ((b), (c), (i), (j)). Starlight also meets the 30-minute sweep (b) and 100 MIPS (d) requirements, and its remaining criteria are unconfirmed rather than failed."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Starlight Incorporated",
+    "rationale": "Starlight has the fewest known failures: it fails (a) the 2-ton truck fit and (c) the 90-minute recovery/redeployment, and its other known criteria (f) weight and (i) past performance are met. Franklin fails (a), (c), (i), and (j), and Cape fails (b), (f), (g), and (h). Starlight's remaining criteria are unconfirmed rather than failed, so it is the most likely to be the best choice."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Starlight Incorporated",
+    "rationale": "My briefing documents failures for Starlight only on (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h). Starlight's other criteria are unverified rather than failed, so it is the least-disqualified option on the evidence I have. I can't verify the passes others have claimed for Cape on (d), (e), and (i), so I haven't counted them."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Cape Industries",
+    "rationale": "My briefing shows Cape passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight has two documented failures (a, c) and only two documented passes (g, j), and Franklin fails four known criteria (a, b, i, j), so Cape has the strongest verified record."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Cape Industries",
+    "rationale": "Cape has the most documented passes (a, d, e, i, j) and its failures (b, f, g) are fewer than Franklin's four (b, c, i, j). Starlight's two failures (a, c) come with only two documented passes and six unverified criteria, so Cape's verified record is stronger."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Starlight Incorporated",
+    "rationale": "Franklin is documented as failing (a), (c), (i), and (j), and Cape as failing (b), (f), (g), and (h), so neither can meet every RFP requirement. Starlight's only documented failures are (a) and (c), and its other criteria are unverified rather than failed, so it is the only proposal that could satisfy all ten criteria."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "I still recommend Starlight Incorporated. Its only documented failures are (a) and (c), while Franklin and Cape each have four documented failures, so Starlight is the least-disqualified option. I'd like the group to confirm whether anyone has evidence that Starlight fails (h) or (e), since those are its only known passes."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "Cape Industries still looks strongest: it has five documented passes, including past performance (i) and manufacturing capacity (j), which Starlight has no record of meeting. Starlight's two documented failures (a, the 2-ton truck fit, and c, recovery within 90 minutes) are vehicle requirements, so they count against it as much as Cape's failures on reliability (g) and cost (h)."
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I'm switching to Cape Industries. It has the most documented passes (a, d, e, i, j) and the best net score (5 passes, 3 failures), including the only confirmed positive past performance and manufacturing capacity. Starlight's two confirmed failures on vehicle criteria (a, c) offset its two passes, and its other criteria are unverified."
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight: it has two documented failures (a, c) against four each for Franklin (a, c, i, j) and Cape (b, f, g, h). Person 3's claimed passes for Cape on (a), (e), and (j) don't appear in my briefing, so unless someone has a source for them, they shouldn't offset Cape's cost and weight failures."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "I still recommend Starlight. Cape's own documented failures on (b), (f), (g), and (h) are as disqualifying as Franklin's four, and Starlight's two failures on (a) and (c) are its only documented misses. I can confirm Cape's passes on (a), (c), and (j) from my briefing, but I see no record of its (d), (e), or (i) results."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "Cape Industries is still my choice. My briefing shows it passing five criteria (c, d, e, i, j), including past performance and manufacturing capacity, with only two documented failures (g, h). Starlight's two documented failures are on the truck fit and recovery time, and most of its other criteria are unverified."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I'm switching back to Starlight Incorporated. My earlier switch was a mistake: Starlight has the fewest documented failures (two, a and c, versus three for Cape and four for Franklin), and its six unverified criteria could still pass. Cape's three failures on sweep time (b), weight (f), and reliability (g) don't favor it."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "I'm sticking with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Franklin fails (a), (c), (i), and (j) and Cape fails (b), (f), (g), and (h). Cape's passes on (c), (d), and (i) don't offset its four documented failures, and I can't verify the (a), (e), or (j) passes that others have claimed for Cape."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "I'm sticking with Starlight. My briefing shows Cape failing four criteria (b, f, g, h) and passing only (a), (c), and (j), so I can't verify the (d), (e), or (i) passes others have claimed. Starlight's two documented failures are fewer than either rival's, and its unverified criteria could still pass."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) still unknown. Starlight has two documented failures on (a) and (c), and six of its criteria are unverified, so Cape's record is stronger."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I'm switching back to Cape Industries. Its documented record (passes on a, d, e, i, j) is stronger than Starlight's two documented passes, and Starlight's six unverified criteria are not evidence of a pass. My last switch to Starlight was inconsistent with that record."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. It is the only proposal with fewer documented failures than passes-and-fails in the rest of the field: two failures (a, c) against four each for Franklin (a, c, i, j) and Cape (b, f, g, h). Its unverified criteria could still pass, and I can't verify Cape's (a), (e), or (j) passes that others have claimed."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight. Every proposal has at least one documented failure, but Starlight has the fewest (a and c, versus four each for Franklin and Cape), and its six unverified criteria could still pass."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. It has five documented passes (c, d, e, i, j) against Starlight's two (g, j), and both have two documented failures, so Cape has the stronger verified record. I'm open to Starlight if someone can document passes on (b), (d), (e), (f), (h), or (i) that outweigh Cape's."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I'm switching back to Starlight Incorporated and will hold it. Starlight has the fewest documented failures (a and c, against three for Cape and four for Franklin), and its unverified criteria could still pass. I flipped to Cape twice without new evidence, so I'm not changing again unless someone documents a failure for Starlight on a criterion I haven't seen."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). Person 2's claim that Cape fails only (g) and (h) doesn't match my briefing, which shows Cape failing (b) and (f) as well."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. Cape's documented failures on (b), (f), (g), and (h) and Franklin's on (a), (c), (i), and (j) are each four, while Starlight's only documented failures are (a) and (c), and its other criteria are still unverified."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows Cape passing five criteria (c, d, e, i, j), with only (g) and (h) failed and (a), (b), (f) unknown. Starlight also has two documented failures, (a) and (c), but only two known passes, and Cape's claimed failures on (b) and (f) don't appear in my briefing."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. My briefing shows Cape failing (b), (f), and (g), and Franklin failing (b), (c), (i), and (j), while Starlight's only documented failures are (a) and (c), the fewest in the field."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h). Person 3's claim that Franklin fails (b) isn't in my briefing, but it wouldn't change the count."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. It has the fewest documented failures (a and c, against four each for Franklin and Cape), and its six unverified criteria could still pass. I can't verify Cape's claimed passes on (d), (e), or (i), so they don't change the count."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown, so Cape has more verified passes than Starlight's two. Cape's claimed failures on (b) and (f) don't appear in my briefing, so I'd like anyone citing them to check their source."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. My briefing shows Cape failing (b), (f), and (g), so Cape has three documented failures to Starlight's two, and Franklin has four. Cape does have more documented passes, so this is close, and I'd change my vote if someone can document a Starlight failure I haven't seen."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Cape failing (b), (f), (g), and (h), not just (g) and (h), so Cape has four documented failures to Starlight's two (a, c)."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h), though Starlight's six unverified criteria mean it isn't confirmed to pass everything."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j), including past performance and manufacturing capacity, with only (g) and (h) failed and (a), (b), and (f) unknown. Starlight has two documented passes (g, j) and two failures (a, c), so Cape's verified record is stronger."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. Cape documents three failures (b, f, g) against Starlight's two (a, c), and Franklin has four (b, c, i, j). Cape's five passes are real, but its failures are on hard requirements."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Cape fails four criteria (b, f, g, h) and Franklin fails four (a, c, i, j). Starlight's remaining criteria are unverified, so I'd change my vote only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h), though Starlight's remaining criteria are unverified. I can't confirm Cape's claimed passes on (d), (e), or (i), and I can't confirm Starlight's claimed pass on (g)."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight's two documented failures on (a) and (c) are as disqualifying as Cape's, and its six unverified criteria are not evidence of a pass."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "I'm switching to Cape Industries. Its record is 5 documented passes (a, d, e, i, j) against 3 failures (b, f, g), a net of +2, while Starlight is net 0 (2 passes, 2 failures) with six criteria unverified. My earlier vote for Starlight counted failures and ignored Cape's passes."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows it failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h), and Starlight's remaining criteria are unverified rather than failed. I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). I can confirm Cape's passes on (a), (c), and (j), but I can't verify the (d), (e), or (i) passes others have claimed, so Starlight's unverified criteria remain a risk."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown, so its verified record beats Starlight's two passes and two failures. Starlight's unverified criteria could still fail, and the (b) and (f) failures others cite for Cape aren't in my briefing."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. It has the fewest documented failures (a and c, against three for Cape and four for Franklin), and I was wrong to switch to Cape on passes alone, since a pass on a criterion that a proposal must meet is less damaging than a failure on one it cannot meet."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "I'm holding with Starlight Incorporated. My briefing shows it failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h), though Starlight's remaining criteria are unverified. I can't confirm Cape's claimed passes on (d), (e), or (i), or Person 3's claimed Starlight failure on (b)."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight has the same two documented failures (a, c) but only two documented passes, so Cape's verified record is stronger."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I'm switching to Cape Industries. My briefing shows five documented passes for Cape (a, d, e, i, j) against three failures (b, f, g), while Starlight has two passes and two failures with six criteria unverified. I can't verify the (h) failure others attribute to Cape, and I'd change my vote if Starlight's unverified criteria turn out to be documented passes."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). Starlight's remaining criteria are unverified, so I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing confirms Cape fails (b), (f), (g), and (h), so Cape has four documented failures, not three, and Starlight's two documented failures (a, c) are still the fewest."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows Franklin failing (b), not Cape, and Cape's (b) and (f) are unknown, so Cape's verified record (passes on c, d, e, i, j; failures only on g and h) is still stronger than Starlight's."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I'm holding with Cape Industries. My briefing shows five documented passes (a, d, e, i, j) against three failures (b, f, g), while Starlight has two passes, two failures, and six unverified criteria. I can't confirm the (h) failure others attribute to Cape, and I'd switch if Starlight's unverified criteria turn out to be documented passes."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). Several Cape passes and failures claimed in this discussion don't appear in my briefing, so I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h). Several passes claimed for Cape and Starlight in this discussion aren't in my briefing, so I'm not counting them."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight's two documented failures (a, c) are as serious as Cape's, and it has only two documented passes."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against three documented failures for Cape (b, f, g) and four for Franklin (b, c, i, j), and I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows it failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. Its only documented failures are (a) and (c), against four each for Franklin (a, c, i, j) and Cape (b, f, g, h), and its remaining criteria are unverified rather than failed."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) against Starlight's two (g, j), and both have two documented failures (Cape on g and h, Starlight on a and c). I'd switch if someone documents passes on Starlight's unknowns (b, d, e, f, h, i) that outweigh Cape's verified record."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I'm holding with Starlight Incorporated. My briefing shows it failing only (a) and (c), against three documented failures for Cape (b, f, g) and four for Franklin (b, c, i, j), and I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows it failing only (a) and (c), while Cape fails (b), (f), (g), and (h) and Franklin fails (a), (c), (i), and (j). I'd switch only if someone documents a Starlight failure I haven't seen."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Starlight failing only (a) and (c), against four documented failures each for Franklin (a, c, i, j) and Cape (b, f, g, h), and its remaining criteria are unverified rather than failed."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight has only two documented passes (g, j) and two failures (a, c), and its other six criteria are unverified, not confirmed passes."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I'm switching to Cape Industries and will hold it. My briefing shows Cape passing five criteria (a, d, e, i, j) against three failures (b, f, g), while Starlight has two passes and two failures, with six criteria unverified."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows it failing only (a) and (c), while Cape fails (b), (f), (g), and (h), and Franklin fails (a), (c), (i), and (j). Cape's claimed passes on (a), (e), and (j) aren't in my briefing, so they don't offset its four documented failures."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows Cape failing four criteria (b, f, g, h) and Franklin failing four (a, c, i, j), while Starlight fails only (a) and (c) with the rest unverified."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (c, d, e, i, j) and failing only (g) and (h), with (a), (b), and (f) unknown. Starlight has the same two documented failure count (a, c) but only two documented passes (g, j), and I can't verify the (b) or (f) failures others attribute to Cape."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I'm holding with Cape Industries. My briefing shows it passing five criteria (a, d, e, i, j) and failing three (b, f, g), while Starlight has two passes, two failures, and six unverified criteria. Starlight's failures on (a) and (c) are no smaller than Cape's, and I can't confirm the (h) failure others attribute to Cape."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "I'm staying with Starlight Incorporated. My briefing shows it failing only (a) and (c), while Cape fails four criteria (b, f, g, h) and Franklin fails four (a, c, i, j), so Starlight has the fewest documented failures."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (e) Y\n- (h) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (c) Y\n- (f) N\n- (h) N\n- (j) Y",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (e) Y\n- (h) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (c) Y\n- (f) N\n- (h) N\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (a) N\n- (b) N\nStarlight Incorporated:\n- (g) Y\n- (j) Y\nCape Industries:\n- (c) Y\n- (d) Y\n- (e) Y\n- (h) N\n- (i) Y\n- (j) Y"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (b) N\nStarlight Incorporated:\n- (g) Y\n- (j) Y\nCape Industries:\n- (c) Y\n- (d) Y\n- (e) Y\n- (h) N\n- (i) Y\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Cape Industries:\n- (g) N",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n",
+     "Franklin Enterprises:\n- (b) N\n- (c) N\nStarlight Incorporated:\n- (b) Y\n- (d) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (d) Y\n- (e) Y\n- (f) N\n- (i) Y\n- (j) Y",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (b) N\n- (c) N\nStarlight Incorporated:\n- (b) Y\n- (d) Y\nCape Industries:\n- (a) Y\n- (b) N\n- (d) Y\n- (e) Y\n- (f) N\n- (i) Y\n- (j) Y"
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "Cape Industries:\n- (g) N",
+     "Franklin Enterprises:\n- (d) Y\n- (e) Y\n- (f) Y\n- (g) Y\n- (h) Y\n- (i) N\n- (j) N\n",
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (f) Y\n- (i) Y\nCape Industries:\n- (b) N\n- (c) Y\n- (d) Y\n- (f) N\n- (h) N\n- (i) Y",
+     "Starlight Incorporated:\n- (a) N\n- (c) N\n"
+    ],
+    "assigned_hidden_information": [
+     "Franklin Enterprises:\n- (a) N\n- (c) N\nStarlight Incorporated:\n- (f) Y\n- (i) Y\nCape Industries:\n- (b) N\n- (c) Y\n- (d) Y\n- (f) N\n- (h) N\n- (i) Y"
+    ]
+   }
+  ]
+ }
+}

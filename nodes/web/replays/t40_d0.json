@@ -1,0 +1,997 @@
+{
+ "task": "t40_d0",
+ "graph": {
+  "scenario": "emergency_hospital_transfer",
+  "correct_answer": "Meadow Valley General",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Riverbend is the fastest option at 20 minutes, leaving a wide margin under the 45-minute transport limit, and it specializes in trauma, which fits an accident victim. Lakeview's travel time is not given, and Meadow Valley's detour would bring it to about 40 minutes, too close to the limit."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview's only on-call trauma surgeon has just left on an airlift and won't be back for four hours, so it cannot provide urgent surgery within the hour. Riverbend specializes in trauma, is 20 minutes away (well within the 45-minute survival limit), and is the fastest option. Meadow Valley's upgraded surgical facilities are appealing, but it is 30 minutes away and we have no confirmation of a trauma surgeon or surgical capacity, so Riverbend is the safer single-shot choice."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview is ruled out because its ICU beds filled after a pileup and the ER is rerouting critical patients. Riverbend is 20 minutes away, well inside the 45-minute transport limit, and specializes in trauma, which fits an accident victim. Meadow Valley is also within limits, but at 30 minutes it leaves less margin for the surgery window, and its recent upgrade does not offset Riverbend's speed and trauma focus. The main risk is that Riverbend is smaller, so its capacity for an emergency surgery should be confirmed by phone if there is time."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Meadow Valley General",
+    "rationale": "Meadow Valley General is 30 minutes away, within the 45-minute survival limit with a 15-minute margin, and its recently upgraded surgical facilities are the only option with no reported operational restriction. Riverbend is faster but is on backup power with non-critical operations diverted, which is a risk for emergency surgery, and Lakeview's travel time and surgical acceptance status are unknown."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Riverbend is 20 minutes away with a trauma specialty, leaving the widest margin under the 45-minute limit. Meadow Valley's closed main road adds a 10-minute detour, putting it near 40 minutes, which is still within the limit but tight. Before departing, phone Riverbend to confirm an operating room and backup generator power, and go straight to Meadow Valley if they decline. Lakeview is excluded by the reported unavailable trauma surgeon and full ICU, which the group has not verified."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview is out because its only on-call trauma surgeon is unavailable for four hours. Riverbend is 20 minutes away with a trauma specialty, leaving the widest margin under the 45-minute limit, while Meadow Valley is 30 minutes away and may be near 40 with a detour that I cannot verify. Before departing, phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview is ruled out because its ICU beds filled after the pileup and it is rerouting critical patients. Riverbend is 20 minutes away with a trauma specialty, which leaves the widest margin under the 45-minute limit. Before departing, phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley (30 minutes, or about 40 with the reported detour, still within the limit) only if Riverbend declines."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Meadow Valley General",
+    "rationale": "Meadow Valley is 30 minutes away, and even with the unverified 10-minute detour it stays within the 45-minute limit. My briefing shows its surgical facilities were recently upgraded with no operational restriction, while Riverbend is on backup power with non-critical operations diverted, which is a real risk for emergency surgery. Before leaving, we should phone Meadow Valley to confirm an operating room is free."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "I vote for Riverbend Medical Center: at 20 minutes it leaves the widest margin under the 45-minute limit, and its trauma specialty fits an accident victim. I've posted Facts 1, 2 and 5 to the board, since they bear directly on the Riverbend and Meadow Valley travel times."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "I agree with Riverbend Medical Center. I've posted Fact 3 to the board: Lakeview's only on-call trauma surgeon is airlifting out and won't return for four hours, so Lakeview can't meet the one-hour surgery window. Riverbend is the only option that is both trauma-capable and well inside the 45-minute transport limit."
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I agree with Riverbend Medical Center: I've posted Fact 4 (20 minutes away, trauma specialty), and Fact 5 already on the board rules out Lakeview. I can't verify Person 2's claim about Lakeview's trauma surgeon from my briefing, but Riverbend's smaller size is still the main risk, so we should confirm its emergency surgery capacity by phone before we leave if time allows."
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: at 30 minutes it is within the 45-minute limit, and its surgical facilities were recently upgraded. My briefing says Riverbend is running on backup power with non-critical operations diverted, which is a risk for emergency surgery. The fact numbers others quoted don't match mine (my Fact 3 is Riverbend's power loss and my Fact 4 is Meadow Valley's 30-minute travel time), and I can't verify the Lakeview claim, so we should confirm surgical acceptance by phone before we commit."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. It is about 20 minutes away and trauma-specialized, while Meadow Valley's detour puts it near 40 minutes, too tight against the 45-minute limit. Neither the Lakeview surgeon claim nor the Riverbend power-loss claim appears in my briefing, so we should confirm Riverbend's surgical acceptance by phone before we leave."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend: it is 20 minutes away with a trauma specialty, and my briefing confirms Lakeview's surgeon is unavailable. I've posted Fact 1 (one ambulance has fuel for any option and main roads were open an hour ago). I can't verify Riverbend's power-loss claim, so we should confirm surgical acceptance by phone before we commit."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with trauma capability, and I've posted my Fact 5 confirming Lakeview's ICU beds are full. Person 1's board fact puts Meadow Valley near 40 minutes via the detour, which is too tight against the 45-minute limit. I can't verify the Riverbend power-loss claim from my briefing, so we should confirm its surgical acceptance by phone before we leave."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing puts it 30 minutes away with recently upgraded surgical facilities, which leaves a 15-minute margin, while Riverbend is on backup power with non-critical operations diverted. I've posted my Facts 3 and 4 so others can check them against the 40-minute and Lakeview claims, which I cannot verify from my briefing."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend: at 20 minutes it leaves the widest margin, and Meadow Valley's detour would leave only about 5 minutes under the 45-minute limit. We should confirm Riverbend can take emergency surgery by phone before departing, since I can't verify the power-loss claim from my briefing."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend. Its 20-minute trip leaves the widest margin, and Person 4's backup-power report only diverts non-critical work, so emergency surgery should still be accepted. We should confirm by phone before leaving, since Meadow Valley's detour would leave only about 5 minutes of margin."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it's 20 minutes away with trauma capability, and Lakeview's ICU beds are full. Since Person 4's power-loss claim is unverified, we should confirm Riverbend can take emergency surgery by phone before we leave."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing gives 30 minutes with a 15-minute margin, recently upgraded surgical facilities, and no operational restriction, while Riverbend is on backup power with non-critical operations diverted. The 40-minute detour and Lakeview claims don't appear in my briefing, so we should confirm Meadow Valley's surgical acceptance by phone before we leave."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend: my briefing gives it 20 minutes with trauma capability, while Meadow Valley's 30-minute figure assumes the flooded main road, so the detour makes it about 40 minutes. Lakeview's travel time isn't in my briefing, and I can't confirm the claims that its ICU beds are full or its trauma surgeon is unavailable, so we should phone Riverbend to confirm it can take emergency surgery before we leave."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: my briefing gives it a 20-minute trip with trauma specialty, and Lakeview's trauma surgeon is unavailable. Before we leave, we should phone Riverbend to confirm it can take emergency surgery now, since I can't verify the backup-power claim or the Meadow Valley detour from my briefing."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with trauma capability, and Lakeview's ICU beds are full (my Fact 5). Before we leave, we should phone Riverbend to confirm it can take emergency surgery, since I can't verify Person 4's backup-power claim."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing gives it 30 minutes with recently upgraded surgical facilities, inside the 45-minute limit, with no restriction reported, while Riverbend is on backup power with non-critical operations diverted. I've posted Facts 3, 4 and 5 so you can check the Riverbend power, Meadow Valley timing, and Lakeview ICU claims against them, but my briefing doesn't support the 40-minute detour or the Lakeview surgeon and full-ICU claims, so we should confirm Meadow Valley's surgical acceptance by phone before leaving."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center. With the flooded main road, Meadow Valley is about 40 minutes (30 plus the 10-minute detour in my Fact 5), leaving only a 5-minute margin under the 45-minute limit. We should phone Riverbend to confirm it can take emergency surgery now, since I can't verify the backup-power claim."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center. My briefing gives it a 20-minute trip with trauma capability, and I can't verify the flooded-road detour or the Riverbend backup-power claims. My Fact 5 lists Meadow Valley at 30 minutes with no detour, so we should phone Riverbend to confirm surgical acceptance before we leave."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it's 20 minutes away with trauma capability, and Lakeview's ICU is full. My briefing lists Meadow Valley at 30 minutes with no detour, so it stays within the limit, but Riverbend has the larger margin. Before we leave, we should phone Riverbend to confirm it can take emergency surgery now."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing gives it 30 minutes with recently upgraded surgical facilities, and it lists no detour. I can't confirm the flooded-road detour, though my Fact 1 says main roads were open an hour ago, so we should check Meadow Valley's surgical acceptance by phone before leaving."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with trauma capability, while my Fact 5 puts Meadow Valley near 40 minutes via the flooded-road detour. Before we leave, we should phone Riverbend to confirm it can take emergency surgery now, since the backup-power claim is unverified."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: my briefing gives it a 20-minute trip and a trauma specialty, and Lakeview is out because its only on-call trauma surgeon has left. Before we leave, we should phone Riverbend to confirm it can take emergency surgery now, since its backup-power claim and Meadow Valley's flooded-road detour are not in my briefing."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center. It is 20 minutes away with a trauma specialty, and Person 4's backup-power report says only non-critical operations are diverted, so emergency surgery should still be accepted. Please phone Riverbend to confirm surgical capacity before we leave."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "I'm changing my vote to Riverbend Medical Center. The board now shows a source-checked flooded-road detour that puts Meadow Valley near 40 minutes, leaving only about 5 minutes under the limit, while Riverbend's 20 minutes leaves a wide margin. Riverbend's backup power is a real risk, but my briefing says only non-critical work is diverted, so we should phone to confirm an operating room is free for emergency surgery before we leave."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "I agree with Riverbend Medical Center: at 20 minutes it leaves the widest margin under the 45-minute limit, while Meadow Valley's flooded-road detour brings it to about 40 minutes. Before we leave, we should phone Riverbend to confirm an operating room is free for emergency surgery, since its backup-power status is unverified."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: my briefing confirms it is 20 minutes away with a trauma specialty, well inside the 45-minute limit. Before we leave, we should phone Riverbend to confirm an operating room is free, since the backup-power report is not in my briefing."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "I agree with Riverbend Medical Center: at 20 minutes it leaves the widest margin under the 45-minute limit, and Lakeview's ICU is full. We should phone ahead to confirm an operating room is free before we leave."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "I now favor Riverbend Medical Center: at 20 minutes it leaves the widest margin, and a 40-minute Meadow Valley route is still inside the limit if Riverbend cannot take us. Before we leave, we should phone Riverbend to confirm an operating room and emergency generator power are available, and go to Meadow Valley if they cannot."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: at 20 minutes it leaves the widest margin under the 45-minute limit, while Meadow Valley's flooded-road detour puts it near 40 minutes. Before we leave, we should phone Riverbend to confirm an operating room and backup generator power, and fall back to Meadow Valley if they cannot take us."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: my Fact 2 gives it a 20-minute trip with a trauma specialty, the widest margin under the 45-minute limit. Before we leave, we should phone to confirm an operating room and backup power, and fall back to Meadow Valley only if Riverbend cannot take us."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "I vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's ICU beds are full per my Fact 5. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and fall back to Meadow Valley if they can't take us."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "I still lean Meadow Valley General. My briefing confirms Riverbend is on backup power with non-critical work diverted, so a mid-route fallback to Meadow Valley could exceed the 45-minute limit. If we choose Riverbend, we should not leave until a phone call confirms an operating room and generator power."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend: at 20 minutes it leaves the most margin, and Meadow Valley's flooded-road detour puts it near 40. Phone Riverbend to confirm an operating room and backup power before we leave, and if they decline, drive straight to Meadow Valley rather than diverting mid-route."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "I vote Riverbend Medical Center: my briefing gives it a 20-minute trip with a trauma specialty, and Lakeview's only on-call trauma surgeon is unavailable for four hours. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline, since my Fact 1 says main roads were open only an hour ago and the flooded-road detour is unverified."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's ICU is full. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline, since a mid-route change would eat into the 45-minute limit."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General. Even with the flooded-road detour (about 40 minutes), it stays inside the 45-minute limit, and Riverbend's confirmed backup power and diverted operations are a direct risk to an emergency surgery. Before we leave, we should phone Meadow Valley to confirm an operating room is free."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: at 20 minutes it leaves the most margin, and Meadow Valley's flooded-road detour puts it near 40 minutes. We should phone ahead to confirm an operating room and backup power, and drive straight to Meadow Valley if Riverbend declines, so we never change course mid-route."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: my Fact 2 gives it a 20-minute trip with a trauma specialty, and Lakeview is out because its only on-call trauma surgeon has left. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and drive straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: my briefing gives it a 20-minute trip with trauma capability, and Lakeview's ICU is full. My briefing doesn't include the flooded-road detour or the Riverbend power-loss claims, so we should phone Riverbend to confirm an operating room and backup power before we leave, and go to Meadow Valley only if they decline."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing gives 30 minutes, recently upgraded surgical facilities, and no restriction, while Riverbend is on backup power with non-critical operations diverted. If the group goes with Riverbend, we should only leave after a phone call confirms an operating room and generator power, and otherwise drive straight to Meadow Valley."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: at 20 minutes it leaves the most margin, and my Fact 5 puts Meadow Valley at about 40 minutes via the flooded-road detour. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline before departure."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's trauma surgeon is unavailable. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and my Fact 5 says Lakeview's ICU is full. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline, since the flooded-road detour is unverified against my Fact 3 (main roads open an hour ago)."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "The board now confirms Lakeview is out (surgeon unavailable, ICU full) and that the flooded-road detour puts Meadow Valley near 40 minutes, so I'll switch to Riverbend Medical Center, but only if a phone call confirms an operating room and backup generator power before we leave. If they decline, we go straight to Meadow Valley."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I vote Riverbend Medical Center: at 20 minutes it leaves the most margin under the 45-minute limit, while Meadow Valley's flooded-road detour brings it to about 40. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline before departure."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I vote Riverbend Medical Center: at 20 minutes with a trauma specialty, it leaves the widest margin under the 45-minute limit. Before departing, we should phone to confirm an operating room and backup power, and drive straight to Meadow Valley only if Riverbend declines."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's ICU is full per my Fact 5. We should phone Riverbend to confirm an operating room and backup power before we leave, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: it is 30 minutes away with upgraded surgical facilities and no reported restriction, and it stays under the 45-minute limit even with the 40-minute detour. Riverbend's backup power and diverted operations are a documented risk for emergency surgery, so we should phone Meadow Valley to confirm an operating room is free before we leave."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "I vote Riverbend Medical Center: its 20-minute trip and trauma specialty leave the widest margin, while Meadow Valley's flooded-road detour (30 + 10 minutes) leaves only about 5 minutes under the limit. Before departing, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I vote Riverbend Medical Center: my briefing puts it 20 minutes away with a trauma specialty, and Lakeview's only on-call trauma surgeon is unavailable for four hours. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline. My briefing doesn't mention the flooded-road detour, so I can't verify the 40-minute estimate."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I vote Riverbend Medical Center: my Fact 4 gives it a 20-minute trip with a trauma specialty, and my Fact 5 rules out Lakeview's full ICU. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go to Meadow Valley only if they decline, since my briefing doesn't include the Riverbend power-loss or flooded-road detour claims."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "I'll switch to Riverbend Medical Center, but only if a call before departure confirms an operating room and generator power; otherwise we go straight to Meadow Valley (30 minutes, within the limit). My briefing doesn't confirm the flooded-road detour or the Lakeview claims, so we should treat those as unverified."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: at 20 minutes it leaves the most margin, while Meadow Valley's flooded-road detour (30 + 10 minutes) puts it near 40 minutes. Before departing, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I vote Riverbend Medical Center: at 20 minutes with a trauma specialty, it leaves the widest margin under the 45-minute limit, and Lakeview's only on-call trauma surgeon is unavailable. Before departing, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's ICU beds are full. Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: it is 30 minutes away with recently upgraded surgical facilities, and even the unverified 40-minute detour estimate stays under the 45-minute limit. Riverbend's backup power and diverted operations are a documented risk for emergency surgery, and I'd want a phone call confirming an operating room before we leave."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend Medical Center: at 20 minutes it leaves the most margin, while Meadow Valley's closed main road (Fact 5) puts it near 40 minutes. Before departing, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I vote Riverbend Medical Center: 20 minutes with a trauma specialty leaves the widest margin, and Lakeview is out because its only on-call trauma surgeon is unavailable for four hours. Before departing, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley (30 minutes in my briefing) only if they decline."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I still vote Riverbend Medical Center: it is 20 minutes away with a trauma specialty, and Lakeview's ICU is full (my Fact 5). Before we leave, we should phone Riverbend to confirm an operating room and backup power, and go straight to Meadow Valley only if they decline."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "I still vote Meadow Valley General: my briefing gives 30 minutes, recently upgraded surgical facilities, and no operational restriction, while Riverbend is on backup power with non-critical operations diverted. I can't verify the flooded-road detour or the Lakeview claims, but even with a 10-minute detour Meadow Valley stays within 45 minutes, so we should phone to confirm an operating room before leaving."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "The main road leading directly to Meadow Valley is closed due to flooding, but an alternate route adds only ten minutes travel time."
+    ],
+    "assigned_hidden_information": [
+     "The main road leading directly to Meadow Valley is closed due to flooding, but an alternate route adds only ten minutes travel time."
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview\u2019s only on-call trauma surgeon just departed on an emergency airlift and won\u2019t be available for four hours.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities."
+    ],
+    "assigned_hidden_information": [
+     "Lakeview\u2019s only on-call trauma surgeon just departed on an emergency airlift and won\u2019t be available for four hours."
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview ICU beds filled up in the last thirty minutes due to a multi-car pileup; the ER is now rerouting critical patients."
+    ],
+    "assigned_hidden_information": [
+     "Lakeview ICU beds filled up in the last thirty minutes due to a multi-car pileup; the ER is now rerouting critical patients."
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Riverbend Medical Center lost power recently and is running on backup, with non-critical operations diverted.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds."
+    ],
+    "assigned_hidden_information": [
+     "Riverbend Medical Center lost power recently and is running on backup, with non-critical operations diverted."
+    ]
+   }
+  ],
+  "posts": [
+   [
+    "Person 1",
+    "s1"
+   ],
+   [
+    "Person 1",
+    "h3"
+   ],
+   [
+    "Person 1",
+    "s3"
+   ],
+   [
+    "Person 2",
+    "h1"
+   ],
+   [
+    "Person 3",
+    "s1"
+   ],
+   [
+    "Person 2",
+    "s3"
+   ],
+   [
+    "Person 3",
+    "h2"
+   ],
+   [
+    "Person 4",
+    "h0"
+   ],
+   [
+    "Person 4",
+    "s2"
+   ],
+   [
+    "Person 4",
+    "s0"
+   ]
+  ],
+  "tool_calls": [
+   {
+    "t": 1792269968.7429392,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 2
+   },
+   {
+    "t": 1792269968.8352115,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792269968.9396045,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792269981.588916,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269983.3575058,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792269996.178382,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 4
+   },
+   {
+    "t": 1792270040.1318865,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792270055.4674907,
+    "agent": "Person 3",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792270057.4375024,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792270072.4162862,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792270072.4975395,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 4
+   },
+   {
+    "t": 1792270099.9836102,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792270187.0193822,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792270187.0974476,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 4
+   },
+   {
+    "t": 1792270187.2369795,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792270278.8789768,
+    "agent": "Person 3",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792270295.8982382,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792270295.9230437,
+    "agent": "Person 4",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792270450.1850276,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792270559.9250202,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   }
+  ],
+  "hidden_holders": {
+   "Person 1": [
+    "The main road leading directly to Meadow Valley is closed due to flooding, but an alternate route adds only ten minutes travel time."
+   ],
+   "Person 2": [
+    "Lakeview\u2019s only on-call trauma surgeon just departed on an emergency airlift and won\u2019t be available for four hours."
+   ],
+   "Person 3": [
+    "Lakeview ICU beds filled up in the last thirty minutes due to a multi-car pileup; the ER is now rerouting critical patients."
+   ],
+   "Person 4": [
+    "Riverbend Medical Center lost power recently and is running on backup, with non-critical operations diverted."
+   ]
+  }
+ },
+ "placebo": {
+  "scenario": "emergency_hospital_transfer",
+  "correct_answer": "Meadow Valley General",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Riverbend is the closest option at 20 minutes, which leaves the most margin inside the 45-minute transport limit and the one-hour surgery window. It specializes in trauma, which fits an accident victim. Meadow Valley would take about 40 minutes with the detour, leaving almost no buffer. Lakeview's travel time is not given, and its strengths (surgical team, ICU beds) do not outweigh the risk of a longer trip."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview's only on-call trauma surgeon is unavailable for four hours, so it cannot reliably perform urgent surgery within the hour. Riverbend specializes in trauma and is 20 minutes away, the fastest option and well within the 45-minute transport limit. Meadow Valley is 30 minutes away with upgraded facilities, but nothing in the briefing confirms surgeon availability, and Riverbend's trauma focus makes it the safer choice despite its smaller size."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Riverbend Medical Center",
+    "rationale": "Lakeview is ruled out because its ICU beds are full and its ER is rerouting critical patients. Riverbend is the closest option at 20 minutes, which leaves the most margin under the 45-minute transport limit, and it specializes in trauma, which fits an accident victim. Meadow Valley is also within the limit at 30 minutes, but Riverbend's shorter trip and trauma focus make it the better choice."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Meadow Valley General",
+    "rationale": "Meadow Valley is 30 minutes away, inside the 45-minute survival limit, and has recently upgraded surgical facilities with no reported constraints. Riverbend is faster and specializes in trauma, but its backup power and diverted operations make it too uncertain for an irreversible choice, and Lakeview's travel time is not given."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Riverbend Medical Center",
+    "rationale": "My Fact 5 closes the main road to Meadow Valley and adds 10 minutes, making that trip about 40 minutes with only a 5-minute margin, while Riverbend is 20 minutes away with a 25-minute margin and specializes in trauma. We should phone Riverbend to confirm an OR and surgeon within the hour before leaving, and go to Meadow Valley only if Riverbend cannot take the patient."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Meadow Valley General",
+    "rationale": "Lakeview is out because its only on-call trauma surgeon is unavailable for four hours. Meadow Valley's recently upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and at 30 minutes it stays within the 45-minute limit even if the reported 10-minute detour is real. Before leaving, we should phone ahead to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley cannot take the patient."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Meadow Valley General",
+    "rationale": "Lakeview is ruled out because its ICU is full and its ER is rerouting critical patients. Meadow Valley's recently upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and its 30-minute trip stays within the 45-minute limit even if the reported 10-minute detour is real. Before leaving, we should phone ahead to confirm an OR and surgeon, with Riverbend (20 minutes, trauma focus) as the fallback only if Meadow Valley cannot take the patient."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Meadow Valley General",
+    "rationale": "Meadow Valley is 30 minutes away, or about 40 if the reported detour is real, and both figures are within the 45-minute limit. Its upgraded surgical facilities are the only confirmed surgical capacity we have, while Riverbend's power loss and diverted operations make its surgical availability uncertain. We should phone Meadow Valley to confirm an OR and surgeon before leaving, and use Riverbend only as a fallback."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "I vote for Riverbend Medical Center: at 20 minutes it leaves the most margin under the 45-minute limit, and its trauma specialty fits this patient. Its small size and unconfirmed emergency surgery capacity are the main risks, so we should confirm it can take the patient before we leave."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "I still vote for Riverbend Medical Center: it's 20 minutes away, specializes in trauma, and Lakeview's trauma surgeon is unavailable for four hours. Before we leave, we should call ahead to confirm Riverbend can take an emergency surgery, with Meadow Valley (30 minutes, upgraded facilities) as the backup."
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I'm changing my vote to Meadow Valley General. Its recently upgraded surgical facilities are the only confirmed surgical capacity we have, and 30 minutes still leaves a 15-minute margin under the 45-minute limit. Riverbend is faster, but its surgical capacity is unverified and it is smaller, so I'd keep it as the backup if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "I agree with Person 3 and vote for Meadow Valley General. Its 30-minute trip leaves a 15-minute margin, and its upgraded surgical facilities are the only confirmed surgical capacity we have. Riverbend's backup power and diverted operations make it too uncertain for an irreversible choice, so I'd keep it as the fallback if Meadow Valley cannot take the patient."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. Fact 5 says the Meadow Valley route adds ten minutes, so the trip is about 40 minutes, not 30, leaving only a 5-minute margin under the 45-minute limit. Riverbend's 20 minutes leaves a 25-minute margin, so we should call ahead to confirm its surgical capacity and keep Meadow Valley as the backup."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend, but Fact 5 says Meadow Valley is 30 minutes away with no added delay, so its margin is 15 minutes, not 5. Both hospitals are within the limit, and we should call Riverbend first to confirm a surgeon and OR are free within the hour, with Meadow Valley as the backup."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I'm holding my vote for Meadow Valley General. Fact 5 concerns Lakeview's ICU and ER, not Meadow Valley's route, so Meadow Valley is still 30 minutes with a 15-minute margin, and its upgraded surgical facilities are the strongest confirmed surgical capacity we have. Riverbend stays the backup if Meadow Valley can't take the patient, and we should call ahead to both before we leave."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "I'm holding my vote for Meadow Valley General. Fact 5 concerns Lakeview, not the Meadow Valley route, so Meadow Valley stays at 30 minutes with a 15-minute margin. Riverbend's recent power loss and diverted operations make it the riskier irreversible choice, so we should confirm an OR and surgeon at Meadow Valley before leaving and keep Riverbend as the fallback."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. Fact 5 explicitly applies the ten-minute detour to Meadow Valley's route, so it's about 40 minutes with only a 5-minute margin, while Riverbend's 20 minutes leaves 25. We should confirm Riverbend's surgical capacity by phone before leaving, and note that a fallback to Meadow Valley would leave very little time."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend, but Fact 5 gives Meadow Valley no 10-minute detour, so it's 30 minutes with a 15-minute margin. Before leaving, we should call Riverbend to confirm it isn't on diversion and has a surgeon and OR free within the hour. If it can't take the patient, we go to Meadow Valley."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I'm holding my vote for Meadow Valley General. Fact 5 concerns Lakeview only, so Meadow Valley stays at 30 minutes with a 15-minute margin and the only confirmed surgical upgrade. Before we leave, we should call both hospitals to confirm an OR and surgeon, with Riverbend as the fallback if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "I'm holding my vote for Meadow Valley General. Fact 5 concerns Lakeview, not Meadow Valley's route, so Meadow Valley is 30 minutes with a 15-minute margin and its upgraded surgical facilities are the only confirmed surgical capacity we have. Before we leave, we should call ahead to confirm an OR and surgeon, and treat Riverbend only as a fallback given its power loss and diverted operations."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. Fact 5 explicitly says the main road to Meadow Valley is closed and the alternate adds ten minutes, so Meadow Valley is about 40 minutes, not 30, leaving only a 5-minute margin. Before leaving, we should confirm by phone that Riverbend has a surgeon and OR available within the hour."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend. My Fact 5 doesn't mention a road closure or detour, and even Person 1's 40-minute figure is within the 45-minute limit, so the decision depends on which hospital can confirm an OR and surgeon now. We should call Riverbend first and divert to Meadow Valley if Riverbend can't take the patient."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: its upgraded surgery is our only confirmed surgical capacity, and even with a reported 10-minute detour it's 40 minutes, under the 45-minute limit. Before we leave, we should phone both hospitals and go to whichever confirms an OR and surgeon within the hour, since a Riverbend diversion after departure would likely push a Meadow Valley fallback past 45 minutes."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General. Its upgraded surgical facilities are the only confirmed surgical capacity we have, and I can't verify the reported 10-minute detour, so it's either 30 or 40 minutes, both within the limit. Before we leave, we should phone Meadow Valley to confirm an OR and surgeon, and use Riverbend only if Meadow Valley can't take the patient, given its power loss and diverted operations."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. Fact 5 puts Meadow Valley at about 40 minutes with the detour, leaving only a 5-minute margin under the 45-minute limit, while Riverbend leaves 25. Before we leave, we should phone Riverbend to confirm an OR and surgeon, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend, since it's 20 minutes away and specializes in trauma, but only if a call confirms a surgeon and OR free within the hour. We should phone Riverbend and Meadow Valley before leaving and commit to whichever confirms first, because a mid-route diversion could push us past 45 minutes even if Meadow Valley's 30-minute route holds."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General. My Fact 5 concerns only Lakeview's ICU and ER, not Meadow Valley's route, so Meadow Valley stays at 30 minutes with a 15-minute margin and the only confirmed surgical upgrade. We should phone both hospitals before leaving and use Riverbend as the fallback if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "I'm still holding Meadow Valley General. My facts don't mention a road closure, and Fact 5 concerns Lakeview's ICU and staffing, so Meadow Valley is 30 minutes (40 at worst, still under 45). We should phone Meadow Valley to confirm an OR and surgeon now, and use Riverbend only if they can't take the patient."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend: Fact 5 applies the ten-minute detour to Meadow Valley's route, making it about 40 minutes with only a 5-minute margin. We should phone Riverbend first to confirm an OR, a surgeon, and no diversion, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I still lean Riverbend, but my Fact 5 gives Meadow Valley's route as 30 minutes with no detour, so the 40-minute figure isn't in my briefing. We should call both hospitals now and go to whichever confirms a surgeon and OR within the hour, favoring Riverbend's 20-minute trip if both can take the patient."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General. My Fact 5 concerns only Lakeview's ICU and ER, so Meadow Valley stays at 30 minutes with a 15-minute margin and the only confirmed surgical upgrade. We should phone both hospitals before leaving and use Riverbend as the fallback if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General. Riverbend's backup power and diverted non-critical operations make it the riskier irreversible choice, and even a reported 10-minute detour keeps Meadow Valley at 40 minutes, under the 45-minute limit. We should phone Meadow Valley to confirm an OR and surgeon before leaving, and use Riverbend only if they can't take the patient."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "I still vote Riverbend. Per my Fact 5, the Meadow Valley main road is closed and the detour adds 10 minutes, so it's about 40 minutes with only a 5-minute margin, versus 20 minutes (25-minute margin) for Riverbend. We should phone Riverbend to confirm an OR and surgeon before leaving, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "I'm switching my vote to Meadow Valley General. Its upgraded surgical facilities are the only confirmed surgical capacity we have, and even under the reported 10-minute detour it stays within the 45-minute limit. Before we leave, we should phone to confirm an OR and surgeon, and use Riverbend only as a fallback if it is confirmed and Meadow Valley cannot take the patient."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: its upgraded surgery is the only confirmed surgical capacity we have, and even with the reported 10-minute detour it arrives within 45 minutes. Before we leave, we should phone to confirm an OR and surgeon, with Riverbend as the fallback if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away (40 at worst if the reported detour is real), both within the 45-minute limit, and its upgraded surgical facilities are the only confirmed surgical capacity we have. We should phone ahead to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend. My Fact 5 puts Meadow Valley at about 40 minutes with the detour, leaving only a 5-minute margin, versus 25 minutes for Riverbend. Before leaving, we should call both hospitals and go to Meadow Valley only if Riverbend cannot confirm an OR and surgeon within the hour."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "I still lean Riverbend: at 20 minutes it leaves the most buffer for a mid-route diversion, and its trauma focus fits. We should phone both hospitals now and go to whichever confirms a surgeon and OR within the hour, preferring Riverbend if both can take the patient."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General, since its upgraded surgical facilities are the only surgical capacity in my briefing and 30 minutes (40 at worst, if the reported detour is real) is within the limit. I can't verify the detour or Riverbend's power and diversion reports, so we should phone both hospitals to confirm an OR and surgeon before leaving."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General. Its upgraded surgical facilities are the only confirmed surgical capacity we have, and even under the reported 10-minute detour it arrives within the 45-minute limit. We should phone ahead to confirm an OR and surgeon before leaving, and treat Riverbend as a fallback only if Meadow Valley cannot take the patient."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "I'm switching to Meadow Valley General. My Fact 5 puts it at about 40 minutes with the detour, still under the 45-minute limit, and its upgraded surgery is the only confirmed surgical capacity we have. We should phone ahead to confirm an OR and surgeon before leaving, since a Riverbend fallback after a 40-minute drive would leave almost no margin."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "I'm switching to Meadow Valley General: its upgraded surgical facilities are the only surgical capacity in my briefing, and 30 minutes leaves a 15-minute margin. I can't verify the reported detour or Riverbend's power and diversion problems, so we should phone both hospitals to confirm an OR and surgeon before leaving, with Riverbend as the fallback."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: its upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and 30 minutes (or 40 if the reported detour is real) is within the 45-minute limit. Before we leave, we should phone to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley cannot take the patient."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General. It's 30 minutes away, inside the 45-minute limit, and its upgraded surgical facilities are the only confirmed surgical capacity we have. We should phone ahead to confirm an OR and surgeon before leaving, with Riverbend as the fallback only if Meadow Valley cannot take the patient."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend. Fact 5 says Meadow Valley's main road is closed and the detour adds 10 minutes, so it's about 40 minutes with only a 5-minute margin, versus 20 minutes (25-minute margin) for Riverbend. We should phone Riverbend to confirm an OR and surgeon within the hour before leaving, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I'm holding Meadow Valley General: its upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and 30 minutes (40 at worst if the reported detour is real) is within the 45-minute limit. We should phone ahead to confirm an OR and surgeon before leaving, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and has the only confirmed surgical upgrade in my briefing. Before we leave, we should phone ahead to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and has the only confirmed surgical upgrade in my briefing. Before we leave, we should phone ahead to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend unless it can't confirm an OR and surgeon within the hour. My Fact 5 applies the ten-minute detour to Meadow Valley's route, so it's about 40 minutes, not 30, which is still under the 45-minute limit. Before leaving, we should call both hospitals and go to Meadow Valley if Riverbend can't confirm."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend: it's 20 minutes away and specializes in trauma, and my Fact 5 mentions no detour or road closure for Meadow Valley, nor any power loss or diversion at Riverbend. Before leaving, we should phone Riverbend to confirm a surgeon and OR within the hour, and go to Meadow Valley (30 minutes, upgraded surgery) only if Riverbend can't take the patient."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away with a 15-minute margin, and its upgraded surgery is the only confirmed surgical capacity in my briefing. Before leaving, we should phone to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General. It's 30 minutes away (40 at worst if the reported detour is real), both within the 45-minute limit, and its upgraded surgery is the only confirmed surgical capacity we have. We should phone ahead to confirm an OR and surgeon before leaving, and use Riverbend only if Meadow Valley can't take the patient, since its power loss and diverted operations make it the riskier choice."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend, since my Fact 5 puts Meadow Valley at about 40 minutes with the detour, against 20 for Riverbend. We should phone Riverbend first and go to Meadow Valley only if Riverbend cannot confirm a surgeon and OR within the hour, given the power-loss and diversion reports others have raised."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I still vote Riverbend: it's 20 minutes away, specializes in trauma, and leaves the most buffer even if Meadow Valley's reported 10-minute detour is real. We should phone Riverbend to confirm a surgeon and OR within the hour before leaving, and go straight to Meadow Valley if Riverbend can't take the patient."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: my facts give it 30 minutes and the only confirmed surgical upgrade, and my Fact 5 concerns only Lakeview. Before leaving, we should phone Meadow Valley to confirm an OR and surgeon, with Riverbend as the fallback if it can't take the patient."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, inside the 45-minute limit, and its upgraded surgical facilities are the only confirmed surgical capacity in my briefing. Before we leave, we should phone to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend. My Fact 5 concerns Meadow Valley, not Lakeview: its main road is closed, so it's about 40 minutes against Riverbend's 20. We should phone Riverbend to confirm an OR and surgeon within the hour, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I'm switching to Meadow Valley General: its upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and 30 minutes leaves a 15-minute margin. Before leaving, we should phone ahead to confirm an OR and surgeon, and use Riverbend only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: my facts put it 30 minutes away with confirmed surgical upgrades, and Fact 5 concerns only Lakeview. Before we leave, we should phone to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and its upgraded surgical facilities are the only confirmed surgical capacity in my briefing. Before we leave, we should phone ahead to confirm an OR and surgeon, and use Riverbend only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend. My Fact 5 puts Meadow Valley at about 40 minutes with the detour, against 20 minutes for Riverbend, so we should phone Riverbend to confirm an OR and surgeon within the hour and go to Meadow Valley only if it can't take the patient."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I'm switching to Meadow Valley General. Its upgraded surgical facilities are the only confirmed surgical capacity in my briefing, and its 30-minute drive is within the limit even if the reported detour is real. We should phone ahead to confirm an OR and surgeon before leaving, with Riverbend as a fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, inside the 45-minute limit, and has the only confirmed surgical upgrade in my briefing. Before leaving, we should phone to confirm an OR and surgeon, with Riverbend as the fallback if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and has the only confirmed surgical upgrade in my briefing. Before we leave, we should phone ahead to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "I'm holding Riverbend: my Fact 5 says the Meadow Valley road is closed with a 10-minute detour, so it's about 40 minutes against Riverbend's 20. Before leaving, we should phone Riverbend to confirm an OR and surgeon within the hour, and go to Meadow Valley only if Riverbend can't take the patient."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and its upgraded surgical facilities are the only confirmed surgical capacity in my briefing. Before we leave, we should phone ahead to confirm an OR and surgeon, and use Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, within the 45-minute limit, and it has the only confirmed surgical upgrade in my briefing. Before we leave, we should phone to confirm an OR and surgeon, with Riverbend as the fallback only if Meadow Valley can't take the patient."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "I'm holding Meadow Valley General: it's 30 minutes away, and its upgraded surgical facilities are the only confirmed surgical capacity in my briefing. Fact 1 says main roads are open, so I can't verify the reported 10-minute detour, and Riverbend's power loss and diverted operations make it the fallback."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "The main road leading directly to Meadow Valley is closed due to flooding, but an alternate route adds only ten minutes travel time."
+    ],
+    "assigned_hidden_information": [
+     "The main road leading directly to Meadow Valley is closed due to flooding, but an alternate route adds only ten minutes travel time."
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview\u2019s only on-call trauma surgeon just departed on an emergency airlift and won\u2019t be available for four hours.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities."
+    ],
+    "assigned_hidden_information": [
+     "Lakeview\u2019s only on-call trauma surgeon just departed on an emergency airlift and won\u2019t be available for four hours."
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds.",
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Lakeview ICU beds filled up in the last thirty minutes due to a multi-car pileup; the ER is now rerouting critical patients."
+    ],
+    "assigned_hidden_information": [
+     "Lakeview ICU beds filled up in the last thirty minutes due to a multi-car pileup; the ER is now rerouting critical patients."
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "There is one ambulance with enough fuel for any of the options, and all main roads are reported open as of an hour ago.",
+     "Riverbend Medical Center is smaller but specializes in trauma cases and is only 20 minutes away.",
+     "Riverbend Medical Center lost power recently and is running on backup, with non-critical operations diverted.",
+     "Meadow Valley General is 30 minutes away and recently upgraded its surgical facilities.",
+     "Lakeview Hospital is known for its large surgical team and usually has available ICU beds."
+    ],
+    "assigned_hidden_information": [
+     "Riverbend Medical Center lost power recently and is running on backup, with non-critical operations diverted."
+    ]
+   }
+  ]
+ }
+}

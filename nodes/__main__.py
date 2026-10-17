@@ -82,10 +82,10 @@ def main():
         stats = core.load_repo(g, (a.package or ws).resolve())
         if not a.stdio:
             print(f"loaded {stats['functions']} functions, {stats['call_edges']} call edges in "
-                  f"{time.perf_counter() - t0:.1f} s into graph {team}")
+                  f"{time.perf_counter() - t0:.1f} s into graph {team}", flush=True)
     if not a.stdio:
-        print(f"MCP:  http://127.0.0.1:{a.port}/mcp   web: http://127.0.0.1:{a.web_port}/")
-        print(f'add an agent:  claude mcp add --transport http nodes http://127.0.0.1:{a.port}/mcp --header "X-Agent: alice"')
+        print(f"MCP:  http://127.0.0.1:{a.port}/mcp   web: http://127.0.0.1:{a.web_port}/", flush=True)
+        print(f'add an agent:  claude mcp add --transport http nodes http://127.0.0.1:{a.port}/mcp --header "X-Agent: alice"', flush=True)
     log_dir = ws / ".nodes"
     log_dir.mkdir(exist_ok=True)
     server.run(team, ws, db_port=a.db_port, port=a.port, web_port=a.web_port, log_dir=log_dir,

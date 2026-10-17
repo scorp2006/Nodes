@@ -1,0 +1,1107 @@
+{
+ "task": "t25_d0",
+ "graph": {
+  "scenario": "select_emergency_shelter",
+  "correct_answer": "Station Delta",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Station Delta",
+    "rationale": "Delta had a maintenance inspection this morning that confirmed safe water, working backup lights, and no contamination, and it is currently empty, so it can take evacuees now. Its aging plumbing is a minor drawback, and I ruled out Bravo because it is closest to the plant."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Station Alpha",
+    "rationale": "Station Alpha has been restocked with fresh food and bottled water, has backup generators, and was open for use last week, so it is ready now. Bravo has possible chemical contamination nearby, and Charlie is smaller and farther away."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Station Alpha",
+    "rationale": "Alpha has backup generators, fresh food and bottled water, and has been open for use, with no reported power, plumbing, or proximity problems. Charlie has no power, Bravo is closer to the chemical plant, and Delta has plumbing issues."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Station Charlie",
+    "rationale": "Station Alpha has confirmed elevated toxin levels from exposed ventilation, so it is ruled out. Station Bravo, though well stocked with 80 cots and medical supplies, is closest to the plant, which is a serious risk in a chemical release. Station Charlie is farther away, on higher ground, and has solar power, so it is the safest known option, even though it is smaller and Station Delta's conditions are less documented."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Station Delta",
+    "rationale": "Delta is the only site with a confirmed, recent inspection (safe water, working backup lights, no contamination), it is empty, and its only documented issue is older plumbing history. Alpha, Charlie, and Bravo each have an adverse report on the board (elevated toxins, no power, abnormal air readings), so we should move evacuees to Delta once a field water check confirms the morning inspection, with Bravo as the fallback only if its air readings are cleared."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Station Delta",
+    "rationale": "Delta is the only site with no adverse report on the board: its only inspection (Person 1's, safe water, working backup lights, no contamination) is single-sourced, but it is empty with open roads. Alpha has an elevated-toxin report, Charlie's no-power report is from repair teams, and Bravo has abnormal air readings near the plant. Commit to Delta only once a field water check passes, and if it fails, get a sourced air check on Bravo before moving anyone there."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Station Delta",
+    "rationale": "Delta is empty, has open roads, and has no sourced contamination report, though its plumbing history means the field water check must pass before we move anyone in. Charlie is out because repair teams confirm no power (Fact 1), and Bravo and Alpha stay fallbacks until their conflicting air-quality reports are sourced."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Station Delta",
+    "rationale": "Station Alpha is ruled out by the elevated indoor toxin report in my Fact 2, and Station Charlie's power status is disputed, with my Fact 5 listing solar panels and no outage. Station Delta has no adverse report in my briefing, and it is empty with open roads, but its plumbing history is unverified, so we should commit only after a field water check passes, with Station Bravo as the fallback once its abnormal air readings are sourced and cleared."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "I propose Station Delta: a maintenance crew confirmed this morning that its water is safe, its backup lights work, and there is no contamination, and it is currently empty. I've posted Fact 1 to the board; I'd like to hear from the others if they have any reports of contamination or access problems at Delta before we commit."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "I'm still backing Station Alpha. Fact 1 says Delta has sometimes had plumbing issues, which doesn't square with the claim that its water is confirmed safe, so I'd want that maintenance report verified before we commit. Alpha was restocked with fresh food and bottled water yesterday, has backup generators, and was in use last week."
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I'm still backing Station Alpha: Fact 5 is now on the board, showing it was restocked with food and water yesterday and has backup generators. I haven't seen the maintenance report Person 1 cites for Delta, so I can't confirm its water is safe, and Fact 2 notes that Delta has had plumbing issues."
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "I've posted Fact 2 to the board: Station Alpha's ventilation was exposed to outdoor air and tested with elevated toxin levels, so Alpha stays ruled out. Person 3 attributed the Delta plumbing issue to Fact 2, but that issue is in Fact 1, and I can't verify Person 1's maintenance report, so I still back Station Charlie over Delta."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "My Fact 3 is the source of the Delta plumbing note, and it's a general history note, while my Fact 1 is this morning's inspection confirming Delta's water is safe. I can't verify Person 4's Alpha ventilation report from my briefing, but if it holds, Delta is the only site confirmed safe, empty, and reachable, so I still back Delta."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "I've posted Facts 1 and 4, and the board now shows Alpha's ventilation exposure report is unverified. My Fact 1 only notes Delta's past plumbing issues and says nothing about a morning inspection, so Delta's safety rests on Person 1's claim alone. Until someone verifies Alpha or Delta, I'd back Station Charlie, the only site with no contamination report from any source."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I've posted Fact 1: Station Charlie has no power, with solar offline and backup batteries depleted, so I can't back it until that changes. Person 4's Alpha ventilation report and Person 1's Delta inspection are both unverified, so I'd ask for a source on each before we rule out Alpha or pick Delta, and I'd consider Bravo (80 cots and medical supplies, though closer to the plant) as the fallback."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "I've checked the board: Alpha's contamination report (Person 4) is the only air-quality evidence and stands, so Alpha stays out. Person 3's report that Charlie has no power (solar offline, batteries depleted) is new and serious, so I'd withdraw my Charlie vote unless someone can confirm power is restored. Until Person 1's Delta inspection is confirmed, Bravo (80 cots and medical supplies, though closer to the plant) is the most defensible fallback, and Person 2 still needs to post the Bravo fact they say they hold."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "My briefing doesn't cover the Alpha ventilation report or the Charlie power outage, so I can't confirm either. My Fact 1 is the only inspection on record: Delta's water is safe, its backup lights work, and there's no contamination. Fact 3 adds that Delta is empty and all roads are open, so I still back Delta unless someone can verify a problem there."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I've posted Facts 2 and 5, so Bravo's abnormal air readings near the plant are on the board. Bravo and Charlie (no power) now look unsafe, and Alpha has an elevated-toxin test result, so I'd back Station Delta conditionally: confirm the maintenance inspection before we commit."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I've posted Fact 2 (Delta is empty with plumbing issues, all roads open) and Fact 3 (Bravo has 80 cots and medical supplies but is closer to the plant). Charlie is out unless power is restored (Fact 1), and neither Person 4's Alpha ventilation report nor Person 1's Delta inspection is in my briefing, so I'd verify both before ruling out Alpha or committing to Delta. Until then, Bravo is the fallback if its air readings check out, since its proximity to the plant is the open concern."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "I've posted Fact 5: Station Charlie is smaller and farther away but on higher ground with solar panels, and it says nothing about an outage, so Person 3's power report needs a source before we drop it. My briefing also shows Alpha's elevated toxin result and Delta's documented plumbing problems with no inspection on record, so I'd back Charlie unless the outage is confirmed."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "The board now shows Delta as the only site with no adverse report: its inspection confirmed safe water and no contamination, while Alpha has an elevated-toxin result, Charlie has no power, and Bravo has abnormal air readings. I back Station Delta, since its plumbing history is an older note that doesn't conflict with this morning's inspection."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "From my briefing, I can't verify any of the adverse reports yet. Fact 1 notes Delta's plumbing problems but no inspection, and Fact 3 shows Charlie on higher ground with solar power, not an outage. I'd back Delta only if its water is confirmed safe, and Charlie if the power outage is disproven."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I back Station Delta, conditional on its water being confirmed: the board's only sourced inspection says it is safe, and my briefing has only its old plumbing history, which doesn't contradict that. Alpha has an elevated indoor toxin test, Charlie has no power, and Bravo has abnormal air readings, so each of the others has a documented problem."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "I back Station Delta, conditional on a second confirmation of this morning's inspection. Alpha has elevated toxins, Charlie has no power, and Bravo has abnormal air readings, while Delta's only documented issue is old plumbing history that the inspection's safe-water finding doesn't contradict. If Delta's inspection can't be confirmed, Bravo is the fallback, since its readings are low but not reported as elevated."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "I still back Station Delta. Its inspection is on the board, and the only drawback posted is older plumbing history, which doesn't contradict the safe-water finding. Charlie's power status is contradicted on the board (solar offline versus solar panels), so it needs resolving before anyone relies on it."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I'd back Station Delta, conditional on the morning inspection being confirmed by a second source. My briefing doesn't contradict it: Delta's plumbing history is old, and the board shows Alpha has elevated toxins, Charlie has no power, and Bravo has abnormal air readings. If Delta's inspection can't be confirmed, Bravo is the fallback, since its readings are low and not reported as elevated."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I need to correct my last message: the Delta inspection is only Person 1's claim, not a sourced report on the board, so I shouldn't have called it \"the board's only sourced inspection.\" I'd hold Delta until someone confirms that inspection, and if it can't be confirmed, Bravo's \"low but abnormal\" readings look like the better fallback over Alpha's elevated toxins or Charlie's reported outage."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "Station Alpha stays ruled out based on my Fact 2 (elevated toxins). I can't confirm Delta's inspection from my briefing, and my Fact 1 shows only its old plumbing history. I'd hold Delta until a source confirms the inspection, and I'd keep Charlie as an option only if its outage claim is disproven, since my Fact 5 lists solar panels and no outage."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I've posted my Fact 1 to the board, so the Delta inspection (safe water, working backup lights, no contamination) is now a source-checked report from my briefing rather than an unsourced claim. I still back Delta, but I'd hold the final commitment until a second team member confirms that inspection on the board; if it can't be confirmed, Bravo is the fallback."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I've posted Fact 3, which says Charlie has solar panels and no outage, so Person 3's outage report needs a source before we rely on it. I still hold Delta until a second source confirms its inspection, and Bravo stays the fallback."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I've posted my Fact 1: repair teams confirm Station Charlie has no power (solar offline from windstorm damage, backup batteries depleted), so Charlie is out unless that's restored. I still can't confirm Delta's inspection from my briefing, and my Fact 2 notes its plumbing problems, so I'd hold Delta until a second source verifies it and keep Bravo as the fallback."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "Station Alpha stays ruled out on my Fact 2 (elevated toxins). I can't verify Person 1's Delta inspection from my briefing, and Charlie's outage is now contradicted by my Fact 5, so I'd commit to Delta only if a second source confirms its inspection, and otherwise go with Bravo, which my Fact 4 shows has 80 cots and medical supplies with no contamination report."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "Station Delta remains my pick: Person 1's Fact 1 is on the board, and no posted report contradicts its safe-water finding. Since only one source backs that inspection, I'd like a second confirmation before we commit, and if it can't be confirmed, Bravo is the fallback."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "The board now has sourced reports against Alpha (elevated indoor toxins), Charlie (no power, from repair teams), and Bravo (abnormal air readings). Delta's inspection is still a single unconfirmed source, so I'd hold Delta until a second team member verifies it, and if that fails, Bravo is the fallback despite its readings."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "My briefing has no Delta inspection and no Alpha ventilation report, so I can't confirm either. I'd hold Delta until a second source verifies it, and I can't independently confirm Bravo's air readings, so they need a source before Bravo is treated as the fallback."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "Station Alpha stays ruled out on my Fact 2 (elevated toxins). I can't verify Delta's inspection from my briefing, which shows only its plumbing history, emptiness, and open roads, so I'd hold Delta until a second source confirms it. Bravo's reported air readings and Charlie's outage both need sourcing before we rely on either."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "Station Delta's inspection is on the board, but only my Fact 1 supports it, so I'd hold the final call until a second team member confirms it. If it can't be confirmed, Bravo is the fallback despite its unverified \"low but abnormal\" air readings, since Alpha has elevated toxins and Charlie's repair-team report says it has no power."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "Until the Delta inspection and the Alpha toxin report are independently verified, I can't rank these sites with confidence. My briefing supports Alpha's restock, generators, and recent use, but I can't check the elevated-toxin claim against it. I'd hold the final call for one quick confirmation round, then choose between Delta if its inspection holds and Bravo only if its air readings are cleared."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "My briefing confirms Charlie has no power (Fact 1) and that Delta is empty with old plumbing issues and open roads (Fact 2), but it has no Delta inspection and no Alpha toxin report. I'd hold Delta until a second source confirms the inspection, and I can't clear Bravo's air readings from my briefing either."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "Alpha stays ruled out on my Fact 2 (elevated toxins). I can't verify Delta's inspection or Charlie's outage from my briefing, and I should correct my earlier message: my Fact 4 says nothing about Bravo's air readings, only that it has 80 cots and is closer to the plant, so Bravo is unverified too. We should get a second source for Delta's inspection or Charlie's outage before committing."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "The board now has sourced reports against Alpha (elevated toxins), Charlie (no power, from repair teams), and Bravo (abnormal air readings), and nothing adverse about Delta. I still back Station Delta, but Person 1's inspection is the only source for its safety, so we should get a second confirmation in the next round or go with Bravo as the fallback."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "All five of my facts are already on the board, so I have nothing new to add. My briefing doesn't include Delta's inspection or Alpha's toxin report, so I can't verify either. I'd hold the choice until someone confirms Delta's inspection, and I wouldn't treat Bravo as clean given its \"low but abnormal\" air readings."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I still can't verify Delta's inspection or Alpha's toxin report from my briefing, so I'd hold the choice until a second source confirms one of them. Charlie's outage is also disputed: my Fact 1 says it has no power, but my Fact 4 says it has solar panels, so that needs resolving before anyone relies on it."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "The board now has every fact posted, and Charlie's outage is not a contradiction: its solar panels exist but the repair teams report them offline from windstorm damage, so Charlie is down. Delta's inspection is still single-sourced, but nothing adverse is posted against Delta, while Bravo has an abnormal air reading, so I'd commit to Delta now with a field check on its water and Bravo as the fallback."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "I still back Station Delta: my Fact 1 is a this-morning inspection confirming safe water, working backup lights, and no contamination, and no posted report contradicts it. I'm fine committing now with a field check on its water, with Bravo as the fallback if that check fails."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I'd commit to Station Delta only after the field water check passes, since my briefing has only its old plumbing history and I can't verify this morning's inspection. If the check fails, I'd fall back to Bravo, but its abnormal air readings from my Fact 2 need clearing first."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I can't commit to Delta yet: my briefing shows only its old plumbing history, not a safety inspection. I'd agree to a field water check at Delta before we move in, and I should correct my earlier message: I have no Bravo air-quality data, so its readings need a source before we rely on Bravo as the fallback."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "Station Alpha stays ruled out based on my Fact 2 (elevated toxins). I agree to commit to Delta only after a field water check, since my Fact 1 shows only its old plumbing history, not an inspection. My briefing has no air data for Bravo and doesn't mention a Charlie outage, so neither can be cleared from my side yet."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "I agree to a field water check at Delta before we move in, since my Fact 1 is the only inspection on record and the others can't verify it. If the check fails, Bravo is the fallback, but its air readings need a source first."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I agree to commit to Station Delta only after a field water check passes, since my briefing shows only its plumbing problems and no inspection. My Fact 2 also shows abnormal air readings near Bravo, so Bravo is not a clean fallback until those readings are cleared."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I agree to commit to Delta only after a field water check passes, since my briefing shows only its old plumbing history and no inspection. I can't verify the Alpha toxin or Bravo air-quality reports from my briefing, so I'd keep Charlie out (no power, per Fact 1) and treat Bravo as a fallback only once its readings are sourced."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "Station Alpha stays ruled out on my Fact 2 (elevated toxins). I agree to commit to Delta once a field water check passes, and I'd treat Bravo and Charlie as fallbacks only after someone sources their air readings and power status."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my Fact 1 is the only inspection on record. If the check fails, Bravo is the fallback, but its air readings need a source before we rely on it."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I agree to commit to Station Delta only after a field water check passes, since my briefing shows only its old plumbing history and no inspection. Bravo is not a clean fallback either, because my Fact 2 reports abnormal air readings near the plant, and Alpha's elevated-toxin claim is one I can't verify from my briefing."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I agree to commit to Station Delta only after a field water check passes, since my briefing shows only its old plumbing history and no inspection. I'd rule out Charlie on my Fact 1 (repair teams confirm no power, which supersedes the older solar note in my Fact 4), and I'd treat Bravo and Alpha as fallbacks only after someone sources their air-quality reports."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my Fact 1 shows only its old plumbing history and no inspection. Alpha stays ruled out on my Fact 2 (elevated toxins), and Bravo and Charlie should stay fallbacks until someone sources their air readings and power status."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "I agree: we commit to Station Delta once the field water check passes. If it fails, we should get a sourced air-quality check for Bravo before moving anyone there, since my Fact 1 is the only inspection on record."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I agree to commit to Station Delta once the field water check passes. From my briefing, I can't verify the Alpha toxin report, the Charlie outage, or Delta's inspection, and Bravo stays unsafe until its abnormal air readings from my Fact 2 are cleared."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my briefing shows only its old plumbing history, that it is empty, and that the roads are open. I'd keep Charlie out (no power, per Fact 1) and treat Bravo and Alpha as fallbacks only after their air-quality reports are sourced."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "I agree to commit to Station Delta once the field water check passes, since my Fact 1 notes its plumbing problems but no inspection. Alpha stays ruled out on my Fact 2 (elevated toxins), and Bravo and Charlie remain fallbacks until someone sources their air and power reports."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "I agree to commit to Station Delta once the field water check passes, since my Fact 1 is the only inspection on record. If the check fails, we should get a sourced air-quality check for Bravo before moving anyone there."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my briefing shows only its plumbing history and no inspection. Bravo is not a clean fallback because my Fact 2 reports abnormal air readings near the plant, so it would also need an air check first."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my briefing shows only its old plumbing history, not an inspection. I'd keep Charlie out (Fact 1 reports no power) and hold Bravo until its abnormal air readings are sourced."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "I agree to commit to Station Delta once the field water check passes, since my Fact 1 shows only its old plumbing history, not an inspection. Alpha stays ruled out on my Fact 2 (elevated toxins), and I'd treat Bravo and Charlie as fallbacks until someone sources their air and power reports."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "I agree to commit to Station Delta once a field water check confirms the morning inspection, which is currently the only report on the board for Delta. Alpha (elevated toxins), Charlie (no power), and Bravo (abnormal air readings) all have adverse reports, so Bravo should be used as a fallback only after its air readings are cleared."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I agree to commit to Station Delta once a field water check passes, since the board's only inspection for Delta is Person 1's and my briefing only shows its old plumbing history. Bravo stays a fallback only after its abnormal air readings are sourced and cleared."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my briefing shows only its old plumbing history. I'd keep Charlie out (Fact 1 reports no power) and hold Bravo and Alpha as fallbacks until their air-quality reports are sourced."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "I agree to commit to Station Delta once a field water check passes, since my Fact 1 shows only its old plumbing history, not an inspection. I also need to correct my earlier message: I had no source for the windstorm explanation of Charlie's outage, so Charlie stays a fallback only if its power status is confirmed."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "Maintenance crew at Station Delta inspected all major systems this morning and confirmed water is safe, backup lights work, and no signs of contamination were found.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power."
+    ],
+    "assigned_hidden_information": [
+     "Maintenance crew at Station Delta inspected all major systems this morning and confirmed water is safe, backup lights work, and no signs of contamination were found."
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Field agent at Bravo reports air sensors detected low but abnormal readings, suggesting possible chemical contamination near Station Bravo.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant."
+    ],
+    "assigned_hidden_information": [
+     "Field agent at Bravo reports air sensors detected low but abnormal readings, suggesting possible chemical contamination near Station Bravo."
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Repair teams confirm that solar panels at Station Charlie are offline due to windstorm damage. The backup batteries are depleted and the station has no power.",
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week."
+    ],
+    "assigned_hidden_information": [
+     "Repair teams confirm that solar panels at Station Charlie are offline due to windstorm damage. The backup batteries are depleted and the station has no power."
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Community hotline reported that Station Alpha's ventilation system was unintentionally exposed to outdoor air after yesterday's accident. Test results show elevated toxin levels inside.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power."
+    ],
+    "assigned_hidden_information": [
+     "Community hotline reported that Station Alpha's ventilation system was unintentionally exposed to outdoor air after yesterday's accident. Test results show elevated toxin levels inside."
+    ]
+   }
+  ],
+  "posts": [
+   [
+    "Person 1",
+    "h3"
+   ],
+   [
+    "Person 3",
+    "s0"
+   ],
+   [
+    "Person 4",
+    "h0"
+   ],
+   [
+    "Person 2",
+    "s3"
+   ],
+   [
+    "Person 2",
+    "s0"
+   ],
+   [
+    "Person 3",
+    "h2"
+   ],
+   [
+    "Person 2",
+    "h1"
+   ],
+   [
+    "Person 2",
+    "s1"
+   ],
+   [
+    "Person 3",
+    "s3"
+   ],
+   [
+    "Person 3",
+    "s1"
+   ],
+   [
+    "Person 4",
+    "s2"
+   ],
+   [
+    "Person 2",
+    "s2"
+   ]
+  ],
+  "tool_calls": [
+   {
+    "t": 1792268825.3851407,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792268852.9655635,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792268868.2333837,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 2
+   },
+   {
+    "t": 1792268901.4231691,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792268901.5485685,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 4
+   },
+   {
+    "t": 1792268901.5729167,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792268920.5229735,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792268937.4331603,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792268937.469088,
+    "agent": "Person 4",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792268973.966027,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792268977.1364927,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 2
+   },
+   {
+    "t": 1792268977.224328,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792268998.3097966,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 2
+   },
+   {
+    "t": 1792268998.4101052,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792269017.507867,
+    "agent": "Person 4",
+    "tool": "share_fact",
+    "fact_number": 5
+   },
+   {
+    "t": 1792269035.7761796,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269035.7969573,
+    "agent": "Person 1",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792269072.904188,
+    "agent": "Person 3",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269072.9500968,
+    "agent": "Person 3",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792269092.1416857,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269092.332004,
+    "agent": "Person 4",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792269114.0762577,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269133.0416222,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269152.526999,
+    "agent": "Person 3",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269185.8358603,
+    "agent": "Person 1",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792269209.0547073,
+    "agent": "Person 2",
+    "tool": "share_fact",
+    "fact_number": 3
+   },
+   {
+    "t": 1792269235.2043438,
+    "agent": "Person 3",
+    "tool": "share_fact",
+    "fact_number": 1
+   },
+   {
+    "t": 1792269274.7025294,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269293.8330286,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269294.3972101,
+    "agent": "Person 2",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792269352.77667,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269435.8405232,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269458.23714,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269498.0806398,
+    "agent": "Person 4",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269498.146288,
+    "agent": "Person 4",
+    "tool": "who_has_not_shared",
+    "fact_number": null
+   },
+   {
+    "t": 1792269803.3258898,
+    "agent": "Person 1",
+    "tool": "shared_facts",
+    "fact_number": null
+   },
+   {
+    "t": 1792269816.7310293,
+    "agent": "Person 2",
+    "tool": "shared_facts",
+    "fact_number": null
+   }
+  ],
+  "hidden_holders": {
+   "Person 1": [
+    "Maintenance crew at Station Delta inspected all major systems this morning and confirmed water is safe, backup lights work, and no signs of contamination were found."
+   ],
+   "Person 2": [
+    "Field agent at Bravo reports air sensors detected low but abnormal readings, suggesting possible chemical contamination near Station Bravo."
+   ],
+   "Person 3": [
+    "Repair teams confirm that solar panels at Station Charlie are offline due to windstorm damage. The backup batteries are depleted and the station has no power."
+   ],
+   "Person 4": [
+    "Community hotline reported that Station Alpha's ventilation system was unintentionally exposed to outdoor air after yesterday's accident. Test results show elevated toxin levels inside."
+   ]
+  }
+ },
+ "placebo": {
+  "scenario": "select_emergency_shelter",
+  "correct_answer": "Station Delta",
+  "initial_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Station Delta",
+    "rationale": "Delta is the only shelter with a same-morning inspection confirming no contamination, safe water, and working backup lights, and it is currently empty with all roads open. Its plumbing history is a minor concern that the inspection already covers. Alpha is a close second, but Bravo sits nearest the chemical plant, and Charlie is smaller and farther away."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Station Alpha",
+    "rationale": "Bravo is ruled out because the field agent detected possible chemical contamination near it. Alpha has no reported hazards, was restocked with food and water, has backup generators, and was recently in use, while Charlie is smaller and farther away and Delta has plumbing problems."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Station Alpha",
+    "rationale": "Station Alpha has backup generators, recently restocked food and water, and was open last week, so it has power and supplies without the problems at other sites. Charlie has no power, Bravo is closer to the chemical plant, and Delta has plumbing issues."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Station Charlie",
+    "rationale": "Station Alpha has confirmed elevated toxins from its exposed ventilation, and Station Bravo sits closer to the plant, so both carry more exposure risk. Charlie is farther from the plant, on higher ground, and has solar power, though its smaller size means we should confirm bed capacity quickly and use Delta as backup if it falls short."
+   }
+  ],
+  "final_votes": [
+   {
+    "agent": "Person 1",
+    "vote": "Station Delta",
+    "rationale": "Delta has a same-morning inspection confirming safe water, working backup lights, and no contamination, it is currently empty, and all roads are open. Person 4's Alpha toxin report and Person 3's Charlie outage are unsourced and absent from the shared facts, so I'd switch only if a named, timestamped source confirms either, and we still need bed counts before finalizing."
+   },
+   {
+    "agent": "Person 2",
+    "vote": "Station Alpha",
+    "rationale": "Bravo is ruled out by the field agent's report of possible chemical contamination nearby. Alpha has no reported hazard in our shared facts, was restocked with food and water, has backup generators, and was recently in use. Delta has documented plumbing problems, and Charlie is smaller and farther away. Person 4's Alpha toxin report is unsourced, so I would switch only if a named, timestamped source confirms it. We still need Alpha's bed count before finalizing."
+   },
+   {
+    "agent": "Person 3",
+    "vote": "Station Alpha",
+    "rationale": "Alpha is the only site whose confirmed facts show backup generators, restocked food and water, and no reported hazard, while Charlie's solar power is offline with depleted batteries, Delta has documented plumbing problems, and Bravo is near the plant. The toxin report against Alpha and the Delta inspection are unsourced, so I would switch only if a named, timestamped source confirms either, and we still need Alpha's bed count before finalizing."
+   },
+   {
+    "agent": "Person 4",
+    "vote": "Station Charlie",
+    "rationale": "My field report shows elevated toxins inside Station Alpha after outdoor air reached its ventilation, so I rule it out despite its generators and supplies. Charlie is on higher ground, has solar panels per Fact 5, and is farther from the plant than Bravo. Its bed count is unknown and it is smaller, so we must confirm capacity before committing, with Delta as backup once its plumbing and water status are verified."
+   }
+  ],
+  "discussion_transcript": [
+   {
+    "round": 1,
+    "agent": "Person 1",
+    "response": "I vote for **Station Delta**: its same-morning inspection confirmed safe water, working backup lights, and no contamination, it is currently empty, and all roads are open. Its plumbing history is covered by that inspection, and Alpha is my backup if Delta's capacity falls short."
+   },
+   {
+    "round": 1,
+    "agent": "Person 2",
+    "response": "I'm sticking with **Station Alpha**. Fact 1 says Delta has plumbing problems, and I can't verify the inspection you cite, so I'd want Delta's water safety and bed capacity confirmed before choosing it over Alpha, which has no reported hazards, restocked water and food, and backup generators. Does anyone have Alpha's or Delta's bed count?"
+   },
+   {
+    "round": 1,
+    "agent": "Person 3",
+    "response": "I'm sticking with **Station Alpha**: it has backup generators, restocked food and water, and no reported hazards. Bravo has 80 cots and medical supplies, but it is closest to the chemical plant, and I can't verify Person 1's Delta inspection. Does anyone have Alpha's bed count?"
+   },
+   {
+    "round": 1,
+    "agent": "Person 4",
+    "response": "Alpha shouldn't be chosen: my field report says its ventilation was exposed to outdoor air after the accident and tested with elevated toxins, so \"no reported hazards\" is wrong. I still favor Charlie (higher ground, solar power, away from the plant) if someone can confirm its bed count, with Delta as backup pending a verified water inspection."
+   },
+   {
+    "round": 2,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**. Fact 1 (shared) reports a same-morning inspection that found safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Person 4, please share the source for Alpha's elevated toxins, since that would rule Alpha out, and we still need Charlie's bed count before comparing it to Delta."
+   },
+   {
+    "round": 2,
+    "agent": "Person 2",
+    "response": "I'm still holding **Station Alpha**: my facts show no hazards, restocked food and water, and backup generators. If Person 4's elevated-toxin report is confirmed, I'd switch to **Charlie** over Delta, since Delta's plumbing problems are documented and Person 1's inspection is unverified. We still need Alpha's and Charlie's bed counts."
+   },
+   {
+    "round": 2,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: it has generators and restocked supplies, while Charlie's solar power is offline with depleted batteries per Fact 1, so Charlie is not a fallback unless its power is restored. Person 4, please share the source for Alpha's elevated toxins, since a verified hazard there would change my vote."
+   },
+   {
+    "round": 2,
+    "agent": "Person 4",
+    "response": "Person 3, Fact 1 doesn't mention Charlie's power at all. Fact 5 says Charlie has solar panels, so I still think Charlie is the better choice over Alpha, with Delta as backup. Alpha's elevated toxins come from my Fact 2: a community hotline report of ventilation exposed to outdoor air, plus test results showing elevated toxin levels inside."
+   },
+   {
+    "round": 3,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**. Person 3, Fact 1 is about Delta's inspection and says nothing about Charlie's power. My Fact 2 also reports no contamination at Alpha, so Person 4's toxin report is unverified, and Delta is empty with a same-morning water-safety inspection. Charlie's and Delta's bed counts are still needed before we commit."
+   },
+   {
+    "round": 3,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show no hazard there, restocked food and water, and backup generators. None of my facts support the Alpha toxin report, the Charlie power outage, or the Delta inspection, and none give bed counts for Alpha, Charlie, or Delta, so we need those before committing."
+   },
+   {
+    "round": 3,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**, but correcting the record: my Fact 1 concerns Charlie's power outage (solar offline, batteries depleted), not Delta, and none of my facts include Delta's inspection or Alpha's toxin report. The only bed count I have is Bravo's 80 cots, which is near the plant, so we still need Alpha's count before committing."
+   },
+   {
+    "round": 3,
+    "agent": "Person 4",
+    "response": "Person 3, my Fact 1 is about Delta's old plumbing and empty status, not Charlie's power, and my Fact 5 says Charlie has solar panels, so your outage report conflicts with my facts and needs checking. I still favor Charlie over Alpha given the toxin report, but we need Charlie's bed count and power status confirmed before committing, with Delta as backup only if its water is verified."
+   },
+   {
+    "round": 4,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: Fact 1 reports a same-morning inspection confirming safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. I need to correct my earlier claim: my Fact 2 says nothing about contamination at Alpha, so Person 4's toxin report is unverified, not refuted. If it is confirmed, I'd switch to Charlie over Alpha, but none of us has a bed count for Delta, Alpha, or Charlie yet."
+   },
+   {
+    "round": 4,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show no contamination there, restocked food and water, and backup generators. My briefing doesn't include Delta's inspection, Charlie's power outage, or Alpha's toxin report, and it says Delta has plumbing problems and Charlie has solar panels, so we need those claims verified before anyone switches."
+   },
+   {
+    "round": 4,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha** because my briefing shows no verified hazard there, and its generators and restocked supplies are confirmed. Before anyone switches, we need verified bed counts for Alpha and Delta, the source and timestamp of Person 4's toxin report and Person 1's Delta inspection, and confirmation of Charlie's current power status, since my briefing says its solar power is offline."
+   },
+   {
+    "round": 4,
+    "agent": "Person 4",
+    "response": "My Fact 5 says Charlie has solar panels and mentions no outage, and my Fact 1 covers Delta's plumbing and empty status, not the inspection Person 1 cites, so those claims need sources. I still favor Charlie over Alpha because my Fact 2 reports elevated toxin levels in Alpha's test results, but none of my facts give bed counts for Alpha, Charlie, or Delta, so we need those before committing."
+   },
+   {
+    "round": 5,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: shared Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Person 4's Alpha toxin report and Person 3's Charlie outage claim appear in none of our shared facts, so unless someone can verify them quickly, I'd proceed with Delta and keep Charlie as the alternate, while we still need bed counts for all three."
+   },
+   {
+    "round": 5,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show no contamination there, plus restocked food and water and backup generators, and none of them support Person 1's Delta inspection, Person 3's Charlie outage, or Person 4's Alpha toxin report. If Person 4's toxin report is verified, I'd switch to **Charlie** rather than Delta, since Delta's documented plumbing problems would stay unresolved without a verified water inspection."
+   },
+   {
+    "round": 5,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**. My briefing confirms its generators and restocked supplies, and I'm not aware of any verified hazard there. Person 4's Alpha toxin report and Person 1's Delta inspection are both unverified, so I'd want their sources and timestamps before anyone switches. Charlie's power status also needs checking, since my Fact 1 says its solar power is offline while Fact 4 says it has solar panels."
+   },
+   {
+    "round": 5,
+    "agent": "Person 4",
+    "response": "I can't verify Person 1's Delta inspection or Person 3's Charlie outage from my facts, but my Fact 2 reports elevated toxins inside Alpha after outdoor air reached its ventilation, so I'd rule out Alpha. On the shared facts, I'd favor Charlie (higher ground, solar panels) over Delta, whose plumbing problems are documented, but we still need bed counts and Charlie's current power status before committing."
+   },
+   {
+    "round": 6,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: my Fact 1 reports a same-morning inspection confirming safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. My facts don't address Alpha's toxin report or Charlie's power outage, and none give bed counts for Delta, Alpha, or Charlie, so we need those before committing."
+   },
+   {
+    "round": 6,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my Fact 4 confirms backup generators and restocked food and water, and none of my facts show a hazard there. Person 4's Alpha toxin report is unverified, so if a source confirms it, I'd switch to **Charlie** over Delta, since Delta's plumbing problems are documented in my Fact 1."
+   },
+   {
+    "round": 6,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**. Fact 1 says Charlie's solar panels are offline with depleted batteries, so Charlie has no power despite having panels (Fact 4). Person 4's toxin report and Person 1's Delta inspection aren't in my facts, so I'd switch only if a source confirms a hazard at Alpha, with Delta as the alternate if its water is verified."
+   },
+   {
+    "round": 6,
+    "agent": "Person 4",
+    "response": "Person 3, my Fact 5 says Charlie has solar panels and mentions no outage, so I can't confirm that claim. My Fact 2 still rules out Alpha because of elevated toxins after outdoor air reached its ventilation, and I favor Charlie over Delta, whose plumbing problems are documented, once we confirm Charlie's bed count and power status."
+   },
+   {
+    "round": 7,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**. The shared facts report a same-morning inspection that found safe water, working backup lights, and no contamination, and that it is empty with all roads open, though its plumbing history is a known concern. Neither Alpha's toxin report nor Charlie's power outage appears in the shared facts, and no one has a bed count for Alpha, Charlie, or Delta yet, so I'd want those verified before anyone switches."
+   },
+   {
+    "round": 7,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show generators, restocked food and water, and no reported contamination there, while Bravo has the cots but a contamination warning. I can't verify Person 4's Alpha toxin report or Person 1's Delta inspection from my facts, so I'd switch only if a named, timestamped source confirms either."
+   },
+   {
+    "round": 7,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**. My Fact 1 is a repair-team report that Charlie's solar panels are offline with depleted batteries, so Charlie has no power despite the panels in Fact 4. I have no Alpha toxin report, no Delta inspection, and no contamination warning for Bravo, so I'd switch only if a named, timestamped source confirms a hazard at Alpha."
+   },
+   {
+    "round": 7,
+    "agent": "Person 4",
+    "response": "Person 3, my Fact 5 says Charlie has solar panels and reports no outage, so that claim needs a named source before we rule Charlie out. My Fact 2 reports elevated toxins inside Alpha after outdoor air reached its ventilation, so I'd keep Alpha off the table and favor Charlie over Delta, pending its bed count and a verified water inspection at Delta."
+   },
+   {
+    "round": 8,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: my Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Since neither Alpha's toxin report nor Charlie's outage is in our shared facts, I'd proceed with Delta unless a named, timestamped source contradicts that inspection, with Charlie as the alternate."
+   },
+   {
+    "round": 8,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show generators, restocked food and water, and no reported hazard there, while Bravo has the contamination warning. Person 4's Alpha toxin report isn't in my briefing, so I'd switch only if a named, timestamped source confirms it, and I'd still want Alpha's bed count."
+   },
+   {
+    "round": 8,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and no reported hazard. I'd switch only if a named, timestamped source confirms Person 4's toxin report, and we still need Alpha's bed count before committing."
+   },
+   {
+    "round": 8,
+    "agent": "Person 4",
+    "response": "Alpha should be ruled out because my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation. I favor Charlie over Delta, since Delta's plumbing problems are documented in my Fact 1, but we still need Charlie's bed count and current power status, and neither Person 1's Delta inspection nor Person 3's Charlie outage appears in my facts."
+   },
+   {
+    "round": 9,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: shared Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Neither the Alpha toxin report nor the Charlie outage appears in the shared facts, so I'd switch only if a named, timestamped source contradicts Fact 1, and we still need Delta's bed count before committing."
+   },
+   {
+    "round": 9,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show generators, restocked food and water, and no contamination there, while Bravo has the only contamination warning. My briefing doesn't include Person 4's Alpha toxin report or Person 1's Delta inspection (my Fact 1 mentions only Delta's plumbing and empty status), so I'd switch only if a named, timestamped source confirms either, and we still need Alpha's bed count before committing."
+   },
+   {
+    "round": 9,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: the shared facts confirm its backup generators and restocked food and water, and Charlie's solar power is offline with depleted batteries. Neither Person 4's Alpha toxin report nor Person 1's Delta inspection appears in the shared facts, so I'd switch only if a named, timestamped source confirms either, and we still need Alpha's bed count before committing."
+   },
+   {
+    "round": 9,
+    "agent": "Person 4",
+    "response": "I still rule out Alpha because my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation. Between Charlie and Delta, neither has a verified bed count, and Charlie's solar outage is unconfirmed (my Fact 5 mentions panels but no outage), so let's confirm both now and keep Delta as backup only if its water inspection is sourced."
+   },
+   {
+    "round": 10,
+    "agent": "Person 1",
+    "response": "I'm still holding **Station Delta**: the shared Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. None of the Alpha toxin, Charlie outage, or Bravo contamination claims appear in my facts, so they need named sources, and we still need Delta's bed count before committing."
+   },
+   {
+    "round": 10,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show no hazard there, restocked food and water, and backup generators, while Bravo has a contamination warning and Delta has documented plumbing problems. I'd switch only if a named, timestamped source confirms a hazard at Alpha, and I still need its bed count before we finalize."
+   },
+   {
+    "round": 10,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and it was open last week, with no hazard reported. I'd switch only if a named, timestamped source confirms an Alpha hazard, and we still need its bed count."
+   },
+   {
+    "round": 10,
+    "agent": "Person 4",
+    "response": "I still rule out Alpha because my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation, and nothing shared refutes that. I still lean Charlie over Delta, since Delta's plumbing problems are documented in my Fact 1, but we need both sites' bed counts and Delta's water status confirmed before we commit."
+   },
+   {
+    "round": 11,
+    "agent": "Person 1",
+    "response": "I'm still holding **Station Delta**, since the same-morning inspection in Fact 1 confirms safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Before anyone switches, we need a named, timestamped source for Person 4's Alpha toxin report, and we still need bed counts for Delta, Alpha, and Charlie."
+   },
+   {
+    "round": 11,
+    "agent": "Person 2",
+    "response": "I'm still holding **Station Alpha**: my Fact 4 confirms its generators and restocked supplies, and no shared fact reports a hazard there. Person 4's toxin claim is unsourced, so I'd switch only if a named, timestamped report confirms it, and I'd want Alpha's bed count before we finalize."
+   },
+   {
+    "round": 11,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and it was open last week, with no hazard reported. I'd switch only if a named, timestamped source confirms Person 4's toxin report, and we still need Alpha's bed count before finalizing."
+   },
+   {
+    "round": 11,
+    "agent": "Person 4",
+    "response": "Alpha should be ruled out: my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation, and nothing shared contradicts that. I favor Charlie (higher ground, solar panels, farther from the plant) with Delta as backup, but we need Charlie's bed count confirmed before committing."
+   },
+   {
+    "round": 12,
+    "agent": "Person 1",
+    "response": "I'm still holding **Station Delta**: the shared Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Person 4's Alpha toxin report is still unsourced, so I'd switch only if a named, timestamped source confirms it, and we still need bed counts for Delta and Charlie before we finalize."
+   },
+   {
+    "round": 12,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and no reported hazard, while Bravo is the only site with a verified contamination warning. Person 4's Alpha toxin report is still unsourced, so I'd switch only if a named, timestamped report confirms it, and we still need Alpha's bed count before finalizing."
+   },
+   {
+    "round": 12,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and no hazard reported. I'd switch only if a named, timestamped source confirms Person 4's toxin report, and I still need Alpha's bed count before we finalize."
+   },
+   {
+    "round": 12,
+    "agent": "Person 4",
+    "response": "Alpha should stay ruled out because my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation, and nothing shared contradicts it. I still favor Charlie (higher ground, solar panels, farther from the plant) with Delta as backup, but we need Charlie's bed count before committing."
+   },
+   {
+    "round": 13,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Person 4's Alpha toxin report is still unsourced, so I'd switch only if a named, timestamped source confirms it, and we still need bed counts for Delta and Charlie before we finalize."
+   },
+   {
+    "round": 13,
+    "agent": "Person 2",
+    "response": "I'm still holding **Station Alpha**: my facts show backup generators, restocked food and water, and no reported hazard, while Bravo has a field-agent report of possible contamination. None of us has Alpha's bed count yet, so I'd confirm that before we finalize."
+   },
+   {
+    "round": 13,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: my briefing confirms its backup generators and restocked food and water, and Charlie's solar power is offline with depleted batteries. Person 4's Alpha toxin report and Person 1's Delta inspection still lack named sources, and none of us has Alpha's bed count yet, so we should confirm it before finalizing."
+   },
+   {
+    "round": 13,
+    "agent": "Person 4",
+    "response": "Alpha stays ruled out because my Fact 2 reports elevated toxins after outdoor air reached its ventilation, and nothing shared contradicts that. I still favor Charlie over Delta, but Charlie's bed count is unknown, so we should confirm it now and keep Delta as the fallback."
+   },
+   {
+    "round": 14,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: the shared Fact 1 reports a same-morning inspection with safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open. Since none of us has a bed count for Delta, Alpha, or Charlie yet, I'd ask each field agent to send a named, timestamped source for the Alpha toxin, Bravo contamination, and Charlie outage claims, plus bed counts, before we finalize."
+   },
+   {
+    "round": 14,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show no reported hazard there, restocked food and water, and backup generators. Neither Alpha's bed count nor Person 4's toxin report is in my briefing, so I'd want both confirmed before we finalize."
+   },
+   {
+    "round": 14,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: the shared facts show backup generators, restocked food and water, and no hazard, while Charlie's solar panels are offline with depleted batteries. Person 4's Alpha toxin report and Person 1's Delta inspection are unsourced, so I'd switch only if a named, timestamped source confirms either, and we still need bed counts for all sites before finalizing."
+   },
+   {
+    "round": 14,
+    "agent": "Person 4",
+    "response": "Alpha stays ruled out: my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation, which outweighs its generators and restocked supplies. I favor Charlie (higher ground, solar panels, farther from the plant) over Delta, whose plumbing problems are in my Fact 1, but we need Charlie's bed count confirmed before we finalize."
+   },
+   {
+    "round": 15,
+    "agent": "Person 1",
+    "response": "I'm holding **Station Delta**: the shared Fact 1 inspection confirms safe water, working backup lights, and no contamination, and Fact 3 says it is empty with all roads open, though its plumbing history is a known concern. None of us has Delta's bed count yet, and the Alpha toxin and Charlie outage claims are unsourced, so I'd switch only if a named, timestamped source confirms either."
+   },
+   {
+    "round": 15,
+    "agent": "Person 2",
+    "response": "I'm holding **Station Alpha**: my facts show backup generators, restocked food and water, and no reported hazard there, while Bravo has the contamination warning and Delta has documented plumbing problems. I'd switch only if a named, timestamped source confirms Alpha's toxin report, and we still need Alpha's bed count before finalizing."
+   },
+   {
+    "round": 15,
+    "agent": "Person 3",
+    "response": "I'm holding **Station Alpha**: the shared facts confirm its backup generators, restocked food and water, and no hazard, while Charlie's power is out per Fact 1. Person 4's toxin report and Person 1's Delta inspection are unsourced, so I'd switch only if a named, timestamped source confirms either, and we still need Alpha's bed count before finalizing."
+   },
+   {
+    "round": 15,
+    "agent": "Person 4",
+    "response": "Alpha stays ruled out because my Fact 2 reports elevated toxins inside after outdoor air reached its ventilation. Neither Person 1's Delta inspection nor Person 3's Charlie outage appears in my facts, so I'd favor Charlie (higher ground, solar panels, farther from the plant) over Delta's documented plumbing problems, but we still need Charlie's bed count before committing."
+   }
+  ],
+  "fact_assignments": [
+   {
+    "agent": "Person 1",
+    "is_special": true,
+    "visible_facts": [
+     "Maintenance crew at Station Delta inspected all major systems this morning and confirmed water is safe, backup lights work, and no signs of contamination were found.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power."
+    ],
+    "assigned_hidden_information": [
+     "Maintenance crew at Station Delta inspected all major systems this morning and confirmed water is safe, backup lights work, and no signs of contamination were found."
+    ]
+   },
+   {
+    "agent": "Person 2",
+    "is_special": true,
+    "visible_facts": [
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Field agent at Bravo reports air sensors detected low but abnormal readings, suggesting possible chemical contamination near Station Bravo.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant."
+    ],
+    "assigned_hidden_information": [
+     "Field agent at Bravo reports air sensors detected low but abnormal readings, suggesting possible chemical contamination near Station Bravo."
+    ]
+   },
+   {
+    "agent": "Person 3",
+    "is_special": true,
+    "visible_facts": [
+     "Repair teams confirm that solar panels at Station Charlie are offline due to windstorm damage. The backup batteries are depleted and the station has no power.",
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week."
+    ],
+    "assigned_hidden_information": [
+     "Repair teams confirm that solar panels at Station Charlie are offline due to windstorm damage. The backup batteries are depleted and the station has no power."
+    ]
+   },
+   {
+    "agent": "Person 4",
+    "is_special": true,
+    "visible_facts": [
+     "Station Delta is the oldest building and sometimes has plumbing issues, but is currently empty. Maps show all roads to every station are open.",
+     "Community hotline reported that Station Alpha's ventilation system was unintentionally exposed to outdoor air after yesterday's accident. Test results show elevated toxin levels inside.",
+     "Station Alpha was restocked with fresh food and bottled water yesterday. It has backup generators and was open for use last week.",
+     "Station Bravo has enough cots for 80 people and medical supplies but is closer to the chemical plant.",
+     "Station Charlie is further away and smaller, but is on higher ground and has solar panels for power."
+    ],
+    "assigned_hidden_information": [
+     "Community hotline reported that Station Alpha's ventilation system was unintentionally exposed to outdoor air after yesterday's accident. Test results show elevated toxin levels inside."
+    ]
+   }
+  ]
+ }
+}
