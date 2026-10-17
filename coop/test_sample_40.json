@@ -1,0 +1,326 @@
+{
+ "note": "40 CooperBench test pairs for the pre-registered batch. Stratified: 3 random pairs from each of the 14 test tasks (huggingface_datasets_task/7309 has only 1 pair) = 40. Drawn before any test-pair run with random.Random(20261019), iterating test tasks in splits.json order.",
+ "source": "coop/splits.json (test)",
+ "pairs": [
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1371",
+   "features": [
+    1,
+    2
+   ]
+  },
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1371",
+   "features": [
+    1,
+    4
+   ]
+  },
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1371",
+   "features": [
+    2,
+    4
+   ]
+  },
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1655",
+   "features": [
+    2,
+    7
+   ]
+  },
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1655",
+   "features": [
+    5,
+    6
+   ]
+  },
+  {
+   "repo": "dottxt_ai_outlines_task",
+   "task": "1655",
+   "features": [
+    5,
+    10
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8563",
+   "features": [
+    1,
+    6
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8563",
+   "features": [
+    3,
+    6
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8563",
+   "features": [
+    5,
+    6
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8587",
+   "features": [
+    1,
+    2
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8587",
+   "features": [
+    1,
+    4
+   ]
+  },
+  {
+   "repo": "dspy_task",
+   "task": "8587",
+   "features": [
+    2,
+    3
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "3997",
+   "features": [
+    1,
+    2
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "3997",
+   "features": [
+    2,
+    3
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "3997",
+   "features": [
+    3,
+    5
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "6252",
+   "features": [
+    1,
+    6
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "6252",
+   "features": [
+    2,
+    5
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "6252",
+   "features": [
+    3,
+    5
+   ]
+  },
+  {
+   "repo": "huggingface_datasets_task",
+   "task": "7309",
+   "features": [
+    1,
+    2
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "17244",
+   "features": [
+    1,
+    4
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "17244",
+   "features": [
+    3,
+    5
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "17244",
+   "features": [
+    6,
+    7
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "18813",
+   "features": [
+    1,
+    5
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "18813",
+   "features": [
+    1,
+    6
+   ]
+  },
+  {
+   "repo": "llama_index_task",
+   "task": "18813",
+   "features": [
+    3,
+    5
+   ]
+  },
+  {
+   "repo": "pallets_click_task",
+   "task": "2956",
+   "features": [
+    1,
+    4
+   ]
+  },
+  {
+   "repo": "pallets_click_task",
+   "task": "2956",
+   "features": [
+    1,
+    7
+   ]
+  },
+  {
+   "repo": "pallets_click_task",
+   "task": "2956",
+   "features": [
+    3,
+    5
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1465",
+   "features": [
+    1,
+    3
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1465",
+   "features": [
+    3,
+    8
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1465",
+   "features": [
+    4,
+    6
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1559",
+   "features": [
+    3,
+    8
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1559",
+   "features": [
+    6,
+    7
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1559",
+   "features": [
+    8,
+    9
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1621",
+   "features": [
+    2,
+    5
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1621",
+   "features": [
+    3,
+    4
+   ]
+  },
+  {
+   "repo": "pallets_jinja_task",
+   "task": "1621",
+   "features": [
+    6,
+    8
+   ]
+  },
+  {
+   "repo": "samuelcolvin_dirty_equals_task",
+   "task": "43",
+   "features": [
+    1,
+    4
+   ]
+  },
+  {
+   "repo": "samuelcolvin_dirty_equals_task",
+   "task": "43",
+   "features": [
+    1,
+    8
+   ]
+  },
+  {
+   "repo": "samuelcolvin_dirty_equals_task",
+   "task": "43",
+   "features": [
+    4,
+    7
+   ]
+  }
+ ]
+}

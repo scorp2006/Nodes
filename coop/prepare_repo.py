@@ -33,7 +33,9 @@ def prepare(repo: str, task: str) -> tuple[Path, str]:
     if not (dest / ".git").exists():
         REPOS.mkdir(parents=True, exist_ok=True)
         subprocess.run(["git", "clone", "-q", "--filter=blob:none", url, str(dest)], check=True)
-    subprocess.run(["git", "-C", str(dest), "checkout", "-q", "--force", commit], check=True)
+    head = subprocess.run(["git", "-C", str(dest), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    if head != commit:  # parallel runs on the same task must not race on git's index lock
+        subprocess.run(["git", "-C", str(dest), "checkout", "-q", "--force", commit], check=True)
     return dest, PACKAGE[repo]
 
 

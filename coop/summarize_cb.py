@@ -28,8 +28,12 @@ def one(log_dir: Path, name: str) -> dict:
                 v = mem.split("/")[0].strip()
                 mib = float(v[:-3]) * (1024 if v.endswith("GiB") else 1) if v[-3:] in ("MiB", "GiB") else 0
                 peak[cname] = max(peak[cname], mib)
+    # An agent that never took a turn (container start timeout, auth error, ...) is an infrastructure failure,
+    # not a coordination failure: such runs are retried, and dropped from every condition if they keep failing.
+    infra = [a for a, v in r["agents"].items() if v["status"] == "Error" and v["steps"] == 0]
     return {
         "name": name,
+        "infra_failed": infra or None,
         "both_passed": e.get("both_passed"),
         "merge": f"{e.get('merge', {}).get('status')}/{e.get('merge', {}).get('strategy')}",
         "f1": e.get("feature1", {}).get("passed"), "f2": e.get("feature2", {}).get("passed"),

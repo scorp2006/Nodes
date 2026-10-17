@@ -50,6 +50,11 @@ $sampler = Start-Job -ArgumentList $statsFile -ScriptBlock {
     }
 }
 
+# Pre-pull the task image: CooperBench's own `docker run` gives up after 120 s, which a 1-5 GB image needs more than.
+$image = "akhatua/cooperbench-" + ($Repo -replace "_task", "" -replace "_", "-") + ":task$Task"
+docker image inspect $image *> $null
+if ($LASTEXITCODE -ne 0) { docker pull -q $image | Out-Null; if ($LASTEXITCODE -ne 0) { throw "could not pull $image" } }
+
 $py = Join-Path $root ".venv-cb\Scripts\python.exe"
 $launcher = @((Join-Path $root "coop\run_cb_graph.py"), "--condition", $Condition)
 if ($Condition -ne "coop") {

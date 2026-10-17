@@ -1,0 +1,4 @@
+Name,Repo,Task,Features,Condition
+dev4-dspy-coop,dspy_task,8394,"1,2",coop
+dev4-dspy-protocol,dspy_task,8394,"1,2",protocol
+dev4-dspy-graph,dspy_task,8394,"1,2",graph
