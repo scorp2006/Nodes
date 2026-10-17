@@ -22,6 +22,8 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import socket
+import subprocess
 import sys
 import time
 import traceback
@@ -59,13 +61,35 @@ EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD,
          "graph_unverified": NUDGE + CLAIMS, "placebo": NUDGE + NOTEPAD}
 
 
-def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str) -> str:
+def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str, http: bool = False) -> str:
     path = run_dir / f"{agent.replace(' ', '_')}.mcp.json"
-    args = ["-I", str(Path(__file__).with_name("graph_tools.py")), "--graph", graph, "--agent", agent,
-            "--mode", mode, "--log", str(run_dir / "tool_calls.jsonl")]
-    path.write_text(json.dumps({"mcpServers": {"board": {"command": sys.executable, "args": args}}}),
-                    encoding="utf-8")
+    log = str(run_dir / "tool_calls.jsonl")
+    if http:  # long-lived server for the whole batch; identity travels in headers we write
+        server = {"type": "http", "url": f"http://127.0.0.1:{graph_tools.HTTP_PORTS[mode]}/mcp",
+                  "headers": {"X-Board-Graph": graph, "X-Board-Agent": agent, "X-Board-Log": log}}
+    else:  # a fresh server process for every agent call
+        server = {"command": sys.executable,
+                  "args": ["-I", str(Path(__file__).with_name("graph_tools.py")), "--graph", graph,
+                           "--agent", agent, "--mode", mode, "--log", log]}
+    path.write_text(json.dumps({"mcpServers": {"board": server}}), encoding="utf-8")
     return str(path)
+
+
+def start_http_server(mode: str) -> subprocess.Popen | None:
+    """Start the long-lived tool server for `mode` unless one is already listening."""
+    port = graph_tools.HTTP_PORTS[mode]
+    with socket.socket() as s:
+        if s.connect_ex(("127.0.0.1", port)) == 0:
+            return None
+    proc = subprocess.Popen([sys.executable, "-I", str(Path(__file__).with_name("graph_tools.py")),
+                             "--http", "--mode", mode], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(100):
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                return proc
+        time.sleep(0.1)
+    proc.kill()
+    raise RuntimeError(f"tool server for {mode} did not start on port {port}")
 
 
 def usage_summary(calls: list[dict]) -> dict:
@@ -103,9 +127,13 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
             suffix = "" if args.condition == "graph" else f"_{args.condition}"  # keep dev1 graph names stable
             graph = f"board_{out_dir.name}{suffix}_t{task.id}_d{dup}"
             graph_tools.seed(graph, task, assignments)  # wipes any leftover board from a failed attempt
+            mode = MODE[args.condition]
             for agent in agents:
-                client.mcp_for_system[agent.history[0]["content"]] = mcp_config_for(
-                    work, graph, agent.name, MODE[args.condition])
+                system = agent.history[0]["content"]
+                client.mcp_for_system[system] = mcp_config_for(work, graph, agent.name, mode, args.server == "http")
+                if args.digest:
+                    client.digest_for_system[system] = (
+                        lambda name=agent.name: graph_tools.digest(graph, name, mode))
 
         run = run_scenario(task, client, args.profile, prompts, rounds=args.rounds, seed=seed,
                            extra_prompt=extra, special_agent_ratio=1.0)
@@ -150,7 +178,12 @@ def main():
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--no-peek", action="store_true", help="print progress counts only, never results")
+    ap.add_argument("--server", choices=["stdio", "http"], default="stdio",
+                    help="stdio: new tool process per call (dev1/test1); http: one long-lived server")
+    ap.add_argument("--digest", action="store_true", help="push the board into every turn")
     args = ap.parse_args()
+    if args.server == "http" and args.condition in MODE:
+        start_http_server(MODE[args.condition])  # left running for later batches; it holds no run state
 
     path = DATA / ("benchmark_short.json" if args.split == "short" else "benchmark.json")
     tasks = load_benchmark(path=str(path))

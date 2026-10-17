@@ -12,6 +12,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+from typing import Callable
 
 SANDBOX = Path(__file__).resolve().parent.parent / "runs" / "agent_cwd"
 
@@ -35,6 +36,9 @@ class ClaudeCLIClient:
         # HiddenBench only hands us messages, so an agent is identified by its
         # system prompt (unique per agent: it holds that agent's facts).
         self.mcp_for_system: dict[str, str] = {}
+        # Optional pushed digest per agent: called on every turn, appended to the prompt,
+        # so agents see the board without spending a tool round trip to read it.
+        self.digest_for_system: dict[str, Callable[[], str]] = {}
         self.timeout = timeout
         self.retries = retries
         self.calls: list[dict] = []
@@ -43,6 +47,8 @@ class ClaudeCLIClient:
 
     def _run(self, messages, schema=None) -> dict:
         system, prompt = flatten(messages)
+        if system in self.digest_for_system:
+            prompt += "\n\n[Board right now]\n" + self.digest_for_system[system]()
         cmd = ["claude", "-p", "--setting-sources", "", "--disable-slash-commands",
                "--system-prompt", system, "--tools", "", "--strict-mcp-config",
                "--no-session-persistence", "--output-format", "json", "--model", self.model_name]
