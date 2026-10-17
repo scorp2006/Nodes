@@ -1,0 +1,17 @@
+tasks valid in all 5 conditions after excluding t1-t3: 40
+tasks missing in some condition (dropped): none
+  baseline           6/40
+  nudge              6/40
+  placebo            5/40
+  graph_unverified   5/40
+  graph             15/40
+  [primary  ] graph vs placebo: better 11, worse 1, exact p = 0.0063
+  [secondary] graph vs baseline: better 9, worse 0, exact p = 0.0039
+  [secondary] graph vs nudge: better 10, worse 1, exact p = 0.0117
+  [secondary] graph vs graph_unverified: better 11, worse 1, exact p = 0.0063
+  [secondary] graph_unverified vs placebo: better 1, worse 1, exact p = 1.0000
+Holm-adjusted secondaries:
+  graph vs baseline: 0.0156
+  graph vs nudge: 0.0234
+  graph vs graph_unverified: 0.0190
+  graph_unverified vs placebo: 1.0000

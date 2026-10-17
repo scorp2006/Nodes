@@ -1,0 +1,6 @@
+board graphs checked: 135
+  posts by an agent that doesn't hold the fact: 0
+  unposted facts visible in a shared_facts() reply: 0
+  fact text in who_has_not_shared() replies: 0
+(non-holder, private fact) combinations checked in transcripts: 2490
+  non-holder reproduced a private fact its holder never posted or said: 0
