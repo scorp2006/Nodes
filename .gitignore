@@ -1,0 +1,10 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# third-party code cloned locally
+external/
+
+# run outputs
+runs/
