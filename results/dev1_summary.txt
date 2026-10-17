@@ -4,20 +4,26 @@ condition  runs       group right         95% CI   agents right before->after   
 baseline     20    2/20  =   10%     3%- 30%          17% -> 19%            1.62
 graph        20   13/20  =   65%    43%- 82%          12% -> 67%            2.15
 nudge        20    5/20  =   25%    11%- 47%          17% -> 30%            1.55
+placebo      20    6/20  =   30%    15%- 52%          18% -> 34%            1.94
 
 Paired vs baseline (same tasks, same seeds; group-level right/wrong):
   graph    on 20 tasks: fixed 13, broke 2, sign-test p = 0.007
   nudge    on 20 tasks: fixed 4, broke 1, sign-test p = 0.375
+  placebo  on 20 tasks: fixed 5, broke 1, sign-test p = 0.219
+
+Paired vs graph (does the shared board beat each control?):
+  graph vs nudge    on 20 tasks: graph better on 9, worse on 1, sign-test p = 0.021
+  graph vs placebo  on 20 tasks: graph better on 9, worse on 2, sign-test p = 0.065
+
+Compute per run (mean):
+  baseline    30947 output tokens    373 s model time    0.0 tool calls
+  graph       50639 output tokens    515 s model time   44.1 tool calls
+  nudge       24046 output tokens    370 s model time    0.0 tool calls
+  placebo     46796 output tokens    464 s model time    4.2 tool calls
 
 Board use: 44.1 tool calls per run, 82% of private facts posted on average
 
-Graph vs nudge (paired, same tasks): fixed 9, broke 1, sign-test p = 0.021
-
-Compute per run (mean over 20 runs):
-  baseline  64.6 calls  30,947 output tokens  373 s model time
-  nudge     64.6 calls  24,046 output tokens  370 s model time
-  graph     64.6 calls  50,639 output tokens  515 s model time
-
 Setup: 20 dev tasks (pilot/splits.json), hidden profile, 15 rounds, claude-haiku-5-5,
 seed 2026, one run per task per condition. Test split (45 tasks) untouched.
-Caveat: graph uses ~64% more output tokens than baseline; an equal-compute control is still needed.
+Placebo notepad use over 20 runs: review_my_facts 64, read_notes 21, write_note 0.
+Placebo used ~92% of graph's output tokens but only ~10% of its tool calls.
