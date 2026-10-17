@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import subprocess
 import threading
+import time
 from pathlib import Path
 
 SANDBOX = Path(__file__).resolve().parent.parent / "runs" / "agent_cwd"
@@ -28,7 +29,7 @@ def flatten(messages: list[dict[str, str]]) -> tuple[str, str]:
 
 
 class ClaudeCLIClient:
-    def __init__(self, model: str, allowed_tools: str = "", timeout: int = 300, retries: int = 2):
+    def __init__(self, model: str, allowed_tools: str = "", timeout: int = 300, retries: int = 3):
         self.model_name = model
         self.allowed_tools = allowed_tools
         # HiddenBench only hands us messages, so an agent is identified by its
@@ -51,7 +52,9 @@ class ClaudeCLIClient:
         if schema:
             cmd += ["--json-schema", json.dumps(schema)]
         last_err = ""
-        for _ in range(self.retries + 1):
+        for attempt in range(self.retries + 1):
+            if attempt:
+                time.sleep(30 * attempt)  # back off: failures here are usually rate limits
             try:
                 # prompt goes over stdin: long transcripts would overflow the Windows command line
                 proc = subprocess.run(cmd, input=prompt, cwd=SANDBOX, capture_output=True, text=True,

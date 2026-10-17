@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 
 from falkordb import FalkorDB
+from redis.exceptions import ResponseError
 
 
 def connect(graph: str):
@@ -22,7 +23,12 @@ def connect(graph: str):
 
 
 def seed(graph: str, task, fact_assignments: list[dict]) -> None:
-    """Write who-knows-what for one run. Idempotent."""
+    """Start a fresh board for one run: wipe the graph, then write who-knows-what."""
+    g = connect(graph)
+    try:
+        g.delete()
+    except ResponseError:  # graph doesn't exist yet
+        pass
     ids = {text: f"s{i}" for i, text in enumerate(task.shared_information)}
     ids |= {text: f"h{i}" for i, text in enumerate(task.hidden_information)}
     rows = [
@@ -30,7 +36,7 @@ def seed(graph: str, task, fact_assignments: list[dict]) -> None:
         for a in fact_assignments
         for n, text in enumerate(a["visible_facts"], start=1)
     ]
-    connect(graph).query(
+    g.query(
         """
         UNWIND $rows AS row
         MERGE (a:Agent {name: row.agent})
@@ -89,26 +95,35 @@ def who_has_not_shared(g) -> str:
     return f"These participants hold facts nobody else has and have not posted them yet: {names}"
 
 
-def serve(graph: str, agent: str) -> None:
+def serve(graph: str, agent: str, log: str | None = None) -> None:
+    import json
+    import time
+
     from mcp.server.mcpserver import MCPServer
 
     g = connect(graph)
     server = MCPServer("board")
 
+    def logged(tool: str, result: str, **kw) -> str:
+        if log:
+            with open(log, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps({"t": time.time(), "agent": agent, "tool": tool, **kw}) + "\n")
+        return result
+
     @server.tool(name="share_fact")
     def _share(fact_number: int) -> str:
         """Post one of your own numbered facts to the shared board. It is marked verified."""
-        return share_fact(g, agent, fact_number)
+        return logged("share_fact", share_fact(g, agent, fact_number), fact_number=fact_number)
 
     @server.tool(name="shared_facts")
     def _shared() -> str:
         """List every fact posted to the board so far, with who posted it."""
-        return shared_facts(g)
+        return logged("shared_facts", shared_facts(g))
 
     @server.tool(name="who_has_not_shared")
     def _who() -> str:
         """Name the participants who hold facts nobody else has and have not posted them."""
-        return who_has_not_shared(g)
+        return logged("who_has_not_shared", who_has_not_shared(g))
 
     server.run()
 
@@ -117,5 +132,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--graph", required=True)
     ap.add_argument("--agent", required=True)
+    ap.add_argument("--log", help="append one JSON line per tool call")
     args = ap.parse_args()
-    serve(args.graph, args.agent)
+    serve(args.graph, args.agent, args.log)
