@@ -1,6 +1,6 @@
 # One CooperBench pair under one condition, local Docker, claude_code adapter, --git always on.
 #   & .\coop\run_pair.ps1 -Name dev-click-graph -Repo pallets_click_task -Task 2068 -Features 1,2 -Condition graph
-# Conditions: coop | placebo | graph   (all go through coop/run_cb_graph.py, so the launcher is identical)
+# Conditions: coop | protocol | graph   (all go through coop/run_cb_graph.py, so the launcher is identical)
 # Token: read from the encrypted saved token if present, else asked once with hidden input (-Remember saves it,
 # encrypted for your Windows account). Never written in plain text, never shown, never in shell history.
 param(
@@ -8,7 +8,7 @@ param(
     [string]$Repo = "pallets_click_task",
     [string]$Task = "2068",
     [string]$Features = "1,2",
-    [ValidateSet("coop", "placebo", "graph")][string]$Condition = "coop",
+    [ValidateSet("coop", "protocol", "graph")][string]$Condition = "coop",
     [string]$Model = "anthropic/claude-haiku-5-5",
     [switch]$Remember
 )

@@ -4,9 +4,9 @@
       --tool-log runs/x.jsonl -- run -n NAME -r pallets_click_task -t 2068 -f 1,2 -a claude_code --git ...
 
 Conditions:
-  coop     CooperBench as published (with --git). Only the Windows container-cleanup fix applies.
-  placebo  + 5 private tools (same server code, same tool count), and a paragraph describing them
-  graph    + 5 shared coordination tools over the repo's world graph, and a paragraph with the protocol
+  coop      CooperBench as published (with --git). Only the Windows container-cleanup fix applies.
+  protocol  + the coordination procedure, settled over CooperBench's chat; 5 private tools that share nothing
+  graph     + the same procedure, settled through 5 shared coordination tools over the repo's world graph
 
 At runtime this script: fixes container cleanup (all conditions); for tool conditions it loads a fresh world
 graph for the pair, starts the long-lived tool server for that mode, appends the paragraph to each agent's
@@ -28,35 +28,56 @@ sys.path.insert(0, str(HERE))
 import coop_tools  # noqa: E402
 from world_graph import load, parse_repo  # noqa: E402
 
-PROMPTS = {
+# Identical in the protocol and graph conditions, word for word. Only HOW you claim, announce and wait differs
+# (MECHANISM below). Nothing here is about scoring beyond what CooperBench's own git block already says.
+PROCEDURE = """
+
+## Coordination procedure
+If your changes overlap your partner's (the same functions, or functions that call each other):
+1. Settle ownership: one of you owns the overlapping functions. The first to claim them owns them.
+2. Owner: implement your WHOLE feature first, including the owned functions. Commit,
+   `git push team <your branch>`, then announce your commit hash.
+3. The other agent (builder): do NOT edit the owned functions. Implement and commit your other parts.
+   When the owner has announced its commit: `git fetch team && git merge --no-edit team/<owner>`, add your
+   changes to the shared functions on top, commit, `git push team <your branch>`, announce your commit hash,
+   then `git diff team/main..HEAD > patch.txt`.
+4. Owner, after the builder announces: `git fetch team && git merge --ff-only team/<builder>`, then
+   `git diff team/main..HEAD > patch.txt`. Do not resolve conflicts or merge any other way; if --ff-only fails,
+   message your partner.
+These steps replace the generic final merge sequence above. If your changes do not overlap, use that generic
+sequence instead."""
+
+MECHANISM = {
     "graph": """
 
-## Coordination tools (shared with your partner)
+## How you claim, announce and wait: shared coordination tools
 You have five tools backed by a graph of this repository's functions and calls, shared with your partner:
 - declare_plan(functions): record the functions you intend to change, using full dotted names
-  (e.g. "click.termui.edit"). It waits for your partner's plan, then reports overlaps and your next step.
-- claim(functions): claim functions so only you change them. Atomic: the first to claim owns them.
-- mark_committed(commit): after you commit and `git push team <your branch>`, pass the commit hash.
-- coordination_status(wait_seconds=0): your role, who owns what, and your exact next step. With
-  wait_seconds (up to 110) it waits for your partner instead of you polling.
+  (e.g. "package.module.Class.method"). It waits for your partner's plan, then reports overlaps and your next step.
+- claim(functions): claim functions (step 1). Atomic: the first to claim a function owns it.
+- mark_committed(commit): announce your commit hash (steps 2 and 3).
+- coordination_status(wait_seconds=0): your role, who owns what, and your next step. With wait_seconds
+  (up to 110) it waits for your partner's announcement instead of you polling.
 - impact_of(function): what calls, or is called by, a function within 2 calls.
-Protocol: call declare_plan before editing anything. If you overlap, claim the overlapping functions.
-Then follow the "Next step" that the tools give you, every time. The owner implements first; the other agent
-merges the owner's commit and builds on top; the owner then fast-forwards to that combined branch, so you
-both submit the same tree. Where the tools give you final git commands, use them instead of the generic
-merge sequence above.""",
-    "placebo": """
+Call declare_plan before editing anything.""",
+    "protocol": """
 
-## Planning tools (private to you)
-You have five tools backed by a graph of this repository's functions and calls. They are private:
+## How you claim, announce and wait: messages
+Use the coop-* messaging commands described above:
+- Plans: before editing anything, send your partner the full dotted names of the functions you intend to change
+  (e.g. "package.module.Class.method"), and read theirs with coop-recv.
+- Claim (step 1): `coop-send <partner> "CLAIM: <functions>"`. The first claim sent owns them; reply "ACK".
+- Announce (steps 2 and 3): `coop-send <partner> "COMMITTED <commit hash>"`.
+- Wait: check with coop-recv; between checks run `sleep 30` instead of polling quickly.
+You also have five private tools backed by a graph of this repository's functions and calls. They share nothing
+with your partner:
 - impact_of(function): what calls, or is called by, a function within 2 calls.
-- record_plan(functions): record the functions you intend to change, in a private plan.
-- my_plan(): show your private plan.
-- write_note(text): save a private note.
-- read_notes(): show your private notes.
-Protocol: record your plan before editing and check impact_of for functions you will change.
-Coordinate with your partner using the messaging and git workflow described above.""",
+- record_plan(functions) / my_plan(): a private plan only you can see.
+- write_note(text) / read_notes(): private notes.""",
 }
+
+PROMPTS = {c: PROCEDURE + MECHANISM[c] for c in MECHANISM}
+TOOL_MODE = {"graph": "graph", "protocol": "placebo"}  # which tool server each condition uses
 
 
 def start_tool_server(mode: str) -> None:
@@ -108,7 +129,7 @@ def patch_adapter(mode: str, world_graph: str, log_path: str) -> None:
 
     original_instruction = adapter.build_instruction
     original_command = adapter._build_claude_command
-    port = coop_tools.PORTS[mode]
+    port = coop_tools.PORTS[TOOL_MODE[mode]]
 
     def build_instruction(*args, **kwargs):
         return original_instruction(*args, **kwargs) + PROMPTS[mode]
@@ -128,7 +149,7 @@ def patch_adapter(mode: str, world_graph: str, log_path: str) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--condition", choices=["coop", "placebo", "graph"], required=True)
+    ap.add_argument("--condition", choices=["coop", "protocol", "graph"], required=True)
     ap.add_argument("--world-graph", help="graph key for this pair (tool conditions)")
     ap.add_argument("--repo-dir")
     ap.add_argument("--src", help="package dir inside the repo, e.g. src/click")
@@ -143,7 +164,7 @@ def main() -> None:
         load(args.world_graph, funcs, calls)  # fresh graph: no claims or plans from earlier runs
         print(f"world graph {args.world_graph}: {stats} in {time.perf_counter() - t0:.1f}s", flush=True)
         Path(args.tool_log).unlink(missing_ok=True)
-        start_tool_server(args.condition)
+        start_tool_server(TOOL_MODE[args.condition])
         patch_adapter(args.condition, args.world_graph, str(Path(args.tool_log).resolve()))
 
     from cooperbench.cli import main as cooperbench_main

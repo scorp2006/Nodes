@@ -1,0 +1,7 @@
+Name,Repo,Task,Features,Condition
+dev3-click-coop,pallets_click_task,2068,"1,2",coop
+dev3-dspy-coop,dspy_task,8394,"1,2",coop
+dev3-click-protocol,pallets_click_task,2068,"1,2",protocol
+dev3-dspy-protocol,dspy_task,8394,"1,2",protocol
+dev3-click-graph,pallets_click_task,2068,"1,2",graph
+dev3-dspy-graph,dspy_task,8394,"1,2",graph
