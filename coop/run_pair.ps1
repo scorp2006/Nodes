@@ -10,6 +10,7 @@ param(
     [string]$Features = "1,2",
     [ValidateSet("coop", "protocol", "graph")][string]$Condition = "coop",
     [string]$Model = "anthropic/claude-haiku-5-5",
+    [string]$Effort = "",
     [switch]$Remember,
     [switch]$NoEval   # batch mode: skip CooperBench's per-pair auto-eval; evaluate everything at the end (no peeking)
 )
@@ -58,6 +59,7 @@ if ($LASTEXITCODE -ne 0) { docker pull -q $image | Out-Null; if ($LASTEXITCODE -
 
 $py = Join-Path $root ".venv-cb\Scripts\python.exe"
 $launcher = @((Join-Path $root "coop\run_cb_graph.py"), "--condition", $Condition)
+if ($Effort) { $launcher += @("--effort", $Effort) }
 if ($Condition -ne "coop") {
     $prep = & (Join-Path $root "..\..\.venv\Scripts\python.exe") -I (Join-Path $root "coop\prepare_repo.py") $Repo $Task
     $repoDir, $src = $prep.Trim().Split("|")

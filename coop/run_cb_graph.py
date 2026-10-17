@@ -124,6 +124,20 @@ def patch_container_cleanup() -> None:
     DockerEnvironment.cleanup = cleanup
 
 
+def patch_effort(effort: str | None) -> None:
+    """Same reasoning effort for every agent in every condition (Claude Code's --effort flag)."""
+    if not effort:
+        return
+    from cooperbench.agents.claude_code import adapter
+
+    original_command = adapter._build_claude_command
+
+    def build_claude_command(*args, extra_flags: str = "", **kwargs):
+        return original_command(*args, extra_flags=extra_flags + f"--effort {shlex.quote(effort)} ", **kwargs)
+
+    adapter._build_claude_command = build_claude_command
+
+
 def patch_adapter(mode: str, world_graph: str, log_path: str) -> None:
     from cooperbench.agents.claude_code import adapter
 
@@ -154,10 +168,12 @@ def main() -> None:
     ap.add_argument("--repo-dir")
     ap.add_argument("--src", help="package dir inside the repo, e.g. src/click")
     ap.add_argument("--tool-log")
+    ap.add_argument("--effort", help="Claude Code --effort for every agent (low|medium|high|xhigh|max)")
     ap.add_argument("cooperbench_args", nargs=argparse.REMAINDER)
     args = ap.parse_args()
 
     patch_container_cleanup()
+    patch_effort(args.effort)  # applied first, so every condition gets exactly the same flag
     if args.condition != "coop":
         t0 = time.perf_counter()
         funcs, calls, stats = parse_repo(Path(args.repo_dir) / args.src)

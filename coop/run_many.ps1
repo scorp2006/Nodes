@@ -5,7 +5,9 @@
 param(
     [Parameter(Mandatory)][string]$Plan,
     [int]$Parallel = 6,
-    [switch]$NoEval
+    [switch]$NoEval,
+    [string]$Model = "anthropic/claude-haiku-5-5",
+    [string]$Effort = ""
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
@@ -16,10 +18,10 @@ $jobs = @()
 foreach ($r in $rows) {
     if (Test-Path (Join-Path $logDir "$($r.Name).wall.txt")) { "skip (already finished): $($r.Name)"; continue }
     while (@($jobs | Where-Object State -eq "Running").Count -ge $Parallel) { Start-Sleep -Seconds 5 }
-    $jobs += Start-Job -Name $r.Name -ArgumentList $root, $r, $logDir, $NoEval.IsPresent -ScriptBlock {
-        param($root, $r, $logDir, $noEval)
+    $jobs += Start-Job -Name $r.Name -ArgumentList $root, $r, $logDir, $NoEval.IsPresent, $Model, $Effort -ScriptBlock {
+        param($root, $r, $logDir, $noEval, $model, $effort)
         & (Join-Path $root "coop\run_pair.ps1") -Name $r.Name -Repo $r.Repo -Task $r.Task -Features $r.Features `
-            -Condition $r.Condition -NoEval:$noEval *>&1 | Out-File -Encoding utf8 (Join-Path $logDir "$($r.Name).out.txt")
+            -Condition $r.Condition -NoEval:$noEval -Model $model -Effort $effort *>&1 | Out-File -Encoding utf8 (Join-Path $logDir "$($r.Name).out.txt")
     }
     "started: $($r.Name)"
 }

@@ -1,6 +1,6 @@
-"""Pre-registered analysis of a CooperBench batch (see results/preregistration_cb1.md). Run once, at the end.
+"""Pre-registered analysis of a CooperBench batch (see results/preregistration_cb1b.md). Run once, at the end.
 
-  python coop/analyze_cb.py coop/plans/test1.csv runs/cooperbench
+  python coop/analyze_cb.py coop/plans/test1b.csv runs/cooperbench
 """
 import csv
 import json
@@ -9,8 +9,9 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-PRIMARY = ("graph", "protocol")
-SECONDARY = [("graph", "coop", "pass"), ("protocol", "coop", "pass"), ("graph", "protocol", "coordinated")]
+# Amended plan (results/preregistration_cb1b.md): co-primary metrics, Holm-Bonferroni within each family.
+PRIMARY = [("graph", "protocol", "coordinated"), ("graph", "protocol", "pass")]
+SECONDARY = [("graph", "coop", "coordinated"), ("graph", "coop", "pass")]
 
 
 def sign_test(wins: int, losses: int) -> float:
@@ -75,13 +76,12 @@ def analyze(plan: Path, log_dir: Path) -> str:
         l = sum(p[a][metric] < p[b][metric] for p in ok.values())
         return w, l, sign_test(w, l)
 
-    w, l, p = paired(*PRIMARY, "pass")
-    lines += ["", "Exact two-sided paired sign test, threshold p < 0.05",
-              f"  [PRIMARY]   {PRIMARY[0]} vs {PRIMARY[1]} on pass: better on {w}, worse on {l}, p = {p:.3f}"]
-    sec = [paired(a, b, m) for a, b, m in SECONDARY]
-    for (a, b, m), (w, l, p), adj in zip(SECONDARY, sec, holm([s[2] for s in sec])):
-        lines.append(f"  [secondary] {a} vs {b} on {m}: better on {w}, worse on {l}, raw p = {p:.3f}, "
-                     f"Holm p = {adj:.3f} ({'survives' if adj < 0.05 else 'does not survive'})")
+    lines += ["", "Exact two-sided paired sign test; Holm-Bonferroni within each family; threshold p < 0.05"]
+    for family, tests in (("PRIMARY", PRIMARY), ("secondary", SECONDARY)):
+        res = [paired(a, b, m) for a, b, m in tests]
+        for (a, b, m), (w, l, p), adj in zip(tests, res, holm([r[2] for r in res])):
+            lines.append(f"  [{family:9}] {a} vs {b} on {m}: better on {w}, worse on {l}, raw p = {p:.3f}, "
+                         f"Holm p = {adj:.3f} ({'significant' if adj < 0.05 else 'not significant'})")
     return "\n".join(lines)
 
 
