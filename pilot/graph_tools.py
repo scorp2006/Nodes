@@ -2,16 +2,20 @@
 
 One graph per scenario run:
   (:Agent {name})-[:KNOWS {num}]->(:Fact {id, text})   what each agent was briefed with
-  (:Agent)-[:SHARED {seq}]->(:Fact)                    what each agent posted to the board
+  (:Agent)-[:SHARED {seq}]->(:Fact)                    board mode: facts posted by number
+  (:Agent)-[:CLAIMED {seq}]->(:Claim {text})           claims mode: free-text posts, unchecked
+  (:Agent)-[:WROTE {seq}]->(:Note {text})              notepad mode: private notes
 
 Run as an MCP server (one process per agent call):
-  python graph_tools.py --graph <name> --agent "Person 1" [--mode notepad]
+  python graph_tools.py --graph <name> --agent "Person 1" [--mode board|claims|notepad]
 
---mode notepad is the placebo: same server, same tool-call mechanics, but every
-tool is private to the calling agent and returns nothing it didn't already know.
+  board   : posts are an agent's own briefing facts, picked by number, so every post
+            is "source-checked" (it really is in that agent's briefing). This says
+            where a fact came from, never whether it is true, and never uses the answer.
+  claims  : same board, but agents post in their own words and nothing is checked.
+  notepad : placebo. Same mechanics, but private to the agent and adds no information.
 
-The board never reveals a fact nobody has posted. It only verifies facts that an
-agent chose to share, and names who still holds unique facts.
+In every mode, nothing an agent has not chosen to post is ever shown to anyone else.
 """
 from __future__ import annotations
 
@@ -50,20 +54,23 @@ def seed(graph: str, task, fact_assignments: list[dict]) -> None:
     )
 
 
+# --- board mode: source-checked posts -------------------------------------------------
+
 def share_fact(g, agent: str, fact_number: int) -> str:
+    """Post the agent's own fact by number. Replies only yes/no, never any fact wording."""
     res = g.query(
         """
         MATCH (a:Agent {name: $agent})-[k:KNOWS {num: $num}]->(f:Fact)
         OPTIONAL MATCH ()-[prev:SHARED]->()
         WITH a, f, count(prev) AS seq
         MERGE (a)-[s:SHARED]->(f) ON CREATE SET s.seq = seq
-        RETURN f.text
+        RETURN f.id
         """,
         {"agent": agent, "num": fact_number},
     ).result_set
     if not res:
-        return f"You have no Fact {fact_number}."
-    return f"Posted to the board as verified: {res[0][0]}"
+        return f"Source-checked: no. You have no Fact {fact_number}, so nothing was posted."
+    return f"Source-checked: yes. Your Fact {fact_number} is now on the board."
 
 
 def shared_facts(g) -> str:
@@ -75,28 +82,65 @@ def shared_facts(g) -> str:
     ).result_set
     if not rows:
         return "The board is empty. Nobody has posted a fact yet."
-    lines = [f"- {who} (verified: this fact is really in their briefing): {text}" for who, text in rows]
-    return "Verified facts on the board:\n" + "\n".join(lines)
+    lines = [f"- {who} (source-checked: this is in their briefing): {text}" for who, text in rows]
+    return "Facts on the board:\n" + "\n".join(lines)
 
 
 def who_has_not_shared(g) -> str:
-    rows = g.ro_query(
+    return _unique_holders_without(g, "SHARED", match_fact=True)
+
+
+# --- claims mode: unchecked free-text posts ----------------------------------------------
+
+def post_claim(g, agent: str, text: str) -> str:
+    g.query(
         """
+        MATCH (a:Agent {name: $agent})
+        OPTIONAL MATCH ()-[prev:CLAIMED]->()
+        WITH a, count(prev) AS seq
+        CREATE (a)-[:CLAIMED {seq: seq}]->(:Claim {text: $text})
+        """,
+        {"agent": agent, "text": text},
+    )
+    return "Your claim is now on the board."
+
+
+def shared_claims(g) -> str:
+    rows = g.ro_query(
+        "MATCH (a:Agent)-[c:CLAIMED]->(cl:Claim) RETURN a.name, cl.text ORDER BY c.seq"
+    ).result_set
+    if not rows:
+        return "The board is empty. Nobody has posted a claim yet."
+    lines = [f"- {who} (not checked): {text}" for who, text in rows]
+    return "Claims on the board:\n" + "\n".join(lines)
+
+
+def who_has_not_posted(g) -> str:
+    return _unique_holders_without(g, "CLAIMED", match_fact=False)
+
+
+def _unique_holders_without(g, rel: str, match_fact: bool) -> str:
+    """Name agents who hold a fact nobody else has and haven't posted it (board) or anything (claims)."""
+    target = "(f)" if match_fact else "()"
+    rows = g.ro_query(
+        f"""
         MATCH (holder:Agent)-[:KNOWS]->(f:Fact)
         WITH f, collect(holder) AS holders
         WHERE size(holders) = 1
         WITH f, holders[0] AS holder
-        OPTIONAL MATCH (holder)-[s:SHARED]->(f)
+        OPTIONAL MATCH (holder)-[s:{rel}]->{target}
         WITH holder, count(s) AS posted
         WHERE posted = 0
         RETURN DISTINCT holder.name ORDER BY holder.name
         """
     ).result_set
     if not rows:
-        return "Everyone has posted the facts that only they hold."
+        return "Everyone who holds facts nobody else has has posted."
     names = ", ".join(r[0] for r in rows)
-    return f"These participants hold facts nobody else has and have not posted them yet: {names}"
+    return f"These participants hold facts nobody else has and have not posted yet: {names}"
 
+
+# --- notepad mode: private placebo -------------------------------------------------------
 
 def write_note(g, agent: str, text: str) -> str:
     g.query(
@@ -157,10 +201,25 @@ def serve(graph: str, agent: str, log: str | None = None, mode: str = "board") -
         def _mine() -> str:
             """List your own numbered facts from your briefing."""
             return logged("review_my_facts", my_facts(g, agent))
+    elif mode == "claims":
+        @server.tool(name="post_claim")
+        def _claim(text: str) -> str:
+            """Post a claim to the shared board, in your own words. Claims are not checked."""
+            return logged("post_claim", post_claim(g, agent, text))
+
+        @server.tool(name="shared_claims")
+        def _claims() -> str:
+            """List every claim posted to the board so far, with who posted it."""
+            return logged("shared_claims", shared_claims(g))
+
+        @server.tool(name="who_has_not_posted")
+        def _who_claims() -> str:
+            """Name the participants who hold facts nobody else has and have not posted anything."""
+            return logged("who_has_not_posted", who_has_not_posted(g))
     else:
         @server.tool(name="share_fact")
         def _share(fact_number: int) -> str:
-            """Post one of your own numbered facts to the shared board. It is marked verified."""
+            """Post one of your own numbered facts to the shared board. It is marked source-checked."""
             return logged("share_fact", share_fact(g, agent, fact_number), fact_number=fact_number)
 
         @server.tool(name="shared_facts")
@@ -180,7 +239,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--graph", required=True)
     ap.add_argument("--agent", required=True)
-    ap.add_argument("--mode", choices=["board", "notepad"], default="board")
+    ap.add_argument("--mode", choices=["board", "claims", "notepad"], default="board")
     ap.add_argument("--log", help="append one JSON line per tool call")
     args = ap.parse_args()
     serve(args.graph, args.agent, args.log, args.mode)

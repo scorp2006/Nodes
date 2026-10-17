@@ -49,11 +49,14 @@ def test_board_flow():
     p1 = assignments[0]
     hidden = p1["assigned_hidden_information"][0]
     num = p1["visible_facts"].index(hidden) + 1
-    assert hidden in graph_tools.share_fact(g, p1["agent"], num)
-    assert "no Fact 99" in graph_tools.share_fact(g, p1["agent"], 99)
+    reply = graph_tools.share_fact(g, p1["agent"], num)
+    assert reply.startswith("Source-checked: yes")
+    assert not any(f in reply for a in assignments for f in a["visible_facts"])  # yes/no only, no wording
+    assert graph_tools.share_fact(g, p1["agent"], 99).startswith("Source-checked: no")
 
     board = graph_tools.shared_facts(g)
     assert hidden in board and p1["agent"] in board
+    assert "source-checked" in board and "verified" not in board and "true" not in board.lower().split()
     # no other private fact leaks onto the board
     for other in assignments[1:]:
         assert other["assigned_hidden_information"][0] not in board
@@ -62,6 +65,21 @@ def test_board_flow():
     # sharing twice does not duplicate
     graph_tools.share_fact(g, p1["agent"], num)
     assert g.ro_query("MATCH ()-[s:SHARED]->() RETURN count(s)").result_set[0][0] == 1
+    g.delete()
+
+
+def test_claims_board_is_shared_unchecked_and_leak_free():
+    task, agents, assignments, g = setup("test_claims")
+    p1, p2 = assignments[0], assignments[1]
+    assert "empty" in graph_tools.shared_claims(g)
+    assert p1["agent"] in graph_tools.who_has_not_posted(g)
+    graph_tools.post_claim(g, p1["agent"], "the bridge is out")
+    board = graph_tools.shared_claims(g)
+    assert "the bridge is out" in board and "(not checked)" in board and "source-checked" not in board
+    assert p1["agent"] not in graph_tools.who_has_not_posted(g)
+    assert p2["agent"] in graph_tools.who_has_not_posted(g)
+    for a in assignments:  # no briefing fact ever appears unless someone typed it
+        assert a["assigned_hidden_information"][0] not in board
     g.delete()
 
 

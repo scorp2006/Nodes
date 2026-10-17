@@ -1,13 +1,15 @@
-"""Run HiddenBench tasks with Claude agents under one of three conditions.
+"""Run HiddenBench tasks with Claude agents under one of five conditions.
 
-  baseline : HiddenBench exactly as published
-  nudge    : + one sentence saying others may hold genuine facts you lack
-  graph    : + the same sentence + a shared evidence board in FalkorDB (MCP tools)
-  placebo  : + the same sentence + a private notepad (same tool mechanics, nothing shared)
+  baseline         : HiddenBench exactly as published
+  nudge            : + one sentence saying others may hold genuine facts you lack
+  graph            : + the same sentence + a shared board in FalkorDB, posts source-checked
+  graph_unverified : + the same sentence + the same board, but free-text posts, nothing checked
+  placebo          : + the same sentence + a private notepad (same tool mechanics, nothing shared)
 
-The nudge text is included in graph and placebo, so graph vs nudge isolates the
-board, and graph vs placebo separates shared evidence from extra tool use and
-thinking. Everything else (tasks, prompts, seeds, model) is identical.
+The nudge text is in every tool condition, so graph vs nudge isolates the board,
+graph vs placebo separates shared evidence from extra tool use and thinking, and
+graph vs graph_unverified isolates the source check. Everything else (tasks,
+prompts, seeds, model) is identical.
 
 Each run is saved to its own file as soon as it finishes, and finished runs are
 skipped, so a batch can be stopped and restarted safely.
@@ -21,8 +23,9 @@ import argparse
 import json
 import random
 import sys
+import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from hiddenbench import load_benchmark
@@ -36,18 +39,24 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "external" / "HiddenBench_ICML" / "data"
 SPLITS = json.loads((Path(__file__).with_name("splits.json")).read_text(encoding="utf-8"))
 TOOLS = {"graph": ["share_fact", "shared_facts", "who_has_not_shared"],
+         "graph_unverified": ["post_claim", "shared_claims", "who_has_not_posted"],
          "placebo": ["write_note", "read_notes", "review_my_facts"]}
-MODE = {"graph": "board", "placebo": "notepad"}
+MODE = {"graph": "board", "graph_unverified": "claims", "placebo": "notepad"}
 
 NUDGE = ("Note: other participants may hold genuine facts that you were not given. "
          "Facts they quote come from their own briefing.")
 BOARD = (" You also have a shared evidence board. share_fact(fact_number) posts one of your "
-         "numbered facts as verified. shared_facts() lists every verified fact posted so far and "
-         "who posted it. who_has_not_shared() names participants who hold facts nobody else has "
-         "and have not posted them.")
+         "numbered facts, marked source-checked (it is really in your briefing). shared_facts() lists "
+         "every fact posted so far and who posted it. who_has_not_shared() names participants who hold "
+         "facts nobody else has and have not posted them.")
+CLAIMS = (" You also have a shared evidence board. post_claim(text) posts a claim in your own words; "
+          "claims are not checked. shared_claims() lists every claim posted so far and who posted it. "
+          "who_has_not_posted() names participants who hold facts nobody else has and have not posted "
+          "anything.")
 NOTEPAD = (" You also have a private notepad. write_note(text) saves a note only you can see. "
            "read_notes() shows your notes. review_my_facts() lists your own numbered facts.")
-EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD, "placebo": NUDGE + NOTEPAD}
+EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD,
+         "graph_unverified": NUDGE + CLAIMS, "placebo": NUDGE + NOTEPAD}
 
 
 def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str) -> str:
@@ -63,6 +72,7 @@ def usage_summary(calls: list[dict]) -> dict:
     u = [c["usage"] for c in calls]
     return {
         "calls": len(calls),
+        "turns": sum((c["num_turns"] or 1) for c in calls),
         "seconds": round(sum((c["duration_ms"] or 0) for c in calls) / 1000, 1),
         "input_tokens": sum(x.get("input_tokens", 0) for x in u),
         "cache_creation_input_tokens": sum(x.get("cache_creation_input_tokens", 0) for x in u),
@@ -76,6 +86,7 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
     out_file = out_dir / args.condition / f"t{task.id}_d{dup}.json"
     if out_file.exists():
         return "skipped"
+    started = time.time()
     seed = _scenario_seed(args.seed, task_index, dup)
     extra = EXTRA[args.condition]
     tools = TOOLS.get(args.condition, [])
@@ -104,7 +115,8 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
         print(f"  FAILED {args.condition} task {task.id} dup {dup} (see errors.log)", flush=True)
         return "failed"
 
-    run.update(condition=args.condition, model=args.model, usage=usage_summary(client.calls))
+    run.update(condition=args.condition, model=args.model,
+               usage=usage_summary(client.calls) | {"wall_seconds": round(time.time() - started, 1)})
     if graph:
         g = graph_tools.connect(graph)
         log = work / "tool_calls.jsonl"
@@ -112,13 +124,16 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
             "graph": graph,
             "posts": g.ro_query("MATCH (a:Agent)-[s:SHARED]->(f:Fact) "
                                 "RETURN a.name, f.id ORDER BY s.seq").result_set,
+            "claims": g.ro_query("MATCH (a:Agent)-[c:CLAIMED]->(cl:Claim) "
+                                 "RETURN a.name, cl.text ORDER BY c.seq").result_set,
             "tool_calls": [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
             if log.exists() else [],
         }
     out_file.parent.mkdir(parents=True, exist_ok=True)
     out_file.write_text(json.dumps(run, indent=1), encoding="utf-8")
-    ok = "OK " if run["majority_vote"] == task.correct_answer else "-- "
-    print(f"  {ok}{args.condition} task {task.id} dup {dup}: majority={run['majority_vote']}", flush=True)
+    if not args.no_peek:
+        ok = "OK " if run["majority_vote"] == task.correct_answer else "-- "
+        print(f"  {ok}{args.condition} task {task.id} dup {dup}: majority={run['majority_vote']}", flush=True)
     return "done"
 
 
@@ -134,6 +149,7 @@ def main():
     ap.add_argument("--duplications", type=int, default=1)
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--no-peek", action="store_true", help="print progress counts only, never results")
     args = ap.parse_args()
 
     path = DATA / ("benchmark_short.json" if args.split == "short" else "benchmark.json")
@@ -147,8 +163,12 @@ def main():
     (out_dir / args.condition / "config.json").write_text(json.dumps(vars(args), indent=1), encoding="utf-8")
     prompts = load_prompts()
     print(f"{args.condition}: {len(jobs)} runs, {args.workers} workers", flush=True)
+    status = []
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        status = list(pool.map(lambda j: run_one(*j, args, prompts, out_dir), jobs))
+        for fut in as_completed([pool.submit(run_one, *j, args, prompts, out_dir) for j in jobs]):
+            status.append(fut.result())
+            if args.no_peek:
+                print(f"  {args.condition}: {len(status)}/{len(jobs)} finished", flush=True)
     print(f"{args.condition} finished: " + ", ".join(f"{s}={status.count(s)}" for s in sorted(set(status))))
 
 
