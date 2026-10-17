@@ -3,9 +3,11 @@
   baseline : HiddenBench exactly as published
   nudge    : + one sentence saying others may hold genuine facts you lack
   graph    : + the same sentence + a shared evidence board in FalkorDB (MCP tools)
+  placebo  : + the same sentence + a private notepad (same tool mechanics, nothing shared)
 
-The nudge text is included in the graph condition, so graph vs nudge isolates
-the board itself. Everything else (tasks, prompts, seeds, model) is identical.
+The nudge text is included in graph and placebo, so graph vs nudge isolates the
+board, and graph vs placebo separates shared evidence from extra tool use and
+thinking. Everything else (tasks, prompts, seeds, model) is identical.
 
 Each run is saved to its own file as soon as it finishes, and finished runs are
 skipped, so a batch can be stopped and restarted safely.
@@ -33,7 +35,9 @@ from claude_client import ClaudeCLIClient
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "external" / "HiddenBench_ICML" / "data"
 SPLITS = json.loads((Path(__file__).with_name("splits.json")).read_text(encoding="utf-8"))
-TOOLS = ["share_fact", "shared_facts", "who_has_not_shared"]
+TOOLS = {"graph": ["share_fact", "shared_facts", "who_has_not_shared"],
+         "placebo": ["write_note", "read_notes", "review_my_facts"]}
+MODE = {"graph": "board", "placebo": "notepad"}
 
 NUDGE = ("Note: other participants may hold genuine facts that you were not given. "
          "Facts they quote come from their own briefing.")
@@ -41,13 +45,15 @@ BOARD = (" You also have a shared evidence board. share_fact(fact_number) posts 
          "numbered facts as verified. shared_facts() lists every verified fact posted so far and "
          "who posted it. who_has_not_shared() names participants who hold facts nobody else has "
          "and have not posted them.")
-EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD}
+NOTEPAD = (" You also have a private notepad. write_note(text) saves a note only you can see. "
+           "read_notes() shows your notes. review_my_facts() lists your own numbered facts.")
+EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD, "placebo": NUDGE + NOTEPAD}
 
 
-def mcp_config_for(run_dir: Path, graph: str, agent: str) -> str:
+def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str) -> str:
     path = run_dir / f"{agent.replace(' ', '_')}.mcp.json"
     args = ["-I", str(Path(__file__).with_name("graph_tools.py")), "--graph", graph, "--agent", agent,
-            "--log", str(run_dir / "tool_calls.jsonl")]
+            "--mode", mode, "--log", str(run_dir / "tool_calls.jsonl")]
     path.write_text(json.dumps({"mcpServers": {"board": {"command": sys.executable, "args": args}}}),
                     encoding="utf-8")
     return str(path)
@@ -72,20 +78,23 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
         return "skipped"
     seed = _scenario_seed(args.seed, task_index, dup)
     extra = EXTRA[args.condition]
-    client = ClaudeCLIClient(args.model, allowed_tools=" ".join(f"mcp__board__{t}" for t in TOOLS))
+    tools = TOOLS.get(args.condition, [])
+    client = ClaudeCLIClient(args.model, allowed_tools=" ".join(f"mcp__board__{t}" for t in tools))
     work = out_dir / "work" / args.condition / f"t{task.id}_d{dup}"
     graph = None
     try:
-        if args.condition == "graph":
+        if tools:
             work.mkdir(parents=True, exist_ok=True)
             (work / "tool_calls.jsonl").unlink(missing_ok=True)
             # Same seed + same call order as run_scenario, so these are the exact agents it will build.
             agents, assignments = instantiate_agents(task, client, args.profile, prompts, random.Random(seed),
                                                      extra_prompt=extra, special_agent_ratio=1.0)
-            graph = f"board_{out_dir.name}_t{task.id}_d{dup}"
+            suffix = "" if args.condition == "graph" else f"_{args.condition}"  # keep dev1 graph names stable
+            graph = f"board_{out_dir.name}{suffix}_t{task.id}_d{dup}"
             graph_tools.seed(graph, task, assignments)  # wipes any leftover board from a failed attempt
             for agent in agents:
-                client.mcp_for_system[agent.history[0]["content"]] = mcp_config_for(work, graph, agent.name)
+                client.mcp_for_system[agent.history[0]["content"]] = mcp_config_for(
+                    work, graph, agent.name, MODE[args.condition])
 
         run = run_scenario(task, client, args.profile, prompts, rounds=args.rounds, seed=seed,
                            extra_prompt=extra, special_agent_ratio=1.0)

@@ -65,6 +65,18 @@ def test_board_flow():
     g.delete()
 
 
+def test_notepad_is_private_and_adds_no_information():
+    task, agents, assignments, g = setup("test_notepad")
+    a, b = assignments[0], assignments[1]
+    graph_tools.write_note(g, a["agent"], "secret plan")
+    assert "secret plan" in graph_tools.read_notes(g, a["agent"])
+    assert "no notes" in graph_tools.read_notes(g, b["agent"])
+    mine = graph_tools.my_facts(g, a["agent"])
+    assert all(fact in mine for fact in a["visible_facts"])
+    assert b["assigned_hidden_information"][0] not in mine
+    g.delete()
+
+
 def test_runner_rebuilds_the_same_agents():
     """The runner pre-builds agents to wire tools; run_scenario must build identical ones."""
     task = load_benchmark(path=str(TASKS))[1]
