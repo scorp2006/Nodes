@@ -82,7 +82,7 @@ def parse_repo(root: Path) -> tuple[list[dict], list[dict], dict]:
         visit(tree.body, mod, None)
 
     known = {f["qualname"] for f in funcs}
-    calls, unresolved = set(), 0
+    calls, unresolved, resolved_sites = set(), 0, 0
     for caller, name, kind, scope in raw_calls:
         if kind in ("method", "qualified"):
             target = name if name in known else None
@@ -92,10 +92,11 @@ def parse_repo(root: Path) -> tuple[list[dict], list[dict], dict]:
             target = next((t for s in stems for t in (s, f"{s}.__init__") if t in known), None)
         if target and target != caller:
             calls.add((caller, target))
+            resolved_sites += 1
         else:
             unresolved += 1
-    stats = {"files": len({f["file"] for f in funcs}), "functions": len(funcs),
-             "calls_resolved": len(calls), "call_sites_unresolved": unresolved}
+    stats = {"files": len({f["file"] for f in funcs}), "functions": len(funcs), "call_edges": len(calls),
+             "call_sites_resolved": resolved_sites, "call_sites_unresolved": unresolved}
     return funcs, [{"src": a, "dst": b} for a, b in sorted(calls)], stats
 
 
