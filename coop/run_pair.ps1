@@ -10,7 +10,8 @@ param(
     [string]$Features = "1,2",
     [ValidateSet("coop", "protocol", "graph")][string]$Condition = "coop",
     [string]$Model = "anthropic/claude-haiku-5-5",
-    [switch]$Remember
+    [switch]$Remember,
+    [switch]$NoEval   # batch mode: skip CooperBench's per-pair auto-eval; evaluate everything at the end (no peeking)
 )
 $ErrorActionPreference = "Stop"
 $env:Path = "C:\Program Files\Docker\Docker\resources\bin;" + $env:Path
@@ -67,6 +68,7 @@ if ($Condition -ne "coop") {
 $cbArgs = @("run", "-n", $Name, "-r", $Repo, "-t", $Task, "-f", $Features, "-m", $Model, "-a", "claude_code",
             "--setting", "coop", "--git", "--backend", "docker", "-c", "1", "--redis", "redis://localhost:6379/1",
             "--dataset-dir", (Join-Path $root "external\CooperBench\dataset"), "--log-dir", $logDir)
+if ($NoEval) { $cbArgs += "--no-auto-eval" }
 $start = Get-Date
 try { & $py @launcher -- @cbArgs }
 finally {

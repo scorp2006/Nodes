@@ -4,7 +4,8 @@
 # Uses the saved encrypted token (run run_pair.ps1 once with -Remember first).
 param(
     [Parameter(Mandatory)][string]$Plan,
-    [int]$Parallel = 6
+    [int]$Parallel = 6,
+    [switch]$NoEval
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
@@ -15,10 +16,10 @@ $jobs = @()
 foreach ($r in $rows) {
     if (Test-Path (Join-Path $logDir "$($r.Name).wall.txt")) { "skip (already finished): $($r.Name)"; continue }
     while (@($jobs | Where-Object State -eq "Running").Count -ge $Parallel) { Start-Sleep -Seconds 5 }
-    $jobs += Start-Job -Name $r.Name -ArgumentList $root, $r, $logDir -ScriptBlock {
-        param($root, $r, $logDir)
+    $jobs += Start-Job -Name $r.Name -ArgumentList $root, $r, $logDir, $NoEval.IsPresent -ScriptBlock {
+        param($root, $r, $logDir, $noEval)
         & (Join-Path $root "coop\run_pair.ps1") -Name $r.Name -Repo $r.Repo -Task $r.Task -Features $r.Features `
-            -Condition $r.Condition *>&1 | Out-File -Encoding utf8 (Join-Path $logDir "$($r.Name).out.txt")
+            -Condition $r.Condition -NoEval:$noEval *>&1 | Out-File -Encoding utf8 (Join-Path $logDir "$($r.Name).out.txt")
     }
     "started: $($r.Name)"
 }
