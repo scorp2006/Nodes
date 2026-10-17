@@ -55,7 +55,11 @@ Checks:
   - Wins: the board stops drift caused by unverifiable claims, and it surfaces the facts that rule options out.
   - Losses: agents discount facts that aren't in their own briefing, and a credible fact can cut against the
     right answer.
-- **Cost** (from the same file): the board uses about 2× the output tokens of baseline (58k vs 28k per run).
+- **Cost and latency** (`verify/cost_table.py` → `results/verify/cost_table_test1.txt`):
+  - The board uses about 2× the output tokens of baseline (58k vs 28k per run).
+  - Because it is right more often, it is the **cheapest per correct group decision**: $0.32, vs $0.56 for
+    baseline and $0.80 for placebo, at Haiku list prices.
+  - It is slower: median wall time is 1,035 s per task, vs 595 s for baseline.
 
 **dev** (20 tasks, used to build the board): board 13/20 vs baseline 2/20 (`results/dev1_summary.txt`).
 

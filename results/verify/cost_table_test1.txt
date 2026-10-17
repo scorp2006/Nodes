@@ -1,0 +1,7 @@
+tasks: 40
+condition          right list $ total $ per right out tok/run calls/run wall s p50 wall s p90
+baseline               6         3.33       0.555       28432      66.7        595        667
+graph                 15         4.84       0.322       58178      66.7       1035       1249
+graph_unverified       5         4.48       0.896       49048      66.7       1040       1192
+nudge                  6         3.21       0.536       21951      66.7        595        631
+placebo                5         4.01       0.802       44329      66.7        924       1120
