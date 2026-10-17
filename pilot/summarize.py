@@ -75,6 +75,24 @@ def summarize(batch: Path) -> str:
                          f"sign-test p = {sign_test(wins, losses):.3f}")
 
     if "graph" in data:
+        lines += ["", "Paired vs graph (does the shared board beat each control?):"]
+        for cond, runs in data.items():
+            if cond in ("graph", "baseline"):
+                continue
+            common = sorted(set(runs) & set(data["graph"]))
+            wins = sum(majority_correct(data["graph"][t]) > majority_correct(runs[t]) for t in common)
+            losses = sum(majority_correct(data["graph"][t]) < majority_correct(runs[t]) for t in common)
+            lines.append(f"  graph vs {cond:8} on {len(common)} tasks: graph better on {wins}, worse on {losses}, "
+                         f"sign-test p = {sign_test(wins, losses):.3f}")
+
+        lines += ["", "Compute per run (mean):"]
+        for cond, runs in data.items():
+            u = [r["usage"] for r in runs.values()]
+            calls = [len(r.get("board", {}).get("tool_calls", [])) for r in runs.values()]
+            lines.append(f"  {cond:8} {sum(x['output_tokens'] for x in u) / len(u):8.0f} output tokens  "
+                         f"{sum(x['seconds'] for x in u) / len(u):5.0f} s model time  "
+                         f"{sum(calls) / len(calls):5.1f} tool calls")
+
         runs = data["graph"].values()
         calls = [len(r.get("board", {}).get("tool_calls", [])) for r in runs]
         posted_hidden = [sum(1 for _, fid in r.get("board", {}).get("posts", []) if fid.startswith("h"))
