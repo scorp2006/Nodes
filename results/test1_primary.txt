@@ -1,0 +1,29 @@
+Batch: runs\test1  (excluded by plan: t1_d0, t2_d0, t3_d0)
+Tasks complete in all 5 conditions: 40
+
+condition         runs       group right         95% CI   agents right before->after   list $
+baseline            40    6/40  =   15%     7%- 29%          20% -> 24%            3.33
+graph               40   15/40  =   38%    24%- 53%          22% -> 44%            4.84
+graph_unverified    40    5/40  =   12%     5%- 26%          23% -> 23%            4.48
+nudge               40    6/40  =   15%     7%- 29%          17% -> 23%            3.21
+placebo             40    5/40  =   12%     5%- 26%          20% -> 22%            4.01
+
+Paired comparisons (exact two-sided sign test on group right/wrong, same tasks and seeds):
+  [PRIMARY  ] graph vs placebo: graph better on 11, worse on 1, p = 0.006
+  [secondary] graph vs baseline: graph better on 9, worse on 0, p = 0.004
+  [secondary] graph vs nudge: graph better on 10, worse on 1, p = 0.012
+  [secondary] graph vs graph_unverified: graph better on 11, worse on 1, p = 0.006
+  [secondary] graph_unverified vs placebo: graph_unverified better on 1, worse on 1, p = 1.000
+
+Compute per run (mean):
+  baseline             28432 output tokens    379 s model time    0.0 tool calls   74.7 turns    594 s wall
+  graph                58178 output tokens    584 s model time   55.5 tool calls  130.1 turns   1046 s wall
+  graph_unverified     49048 output tokens    539 s model time   39.4 tool calls  114.0 turns   1009 s wall
+  nudge                21951 output tokens    374 s model time    0.0 tool calls   74.7 turns    589 s wall
+  placebo              44329 output tokens    473 s model time    4.4 tool calls   79.0 turns    953 s wall
+
+Graph board: 96% of private facts posted on average
+  graph vs baseline                raw p = 0.004   Holm-adjusted p = 0.016   survives
+  graph vs nudge                   raw p = 0.012   Holm-adjusted p = 0.024   survives
+  graph vs graph_unverified        raw p = 0.006   Holm-adjusted p = 0.018   survives
+  graph_unverified vs placebo      raw p = 1.000   Holm-adjusted p = 1.000   does not survive

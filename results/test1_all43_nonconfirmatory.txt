@@ -1,0 +1,26 @@
+NON-CONFIRMATORY: all tasks incl. 1-3 (practice-set overlap)
+Batch: runs\test1
+Tasks complete in all 5 conditions: 43
+
+condition         runs       group right         95% CI   agents right before->after   list $
+baseline            43    7/43  =   16%     8%- 30%          21% -> 25%            3.59
+graph               43   17/43  =   40%    26%- 54%          24% -> 46%            5.22
+graph_unverified    43    6/43  =   14%     7%- 27%          24% -> 25%            4.82
+nudge               43    7/43  =   16%     8%- 30%          18% -> 24%            3.48
+placebo             43    6/43  =   14%     7%- 27%          22% -> 24%            4.33
+
+Paired comparisons (exact two-sided sign test on group right/wrong, same tasks and seeds):
+  [PRIMARY  ] graph vs placebo: graph better on 12, worse on 1, p = 0.003
+  [secondary] graph vs baseline: graph better on 10, worse on 0, p = 0.002
+  [secondary] graph vs nudge: graph better on 11, worse on 1, p = 0.006
+  [secondary] graph vs graph_unverified: graph better on 12, worse on 1, p = 0.003
+  [secondary] graph_unverified vs placebo: graph_unverified better on 1, worse on 1, p = 1.000
+
+Compute per run (mean):
+  baseline             29957 output tokens    387 s model time    0.0 tool calls   74.8 turns    603 s wall
+  graph                59338 output tokens    590 s model time   55.2 tool calls  129.9 turns   1061 s wall
+  graph_unverified     50221 output tokens    545 s model time   37.9 tool calls  112.6 turns   1024 s wall
+  nudge                23737 output tokens    382 s model time    0.0 tool calls   74.8 turns    598 s wall
+  placebo              45767 output tokens    482 s model time    4.1 tool calls   78.9 turns    970 s wall
+
+Graph board: 96% of private facts posted on average
