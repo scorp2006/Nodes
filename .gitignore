@@ -8,3 +8,6 @@ external/
 
 # run outputs
 runs/
+
+# tool server stamps
+.server_*.json
