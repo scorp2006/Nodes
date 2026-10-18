@@ -11,3 +11,6 @@ runs/
 
 # tool server stamps
 .server_*.json
+
+# raw coverage output (large)
+results/v4_signals/cov_raw/
