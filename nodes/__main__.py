@@ -161,6 +161,7 @@ def cmd_init(a):
     if a.fresh:
         st.reset()
         st.r.hdel("nodes:git", ws)
+        (Path(".nodes/traces") / f"{ws}.trace.jsonl").unlink(missing_ok=True)  # the Activity view reads this
     st.setup()
     t0 = time.perf_counter()
     stats = indexer.index(st, repo, a.package, ws)
