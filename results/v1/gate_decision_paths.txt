@@ -1,0 +1,10 @@
+Gate decisions recorded by demo/gate_demo.py (workspace gatedemo; three agents, real MCP calls, no LLM).
+Each line: agent, verdict, and the graph path the server returned as the reason. Pulled from /api/events?ws=gatedemo.
+
+alice  proceed   alice -HOLDS-> region:gatedemo:src/shop/models.py#User.__body__, region:gatedemo:src/shop/models.py#module@4
+bob    defer     bob -NEEDS-> region:gatedemo:src/shop/models.py#User.__body__ -LEASED_BY-> alice
+bob    proceed   bob -HOLDS-> fn:gatedemo:src/shop/models.py#order_total
+alice  escalate  alice -WAITS_FOR-> bob -WAITS_FOR-> alice
+carol  escalate  carol -RELIES_ON-> fact:1ebf31d92fe87717 -STATUS-> unverified
+bob    handoff   alice -DONE_AT-> a1b2c3d -HANDS-> region:gatedemo:src/shop/models.py#User.__body__ -TO-> bob
+alice  proceed   alice -HOLDS-> region:gatedemo:src/shop/models.py#User.__body__, region:gatedemo:src/shop/models.py#module@1

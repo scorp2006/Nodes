@@ -1,0 +1,42 @@
+// The core of the Nodes graph schema, read from a live workspace (CALL db.labels(), db.relationshipTypes()).
+// Full schema: docs/schema.md. Render: node docs/img/render.mjs
+digraph nodes {
+  graph [rankdir=TB, bgcolor="white", pad=0.35, nodesep=0.55, ranksep=0.7, fontname="Helvetica", fontsize=15, newrank=true];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=14, margin="0.18,0.09", penwidth=1.4];
+  edge  [fontname="Helvetica", fontsize=11.5, color="#6b6b74", fontcolor="#3a3a42", arrowsize=0.7, penwidth=1.2];
+
+  subgraph cluster_work {
+    label=<<b>Work</b>: who is doing what>; fontcolor="#8a5a00"; style="rounded,filled"; fillcolor="#fffaf0"; color="#ecc98a";
+    node [fillcolor="#fff1d6", color="#d9901a"];
+    Principal [label=<<b>Principal</b><br/><font point-size="11">person or agent</font>>];
+    Session   [label=<<b>Session</b><br/><font point-size="11">one agent or subagent</font>>];
+    Intent    [label=<<b>Intent</b><br/><font point-size="11">planned change</font>>];
+    Decision  [label=<<b>Decision</b><br/><font point-size="11">proceed · defer · handoff · escalate</font>>];
+  }
+  subgraph cluster_code {
+    label=<<b>Code</b>: the repo and its history>; fontcolor="#1f5fa8"; style="rounded,filled"; fillcolor="#f3f8ff"; color="#a9cdf2";
+    node [fillcolor="#e1eefc", color="#2f7fd1"];
+    Unit     [label=<<b>Unit</b><br/><font point-size="11">file · class · function · region</font>>];
+    Revision [label=<<b>Revision</b><br/><font point-size="11">git commit</font>>];
+  }
+  subgraph cluster_know {
+    label=<<b>Knowledge</b>: what is known, and from where>; fontcolor="#1f7a50"; style="rounded,filled"; fillcolor="#f2fbf6"; color="#9fd6b8";
+    node [fillcolor="#dcf3e6", color="#2f9e6b"];
+    Fact   [label=<<b>Fact</b><br/><font point-size="11">source-checked or unverified</font>>];
+    Source [label=<<b>Source</b><br/><font point-size="11">file, commit, test run</font>>];
+  }
+
+  Principal -> Session  [label="RUNS"];
+  Session   -> Session  [label="SPAWNED\nWAITS_FOR"];
+  Session   -> Intent   [label="DECLARED"];
+  Session   -> Decision [label="MADE"];
+  Decision  -> Intent   [label="FOR"];
+  Intent    -> Unit     [label="TOUCHES"];
+  Session   -> Unit     [label="HELD\n(lease, epoch)", color="#d9901a", fontcolor="#8a5a00", penwidth=2];
+  Unit      -> Unit     [label="CONTAINS\nDEPENDS_ON\nIMPORTS"];
+  Principal -> Revision [label="AUTHORED"];
+  Revision  -> Unit     [label="CHANGED"];
+  Session   -> Fact     [label="ASSERTED"];
+  Fact      -> Source   [label="SOURCED_FROM", color="#2f9e6b", fontcolor="#1f7a50", penwidth=2];
+  Fact      -> Unit     [label="ABOUT"];
+}

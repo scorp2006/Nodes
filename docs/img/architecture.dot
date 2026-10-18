@@ -1,0 +1,21 @@
+// How a Nodes decision flows, left to right. Render: node docs/img/render.mjs
+digraph arch {
+  graph [rankdir=LR, bgcolor="white", pad=0.35, nodesep=0.5, ranksep=0.65, fontname="Helvetica"];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=14, margin="0.2,0.12", penwidth=1.4];
+  edge  [fontname="Helvetica", fontsize=11.5, color="#6b6b74", fontcolor="#3a3a42", arrowsize=0.75, penwidth=1.3];
+
+  agents [label=<<b>1 · Claude Code</b><br/><font point-size="11.5">agents and subagents</font>>, fillcolor="#fff1d6", color="#d9901a"];
+  hooks  [label=<<b>2 · Hooks + MCP tools</b><br/><font point-size="11.5">every Edit, Write and<br/>file-writing Bash command</font>>, fillcolor="#e1eefc", color="#2f7fd1"];
+  server [label=<<b>3 · Nodes server</b><br/><font point-size="11.5">gate: proceed · defer · handoff · escalate<br/>leases with epochs<br/>fact source check</font>>, fillcolor="#e1eefc", color="#2f7fd1"];
+  db     [label=<<b>4 · FalkorDB</b><br/><font point-size="11.5">one graph per repo</font>>, shape=cylinder, fillcolor="#dcf3e6", color="#2f9e6b"];
+  answer [label=<<b>5 · Decision + reason</b><br/><font point-size="11.5">back to the agent, with<br/>the graph path behind it</font>>, fillcolor="#fff1d6", color="#d9901a"];
+  dash   [label=<<b>Live dashboard</b><br/><font point-size="11.5">server-sent events</font>>, fillcolor="#f4f4f2", color="#9a9aa2", style="rounded,filled,dashed"];
+
+  agents -> hooks -> server;
+  server -> db [dir=both, label="Cypher"];
+  db -> answer [style=invis];
+  server -> answer;
+  answer -> agents [constraint=false, label="the agent acts on it"];
+  server -> dash [style=dashed];
+  {rank=same; db; dash}
+}
