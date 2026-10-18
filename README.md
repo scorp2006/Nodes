@@ -148,31 +148,44 @@ The HiddenBench board (`pilot/graph_tools.py`) posts a fact only along an edge t
 "source-checked: yes/no".
 
 ## Run it
-Requirements: Docker and Python 3.12.
-```bash
-pip install -r requirements.txt
-python -m nodes up --workspace path/to/repo --package path/to/repo/src/yourpkg
-```
-This starts FalkorDB in Docker (a pinned image digest) if nothing is answering on port 6379, loads the code
-graph, and serves:
-- MCP at `http://127.0.0.1:8780/mcp`;
-- the live view at `http://127.0.0.1:8781/`;
-- replays at `http://127.0.0.1:8781/replay?task=t42_d0`.
+Requirements: Docker, Python 3.11 or 3.12, and Claude Code. Full details and options are in [SETUP.md](SETUP.md).
 
-Connect an agent, for example Claude Code:
+**1. Once per machine: start Nodes.**
 ```bash
-claude mcp add --transport http nodes http://127.0.0.1:8780/mcp --header "X-Agent: alice"
+git clone https://github.com/scorp2006/Nodes.git && cd Nodes
+python -m venv .venv
+.venv/Scripts/python -m pip install -r requirements.txt     # macOS/Linux: .venv/bin/python
+.venv/Scripts/python -m nodes up
 ```
-Tools:
-- `declare_plan`, `claim`, `release`, `mark_done`, `status`, `impact_of`;
-- `share_fact(text, source)` and `board` for the board.
+This starts FalkorDB in Docker (a pinned image digest) on port 6380 if nothing is answering there, then serves
+the MCP server, the Claude Code hooks and the dashboard at `http://127.0.0.1:8780`. Leave it running.
 
-To see it without an LLM, run `python -m nodes.demo` (two scripted agents on pallets/click).
-Tests: `python -m pytest nodes/test_nodes.py`.
+**2. Once per repository: index it.**
+```bash
+.venv/Scripts/python -m nodes init --repo path/to/your/repo
+```
+This indexes the code (14 languages) and its git history, and writes the MCP and hook config into the repo
+(kept out of git).
+
+**3. Open Claude Code in that repository once.** Accept the folder trust prompt and approve the `nodes` MCP
+server. From then on every session and subagent there is tracked with no token or login, and you can watch it
+at `http://127.0.0.1:8780`.
+
+What agents get: six tools (`context_for`, `declare_intent`, `before_acting`, `post_fact`, `coordinate`,
+`status`), and every Edit, Write, and file-writing Bash command is checked against the shared graph before it
+runs. If the Nodes server is down, those edits are blocked rather than allowed through unchecked
+(`nodes init --fail-mode open` changes that).
+
+Also available: a Claude Code plugin (`plugin/`), `nodes replay` to re-watch a recorded run, LAN mode with a
+token, and opt-in import of past session rationale. See [SETUP.md](SETUP.md).
+
+Tests: `python -m pytest nodes/test_v1.py nodes/test_product.py nodes/test_audit.py` (needs FalkorDB on 6380).
 
 ## Limitations
-- **Identity is trusted.** `X-Agent` isn't authenticated, so this is for one trusted team on localhost.
-- **Claims don't expire.** They last until released; there's no lease TTL.
+- **Built for one trusted team.** Identity comes from Claude Code's hooks on localhost; beyond localhost a
+  shared server token is required, but there are no per-user permissions.
+- **Some writes can't be gated.** Scripts that write files through variables, `eval`, or another script file
+  aren't seen by the Bash check.
 - **The call graph is static.** About 29–37% of call sites resolve (dev). Multi-hop overlap did not predict
   failures (result 3).
 - **The HiddenBench result is narrow.** One model (Haiku) and one benchmark. The board costs about 2× the
