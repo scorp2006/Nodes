@@ -61,3 +61,15 @@ pairs with only 4 failures.
 - **Secondary:** the same on the heavy-only disjoint pairs.
 - **Reporting rule:** fewer than 10 interaction failures in the primary subset is too few to conclude anything.
   The report will say so plainly and present the numbers as descriptive only.
+
+## Amendment 1 (committed after the static filter, before any ground-truth test ran)
+Static results (`results/detector3_static.jsonl`, edit sets only, no outcomes):
+- 199 pairs; 1 excluded (missing patch: outlines 1706, features 5 + 8); 109 disjoint pairs.
+- **Environment fix.** datasets 3997 first failed to check out because of Windows' path-length limit. Setting
+  `core.longpaths=true` in that clone fixed it. No code changed; its pairs are included.
+- **Added secondary analysis.** In 80 of the 109 disjoint pairs, at least one patch edits no function in the
+  graph (module- or class-level code only; for example, all 45 outlines 1655 pairs edit only module-level type
+  aliases). For these pairs the call-graph predictors are "no path" by construction. We therefore add a
+  secondary subset: disjoint pairs where **both** patches edit at least one mapped function (29 heavy pairs,
+  plus the light v2 rows that meet the same criterion), reported pooled.
+- **The primary analysis is unchanged.** All tests run in the same seeded order as pre-registered.
