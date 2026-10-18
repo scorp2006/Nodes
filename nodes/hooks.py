@@ -25,7 +25,7 @@ from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse, Response
 
-from . import identity, indexer, ops
+from . import identity, indexer, ops, redact
 from .lang import EXT
 from .shellwrites import write_targets
 
@@ -499,6 +499,43 @@ def register(server, reg) -> None:
                         "patterns": sorted({pt for q in qs for pt in patterns(q[2])})[:8]})
         return JSONResponse(out)
 
+    def graph_names() -> list[str]:
+        return sorted(n.decode() if isinstance(n, bytes) else n for n in reg.r.execute_command("GRAPH.LIST"))
+
+    async def graphs(request: Request) -> Response:
+        """Every graph in this FalkorDB (workspaces, snapshots, anything else), for the raw graph explorer."""
+        return JSONResponse(graph_names())
+
+    def clip(props: dict) -> dict:  # what the browser may see of a node: secrets redacted, long values cut
+        out = redact.value({k: v for k, v in props.items() if k != "token_hash"})
+        return {k: (v[:300] + "…" if isinstance(v, str) and len(v) > 300 else v) for k, v in out.items()}
+
+    async def raw(request: Request) -> Response:
+        """A read-only look at any graph: label and relationship counts, and up to `limit` nodes of the chosen labels
+        with the relationships between them (FalkorDB Browser's view, inside the dashboard)."""
+        name = request.query_params.get("graph", "")
+        if name not in graph_names():
+            return JSONResponse({"error": "no such graph"}, 404)
+        g = reg.store("_registry").db.select_graph(name)
+        limit = min(int(request.query_params.get("limit", "300")), 1500)
+        labels = {lbl: g.ro_query(f"MATCH (n:`{lbl}`) RETURN count(n)").result_set[0][0]
+                  for (lbl,) in g.ro_query("CALL db.labels()").result_set}
+        rels = {t: g.ro_query(f"MATCH ()-[r:`{t}`]->() RETURN count(r)").result_set[0][0]
+                for (t,) in g.ro_query("CALL db.relationshipTypes()").result_set}
+        want = [x for x in request.query_params.get("labels", "").split(",") if x in labels] or list(labels)
+        per = max(1, limit // max(1, len(want)))  # a fair share for every label, so small labels aren't crowded out
+        nodes = {}
+        for lbl in want:
+            for nid, lbls, props in g.ro_query(f"MATCH (n:`{lbl}`) RETURN ID(n), labels(n), properties(n) LIMIT $k",
+                                               {"k": per}).result_set:
+                nodes[nid] = {"id": nid, "labels": lbls, "props": clip(props)}
+        ids = list(nodes)
+        edges = [{"id": rid, "type": t, "src": a, "dst": b, "props": clip(p)} for rid, t, a, b, p in g.ro_query(
+            "MATCH (a)-[r]->(b) WHERE ID(a) IN $ids AND ID(b) IN $ids RETURN ID(r), type(r), ID(a), ID(b), properties(r) "
+            "LIMIT 4000", {"ids": ids}).result_set]
+        return JSONResponse({"graph": name, "labels": labels, "relationships": rels, "nodes": list(nodes.values()),
+                             "edges": edges, "shown": len(nodes), "total": sum(labels.values())})
+
     async def static(request: Request) -> Response:  # the dashboard's own files (app.js, vendored canvas)
         base = Path(__file__).with_name("web").resolve()
         f = (base / request.path_params["path"]).resolve()
@@ -511,7 +548,7 @@ def register(server, reg) -> None:
 
     for path, fn in (("/api/stream", stream), ("/api/events", all_events), ("/api/trace", trace), ("/api/graph", graph),
                      ("/api/node", node), ("/api/server", server_info), ("/api/calls", calls),
-                     ("/static/{path:path}", static)):
+                     ("/api/graphs", graphs), ("/api/raw", raw), ("/static/{path:path}", static)):
         server.custom_route(path, methods=["GET"])(fn)
 
 

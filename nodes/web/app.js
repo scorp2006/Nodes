@@ -179,8 +179,9 @@ canvas.setConfig({
   node: {nodeCanvasObject: drawNode, nodePointerAreaPaint: (n, c, ctx) => { ctx.fillStyle = c; ctx.beginPath();
     ctx.arc(n.x, n.y, (n.size || 8) + 3, 0, 2 * Math.PI); ctx.fill(); }},
   linkLineDash: l => l.data?.by === "name-match" ? [3, 3] : null,
-  eventHandlers: {onNodeClick: n => showNode(n), onBackgroundClick: () => renderGside(),
-                  onNodeHover: n => { hover = n?.id || null; document.querySelector(".gstage").style.cursor = n ? "pointer" : ""; }},
+  eventHandlers: {onNodeClick: n => n.data?.raw ? showRawNode(n.data.raw) : showNode(n),
+                  onBackgroundClick: () => source === "raw" ? renderRawSide() : renderGside(),
+                  onNodeHover: n => { hover = n?.id || null; document.querySelector(".gstage").style.cursor = n ? "pointer" : ""; tip(n); }},
 });
 new ResizeObserver(([e]) => { const r = e.contentRect; if (r.width) { canvas.setWidth(r.width); canvas.setHeight(r.height); } }).observe(document.querySelector(".gstage"));
 setInterval(() => canvas.getGraph?.()?.autoPauseRedraw(!$("v-graph").classList.contains("on")), 500);  // keep it moving
@@ -209,11 +210,12 @@ function drawNode(n, ctx) {  // FalkorDB's engine and layouts; our node face: ki
     ctx.textBaseline = "middle"; ctx.fillText((n.data?.name || "?")[0].toUpperCase(), n.x, n.y + .5);
   }
   const label = n.data?.name || "", big = (degree[n.id] || 0) >= 4;
-  const show = agent || ring || on || hover === n.id || (big && k > .9) || k > 1.6;  // labels arrive as you zoom in
+  const show = agent || ring || on || hover === n.id || (big && k > .9) || k > 1.6  // labels arrive as you zoom in
+    || (n.data?.raw && (nodeCount < 30 || k > 1.3 || (degree[n.id] || 0) >= 4));
   if (!label || !show) return;
   ctx.font = `${agent || ring ? 600 : 400} ${(agent ? 12.5 : 11) / k}px Inter, Segoe UI, system-ui, sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "top";
-  ctx.fillStyle = agent || ring || on || hover === n.id ? "#f1f1f3" : "#9a9aa3";
+  ctx.fillStyle = agent || ring || on || hover === n.id || n.data?.raw ? "#e6e6ea" : "#9a9aa3";
   ctx.fillText(label.length > 28 ? label.slice(0, 27) + "…" : label, n.x, n.y + r + (ring ? 7 : 5) / k);
 }
 
@@ -229,6 +231,7 @@ function animateLinks() {  // particles stream from each agent into the code it 
 }
 let shape = "";
 function renderGraph() {
+  if (source === "raw") return;
   const agents = Object.keys(state.holds).filter(a => state.holds[a].size);
   // a planned unit (declared, or a new file the gate saw) is the same thing as the real file once it exists: fold it in
   const real = Object.fromEntries(graph.nodes.filter(n => n.kind === "file" && !n.id.includes("planned")).map(n => [n.id.split(":").slice(2).join(":"), n.id]));
@@ -252,6 +255,7 @@ function renderGraph() {
       color: e.rel === "CALLS" ? "#4a5b66" : "#33333a", data: {by: e.by, rel: e.rel}}))  // structure: lines, no captions
     .concat(agents.flatMap(a => [...new Set([...state.holds[a]].map(canon))].filter(u => ids.has(u)).map(u => ({id: `h:${a}:${u}`,
       relationship: "HOLDS", source: `agent:${a}`, target: u, visible: true, color: color(a), width: 1.6, data: {}}))));
+  nodeCount = nodes.length;
   const sig = nodes.map(n => n.id).join("|") + "#" + links.map(l => l.id).join("|") + layout;
   if (sig !== shape) { shape = sig; canvas.setData({nodes, links}); setTimeout(animateLinks, 50); }
   else {
@@ -317,6 +321,97 @@ async function showNode(n) {
   light([n.id], 1800);
 }
 
+// ---------------------------------------------------------------- raw graph: any graph in this FalkorDB, Browser-style
+let source = "code", rawData = null, rawOff = {labels: new Set(), rels: new Set()}, nodeCount = 0, mouse = {x: 0, y: 0};
+const LABEL_COLORS = ["#4cc9a6", "#ff6b6b", "#4dabf7", "#ffd43b", "#ff922b", "#3bc9db", "#94d82d", "#f783ac", "#e9ecef", "#c9a27e", "#74c0fc", "#ffa8a8"];
+const labelColors = {};
+const lcol = l => labelColors[l] ??= LABEL_COLORS[Object.keys(labelColors).length % LABEL_COLORS.length];
+const CAPTION = ["name", "symbol", "title", "verdict", "text", "path", "sha", "uid", "id"];
+const caption = p => { for (const k of CAPTION) if (p[k] != null && p[k] !== "") return String(p[k]); return ""; };
+const shortCap = s => { const t = s.includes("#") ? s.split("#").pop() : s.split("/").pop() || s; return t.length > 30 ? t.slice(0, 29) + "…" : t; };
+const val = v => typeof v === "object" ? JSON.stringify(v) : String(v);
+
+async function loadGraphList() {
+  const names = await (await fetch("/api/graphs")).json();
+  const pick = $("rawsel").value || `ws:${ws}`;
+  $("rawsel").innerHTML = names.map(n => `<option ${n === pick ? "selected" : ""}>${esc(n)}</option>`).join("");
+}
+async function loadRaw() {
+  rawData = await (await fetch(`/api/raw?graph=${q($("rawsel").value)}&limit=600`)).json();
+  if (rawData.error) { rawData = null; return; }
+  rawOff = {labels: new Set(), rels: new Set()}; renderRaw(); renderRawSide();
+}
+function renderRaw() {
+  const d = rawData; if (!d) return;
+  const nodes = d.nodes.filter(n => !rawOff.labels.has(n.labels[0])).map(n => ({id: `r${n.id}`, labels: n.labels, visible: true,
+    color: lcol(n.labels[0]), size: 7, data: {name: shortCap(caption(n.props)), raw: n}}));
+  const ids = new Set(nodes.map(n => n.id));
+  const links = d.edges.filter(e => !rawOff.rels.has(e.type) && ids.has(`r${e.src}`) && ids.has(`r${e.dst}`))
+    .map(e => ({id: `re${e.id}`, relationship: e.type, source: `r${e.src}`, target: `r${e.dst}`, visible: true, color: "#56626e", data: {raw: e}}));
+  degree = {}; links.forEach(l => { degree[l.source] = (degree[l.source] || 0) + 1; degree[l.target] = (degree[l.target] || 0) + 1; });
+  nodes.forEach(n => { n.size = 6 + Math.min(6, Math.sqrt(degree[n.id] || 0) * 1.5); });
+  nodeCount = nodes.length; shape = "raw"; canvas.setData({nodes, links}); setTimeout(animateLinks, 50);
+  $("gempty").hidden = nodes.length > 0;
+  $("gempty").innerHTML = `<div class="empty"><b>Nothing to show</b>Turn a label back on, or pick another graph.</div>`;
+  $("gpanel").innerHTML = `<div class="box"><span class="label">Labels</span>${Object.entries(d.labels).filter(([, c]) => c).map(([l, c]) =>
+      `<button class="toggle ${rawOff.labels.has(l) ? "off" : ""}" data-label="${esc(l)}"><i style="background:${lcol(l)}"></i>${esc(l)}<small>${c}</small></button>`).join("")
+      || '<span class="muted" style="font-size:12.5px">empty graph</span>'}</div>
+    <div class="box"><span class="label">Relationships</span>${Object.entries(d.relationships).filter(([, c]) => c).map(([t, c]) =>
+      `<button class="toggle rel ${rawOff.rels.has(t) ? "off" : ""}" data-rel="${esc(t)}"><i style="background:#8a97a3"></i>${esc(t)}<small>${c}</small></button>`).join("")
+      || '<span class="muted" style="font-size:12.5px">none</span>'}</div>`;
+  $("legend").innerHTML = `<span class="muted">${nodes.length} of ${d.total.toLocaleString()} nodes · ${links.length} relationships shown</span>`;
+}
+function renderRawSide() {
+  $("gside").innerHTML = `<span class="label">Graph</span><h3 class="mono" style="margin:8px 0 4px;word-break:break-all">${esc(rawData?.graph || "")}</h3>
+    <p class="muted" style="font-size:13px;margin:0 0 6px">Read-only. Up to 600 nodes, shared fairly across the labels you have on.</p>
+    <div class="sect"><span class="label">Node</span><p class="muted" style="font-size:13px;margin:8px 0 0">Hover a node for a summary; click it for every property.</p></div>`;
+}
+function showRawNode(r) {
+  $("gside").innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap">${r.labels.map(l => `<span class="tag" style="background:${lcol(l)};color:#111">${esc(l)}</span>`).join("")}</div>
+    <h3 style="margin:10px 0 12px;word-break:break-all">${esc(caption(r.props) || `#${r.id}`)}</h3>
+    <div class="props"><div class="row"><span>&lt;id&gt;</span><span class="mono">${r.id}</span></div>
+    ${Object.entries(r.props).map(([k, v]) => `<div class="row"><span>${esc(k)}</span><span>${esc(val(v))}</span></div>`).join("")}</div>`;
+}
+function placeTip() {
+  const t = $("gtip"); if (t.hidden) return; const box = t.parentElement;
+  t.style.left = Math.max(8, Math.min(mouse.x + 16, box.clientWidth - t.offsetWidth - 8)) + "px";
+  t.style.top = Math.max(8, Math.min(mouse.y + 16, box.clientHeight - t.offsetHeight - 8)) + "px";
+}
+function tip(n) {  // what a node holds, on hover
+  const t = $("gtip"); if (!n) { t.hidden = true; return; }
+  const row = (k, v) => `<div class="row"><span>${esc(k)}</span><span>${esc(String(v).slice(0, 96))}</span></div>`;
+  let html;
+  if (n.data?.raw) {
+    const r = n.data.raw;
+    html = `<div class="lbls">${r.labels.map(l => `<span class="lbl" style="background:${lcol(l)}">${esc(l)}</span>`).join("")}</div>`
+      + Object.entries(r.props).slice(0, 8).map(([k, v]) => row(k, val(v))).join("")
+      + (Object.keys(r.props).length > 8 ? `<div class="muted" style="margin-top:6px">+${Object.keys(r.props).length - 8} more: click</div>` : "");
+  } else if (String(n.id).startsWith("agent:")) {
+    const a = n.id.slice(6);
+    html = `<div class="lbls"><span class="lbl" style="background:${n.color}">agent</span></div>${row("name", nameOf(a))}`
+      + row("holds", `${state.holds[a]?.size || 0} unit(s)`) + (state.last[a] ? row("last", state.last[a]) : "");
+  } else {
+    const own = owners[n.id], w = worked[n.id];
+    html = `<div class="lbls"><span class="lbl" style="background:${n.color}">${esc(n.data?.kind || "unit")}</span></div>`
+      + row("name", n.data?.name || "") + row("uid", n.id) + (own ? row("held by", nameOf(own)) : w ? row("worked on by", nameOf(w)) : "")
+      + row("links", degree[n.id] || 0) + `<div class="muted" style="margin-top:6px">Click for lease, authors and history</div>`;
+  }
+  t.innerHTML = html; t.hidden = false; placeTip();
+}
+document.querySelector(".gstage").addEventListener("mousemove", e => {
+  const r = e.currentTarget.getBoundingClientRect(); mouse = {x: e.clientX - r.left, y: e.clientY - r.top}; placeTip(); });
+document.querySelector(".gstage").addEventListener("mouseleave", () => { $("gtip").hidden = true; });
+$("gpanel").onclick = e => { const b = e.target.closest(".toggle"); if (!b) return;
+  const set = b.dataset.label ? rawOff.labels : rawOff.rels, key = b.dataset.label || b.dataset.rel;
+  set.has(key) ? set.delete(key) : set.add(key); renderRaw(); };
+$("rawsel").onchange = () => loadRaw();
+$("gsource").onclick = async e => { const b = e.target.closest("button"); if (!b || b.dataset.s === source) return; source = b.dataset.s;
+  document.querySelectorAll("#gsource button").forEach(x => x.classList.toggle("on", x === b));
+  $("rawpick").hidden = $("gpanel").hidden = source !== "raw"; $("gtip").hidden = true; shape = "";
+  $("gsub").textContent = source === "raw" ? "Any graph in this FalkorDB, as stored. Toggle labels and relationships; hover or click a node to see what it holds."
+    : "Your code as FalkorDB stores it, coloured by kind. A ring shows which agent holds it.";
+  if (source === "raw") { await loadGraphList(); await loadRaw(); } else { renderGraph(); renderGside(); } };
+
 // ---------------------------------------------------------------- facts
 function renderFacts() {
   $("facts").innerHTML = facts.map(f => `<div class="fact"><div class="meta"><span class="tag ${f.status === "source-checked" ? "t-go" : f.status === "extracted" ? "t-hand" : "t-block"}">${esc(f.status === "unverified" ? "unverified" : f.status)}</span>
@@ -355,13 +450,14 @@ async function refreshState() {
 }
 function render(fresh = false) {
   state = rebuild(live ? events.length : cursor);
-  renderOverview(fresh); renderSpark(); renderGraph(); if (!document.querySelector("#gside .kv")) renderGside();
+  renderOverview(fresh); renderSpark(); renderGraph(); if (source === "code" && !document.querySelector("#gside .kv, #gside .props")) renderGside();
   $("mode").textContent = live ? "live" : `${cursor} / ${events.length}`;
   $("dot").classList.toggle("on", live && !!es);
 }
 async function connect() {
   if (es) es.close();
   $("crumb-ws").textContent = ws || "–"; $("ws-avatar").textContent = (ws[0] || "N").toUpperCase(); shape = ""; selCall = null;
+  if (source === "raw") { $("rawsel").value = `ws:${ws}`; loadGraphList().then(loadRaw); }
   events = await (await fetch(`/api/events?ws=${q(ws)}`)).json();
   $("slider").max = events.length; $("slider").value = cursor = events.length; live = true;
   await refreshState(); render(); refreshServer(); refreshCalls();

@@ -144,6 +144,22 @@ details pre{border:0;border-top:1px solid var(--line);border-radius:0 0 6px 6px}
   background:radial-gradient(circle at 1px 1px,#1e1e23 1px,transparent 0) 0 0/24px 24px,#0e0e10}
 falkordb-canvas{display:block;width:100%;height:100%}
 .gside{overflow:auto;padding:20px 22px}
+.gsel{position:relative}.gsel select{appearance:none;background:var(--panel);border:1px solid var(--line2);border-radius:6px;padding:7px 30px 7px 12px;
+  font:13px var(--mono);color:var(--ink);cursor:pointer;max-width:280px}
+.gsel:after{content:"";position:absolute;right:12px;top:15px;border:4px solid transparent;border-top-color:var(--ink2);pointer-events:none}
+.gpanel{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:8px;width:190px;max-height:calc(100% - 28px);overflow:auto}
+.gpanel .box{background:rgba(17,17,19,.92);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+.gpanel .box .label{display:block;margin-bottom:8px}
+.toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:3px 2px;cursor:pointer;font-size:12.5px;color:var(--ink);text-align:left}
+.toggle i{width:11px;height:11px;border-radius:50%;flex:none}.toggle.rel i{border-radius:2px;height:4px}
+.toggle small{margin-left:auto;color:var(--ink3);font:11.5px var(--mono)}.toggle.off{opacity:.38}
+.gtip{position:absolute;pointer-events:none;z-index:5;background:#141417;border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
+  max-width:340px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.gtip .lbls{display:flex;gap:6px;margin-bottom:6px}.gtip .lbl{font:11px var(--mono);border-radius:4px;padding:2px 6px;color:#111}
+.gtip .row{display:flex;gap:10px;padding:2px 0}.gtip .row span:first-child{color:var(--ink3);font-family:var(--mono);min-width:76px}
+.gtip .row span:last-child{color:var(--ink);word-break:break-word}
+.props .row{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.props .row span:first-child{color:var(--ink3);font-family:var(--mono);font-size:12px}.props .row span:last-child{word-break:break-word}
 .gempty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
 .facts .fact{padding:16px 20px;border-top:1px solid var(--line)}.facts .fact:first-child{border-top:0}
 .fact .meta{display:flex;gap:10px;align-items:center;color:var(--ink3);font-size:12.5px;margin-bottom:6px}
@@ -221,14 +237,17 @@ falkordb-canvas{display:block;width:100%;height:100%}
     </section>
 
     <section class="view" id="v-graph">
-      <h1>Graph</h1><p class="sub">Your code as FalkorDB stores it, coloured by kind. A ring shows which agent holds it.</p>
+      <h1>Graph</h1><p class="sub" id="gsub">Your code as FalkorDB stores it, coloured by kind. A ring shows which agent holds it.</p>
       <div class="gtools">
+        <div class="tabs" id="gsource"><button data-s="code" class="on">Code map</button><button data-s="raw">Raw graph</button></div>
+        <label class="gsel" id="rawpick" hidden><select id="rawsel" aria-label="Graph"></select></label>
         <div class="tabs" id="layout"><button data-l="force" class="on">Force</button><button data-l="tree">Tree</button><button data-l="radial">Radial</button></div>
         <button class="btn" id="fit">Fit</button>
         <div class="legend" id="legend"></div>
       </div>
       <div class="gwrap">
-        <div class="gstage"><falkordb-canvas id="canvas"></falkordb-canvas><div class="gempty" id="gempty" hidden></div></div>
+        <div class="gstage"><falkordb-canvas id="canvas"></falkordb-canvas><div class="gempty" id="gempty" hidden></div>
+          <div class="gpanel" id="gpanel" hidden></div><div class="gtip" id="gtip" hidden></div></div>
         <div class="card gside" id="gside"></div>
       </div>
     </section>
