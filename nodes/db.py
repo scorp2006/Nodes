@@ -44,6 +44,7 @@ class Store:
             self._try_cmd("GRAPH.CONSTRAINT", "CREATE", self.g.name, "UNIQUE", "NODE", label, "PROPERTIES", 1, "uid")
         for label, prop in EXTRA_INDEXES:
             self._try(f"CREATE INDEX FOR (n:{label}) ON (n.{prop})")
+        self._try("CALL db.idx.fulltext.createNodeIndex('Fact', 'text')")  # context_for searches fact text
         for label, prop in MANDATORY:
             self._try_cmd("GRAPH.CONSTRAINT", "CREATE", self.g.name, "MANDATORY", "NODE", label, "PROPERTIES", 1, prop)
         for _ in range(100):

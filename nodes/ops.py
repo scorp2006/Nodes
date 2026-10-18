@@ -294,6 +294,13 @@ def post_fact(store, sess: dict, text: str, source_ref: dict, root: Path | None 
 
 # ------------------------------------------------------------------ coordinate -------
 
+def waiters_on(store, owner_sid: str, units: list[str]) -> list[str]:
+    """Agents deferred on any of these units (their WAITS_FOR edge names the unit): told the moment it frees."""
+    return [r[0] for r in store.q("coord.waiters", "MATCH (x:Session)-[w:WAITS_FOR]->(:Session {uid: $o}) "
+                                  "WHERE w.unit IN $u RETURN DISTINCT x.name", {"o": owner_sid, "u": units}, ro=True)
+            ] if units else []
+
+
 def coordinate(store, sess: dict, op: str, target: str = "", text: str = "") -> dict:
     me, name = sess["session"], sess["name"]
     if op == "done":
@@ -312,7 +319,7 @@ def coordinate(store, sess: dict, op: str, target: str = "", text: str = "") -> 
         rel = [r[0] for r in store.q("coord.release", """
             MATCH (u:Unit {lease_owner: $me}) WHERE size($u) = 0 OR u.uid IN $u
             SET u.lease_owner = NULL, u.lease_expires = NULL RETURN u.uid""", {"me": me, "u": uids})]
-        store.event("release", name, units=rel)
+        store.event("release", name, units=rel, notify=waiters_on(store, me, rel))
         return envelope({"released": rel}, "Released.")
     if op in ("request", "commit_to"):
         rid = f"{'req' if op == 'request' else 'commit'}:{uuid.uuid4().hex[:10]}"
@@ -354,13 +361,26 @@ def digest(store, sess: dict) -> dict:
             "facts": [{"by": a, "text": t, "status": s, "source": src} for a, t, s, src in facts]}
 
 
+def _fulltext(query: str) -> str:
+    """Words of the query as a RediSearch OR query; syntax characters dropped so user text can't break it."""
+    words = [w for w in re.findall(r"\w+", query or "") if len(w) > 1][:12]
+    return " | ".join(words)
+
+
 def context_for(store, sess: dict, query: str, budget: int = 1500) -> dict:
     units = store.q("read.context_units", """
         MATCH (u:Unit) WHERE u.kind <> 'file' AND (u.uid CONTAINS $q OR u.path CONTAINS $q OR u.symbol CONTAINS $q)
         OPTIONAL MATCH (o:Session {uid: u.lease_owner})
         RETURN u.uid, u.kind, o.name, u.lease_expires LIMIT 25""", {"q": query}, ro=True)
+    matching = store.q("read.context_facts", """
+        CALL db.idx.fulltext.queryNodes('Fact', $q) YIELD node, score
+        OPTIONAL MATCH (s:Session)-[:ASSERTED]->(node)
+        RETURN s.name, node.text, node.status, node.source_uid, score ORDER BY score DESC LIMIT 10""",
+                       {"q": _fulltext(query)}, ro=True) if _fulltext(query) else []
     data = digest(store, sess) | {"units": [{"uid": u, "kind": k, "owner": o if (x or 0) >= now_ms() else None}
                                             for u, k, o, x in units],
+                                  "facts_matching": [{"by": a, "text": t, "status": s, "source": src}
+                                                     for a, t, s, src, _ in matching],
                                   "recent": store.events(15)}
     return envelope(data, "Declare what you will change with declare_intent, then call before_acting before editing.",
                     sources=[{"kind": "fact", "ref": f["source"], "status": f["status"]} for f in data["facts"]],

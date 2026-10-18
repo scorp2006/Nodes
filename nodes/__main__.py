@@ -77,9 +77,11 @@ def cmd_up(a):
     run(Registry(a.db_host, a.db_port, Path(a.trace_dir)), a.profile, a.host, a.port, server_token=token if lan else "")
 
 
-def config_files(port: int, lan: bool = False) -> tuple[dict, dict]:
+def config_files(port: int, lan: bool = False, fail_mode: str = "closed") -> tuple[dict, dict]:
     """MCP + hook config. Local mode needs no token: hooks carry session/agent ids and the server routes by the git
-    root of cwd. LAN mode adds the server token (from NODES_SERVER_TOKEN) to every request."""
+    root of cwd. LAN mode adds the server token (from NODES_SERVER_TOKEN) to every request.
+    fail_mode 'closed' (default): if the server can't be reached, the gated tools (Edit/Write/MultiEdit/Bash and the
+    Nodes tools) are blocked (`onFailure: block`); 'open': they go ahead ungated (Claude Code's default)."""
     base = f"http://127.0.0.1:{port}"
     auth = {"headers": {"Authorization": "Bearer $NODES_SERVER_TOKEN"}, "allowedEnvVars": ["NODES_SERVER_TOKEN"]} \
         if lan else {}
@@ -89,6 +91,8 @@ def config_files(port: int, lan: bool = False) -> tuple[dict, dict]:
              + ('-H "Authorization: Bearer $NODES_SERVER_TOKEN" ' if lan else "")
              + f'--data-binary @- {base}/hooks/session-start')
 
+    on_fail = "block" if fail_mode == "closed" else "continue"
+
     def http(path, timeout, **extra):
         return {"type": "http", "url": f"{base}/hooks/{path}", "timeout": timeout, **auth, **extra}
     settings = {
@@ -97,9 +101,9 @@ def config_files(port: int, lan: bool = False) -> tuple[dict, dict]:
         "hooks": {
             "SessionStart": [{"hooks": [{"type": "command", "command": start, "timeout": 15}]}],
             # Nodes tools first: the hook stamps the caller (session, subagent, cwd) into the call
-            "PreToolUse": [{"matcher": "mcp__nodes__.*", "hooks": [http("pre-tool-use", 10)]},
+            "PreToolUse": [{"matcher": "mcp__nodes__.*", "hooks": [http("pre-tool-use", 10, onFailure=on_fail)]},
                            {"matcher": "Edit|Write|MultiEdit|Bash",
-                            "hooks": [http("pre-tool-use", 15, onFailure="continue")]}],
+                            "hooks": [http("pre-tool-use", 15, onFailure=on_fail)]}],
             "PostToolUse": [{"matcher": "Edit|Write|MultiEdit", "hooks": [http("post-tool-use", 30)]}],
             "SubagentStart": [{"hooks": [http("subagent-start", 5)]}],
             "SubagentStop": [{"hooks": [http("subagent-stop", 5)]}],
@@ -110,17 +114,26 @@ def config_files(port: int, lan: bool = False) -> tuple[dict, dict]:
     return mcp, settings
 
 
-def write_config(target: Path, port: int, lan: bool = False) -> None:
-    mcp, settings = config_files(port, lan)
+def plugin_files(port: int = 8780) -> tuple[dict, dict]:
+    """The Claude Code plugin (plugin/): the same hooks and MCP server as `nodes init`, except PreToolUse runs
+    hooks/gate.sh, which fails closed only in repos that ran `nodes init` (a user-scope plugin sees every repo)."""
+    mcp, settings = config_files(port, fail_mode="open")
+    gate = {"type": "command", "command": 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/gate.sh"', "timeout": 20}
+    settings["hooks"]["PreToolUse"] = [{"matcher": m["matcher"], "hooks": [gate]} for m in settings["hooks"]["PreToolUse"]]
+    return {"hooks": settings["hooks"]}, mcp
+
+
+def write_config(target: Path, port: int, lan: bool = False, fail_mode: str = "closed") -> None:
+    mcp, settings = config_files(port, lan, fail_mode)
     (target / ".mcp.json").write_text(json.dumps(mcp, indent=2), encoding="utf-8")
     (target / ".claude").mkdir(exist_ok=True)
     (target / ".claude" / "settings.json").write_text(json.dumps(settings, indent=2), encoding="utf-8")
 
 
-def write_user_config(port: int, lan: bool = False, settings_path: Path | None = None) -> str:
+def write_user_config(port: int, lan: bool = False, settings_path: Path | None = None, fail_mode: str = "closed") -> str:
     """User scope: merge the hooks into ~/.claude/settings.json and register the MCP server for every project.
     Sessions in repos that were never `nodes init`-ed are ignored by the server (nothing is stored)."""
-    mcp, settings = config_files(port, lan)
+    mcp, settings = config_files(port, lan, fail_mode)
     path = settings_path or Path.home() / ".claude" / "settings.json"
     cur = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
     cur.setdefault("hooks", {}).update(settings["hooks"])
@@ -165,7 +178,11 @@ def cmd_init(a):
         add = [x for x in (".nodes/", ".mcp.json", ".claude/settings.json") if x not in have.split()]
         if add:
             excl.write_text(have.rstrip("\n") + "\n" + "\n".join(add) + "\n", encoding="utf-8")
-    where = write_user_config(a.port, a.lan) if a.scope == "user" else (write_config(repo, a.port, a.lan) or str(repo))
+        # marker in the shared git dir (every worktree sees it): the plugin's gate fails closed only here
+        (Path(common) / "nodes.json").write_text(json.dumps({"workspace": ws, "port": a.port,
+                                                             "fail_mode": a.fail_mode}), encoding="utf-8")
+    where = (write_user_config(a.port, a.lan, fail_mode=a.fail_mode) if a.scope == "user"
+             else (write_config(repo, a.port, a.lan, a.fail_mode) or str(repo)))
     print(json.dumps({"workspace": ws, "seconds": round(time.perf_counter() - t0, 2), "index": stats, "git": gstats,
                       "config": f"{a.scope} scope -> {where}", "tokens": str(tok_file)}, indent=1))
 
@@ -258,6 +275,8 @@ def main():
     i.add_argument("--agents", type=int, default=2, help="agent tokens to mint for clients without hooks")
     i.add_argument("--fresh", action="store_true", help="wipe the workspace graph first (default: incremental)")
     i.add_argument("--no-git", action="store_true")
+    i.add_argument("--fail-mode", choices=["closed", "open"], default="closed",
+                   help="server unreachable: block gated tools (closed, default) or let them run ungated (open)")
     i.add_argument("--lan", action="store_true", help="config for a server bound beyond localhost (token required)")
     i.add_argument("--workspace")
     i.add_argument("--team-size", type=int, default=2)

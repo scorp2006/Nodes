@@ -36,9 +36,38 @@ Then open Claude Code in the repo **interactively once** and:
 After that, every Claude Code session and subagent in that repo is tracked with no login or token step.
 Open `http://127.0.0.1:8780` to watch.
 
+### What is gated, and what happens when the server is down
+
+Every Edit / Write / MultiEdit, and every Bash command that writes a source file, asks Nodes first. Bash writes
+that are recognised: redirections (`>`, `>>`, `&>`), `tee`, `sed -i`, `perl -i`, `cp` / `mv` / `install` onto a
+file, `git checkout -- <paths>` / `git restore <paths>`, and `python` / `node` / `ruby` `-c`/`-e` or heredoc
+scripts whose code writes a file it names. A script that writes files without naming them (paths in variables,
+`eval`, another script file) can't be gated; the agent is told so and pointed at Edit/Write.
+
+After a write lands, Nodes checks that the writer still holds the lease at the epoch its gate granted. A write
+after the lease was released, handed on, or after the writer called `done` is reported back as `STALE_EPOCH`.
+An agent told to wait (DEFER) is notified the moment the lease frees (done, release, or the owner's session
+ending); `status(wait_seconds=60)` blocks on that notification instead of polling.
+
+**Fail mode: closed by default.** If the Nodes server can't be reached, the gated tools are blocked
+(`onFailure: "block"`, Claude Code 2.1.295 or later) until you start it again. `nodes init --fail-mode open`
+lets them run ungated instead. Repos that were never `init`-ed are never blocked.
+
 Options: `--scope user` writes the hooks to `~/.claude/settings.json` and registers the server with
 `claude mcp add --scope user` instead (repos that were never `init`-ed are ignored). `--fresh` wipes the
 workspace graph first. `--no-git` skips the history import.
+
+## As a Claude Code plugin (instead of per-repo config)
+
+```bash
+claude plugin marketplace add C:/path/to/nodes      # or owner/repo once it is on GitHub
+claude plugin install nodes@nodes
+```
+
+The plugin carries the same hooks and MCP server as `nodes init` writes, for every project. You still run
+`nodes init` once per repo (it indexes the code and marks the repo); the plugin's gate fails closed only in
+repos marked that way, so an unrelated project is never blocked when the server is down. The plugin expects
+the server on `http://127.0.0.1:8780` (the default of `nodes up`).
 
 ## Replay a recorded run (no agents, no LLM)
 

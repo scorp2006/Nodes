@@ -163,7 +163,7 @@ def test_mcp_requires_a_bearer_token_and_hooks_deny_on_defer(ws, tmp_path):
             f"'nodes', '127.0.0.1', {port})")
     proc = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        for _ in range(50):
+        for _ in range(150):  # up to 30 s: imports are slow when the machine is busy
             try:
                 urllib.request.urlopen(f"http://127.0.0.1:{port}/api/state?ws={st.ws}")
                 break
@@ -210,9 +210,9 @@ def test_lan_mode_requires_the_token_on_every_endpoint(tmp_path):
                 return urllib.request.urlopen(req).status
             except urllib.error.HTTPError as e:
                 return e.code
-            except urllib.error.URLError:
-                return 0  # not listening yet
-        for _ in range(50):
+            except (urllib.error.URLError, OSError):
+                return 0  # not listening yet (refused or reset while starting)
+        for _ in range(150):  # up to 30 s: imports are slow when the machine is busy
             if get("/") in (200, 401):
                 break
             time.sleep(0.2)

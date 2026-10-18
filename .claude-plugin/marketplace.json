@@ -1,0 +1,13 @@
+{
+  "name": "nodes",
+  "owner": {
+    "name": "scorp2006"
+  },
+  "plugins": [
+    {
+      "name": "nodes",
+      "source": "./plugin",
+      "description": "Nodes hooks + MCP server for Claude Code"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "nodes",
+  "version": "1.0.0",
+  "description": "Coordinate parallel coding agents through a shared code graph: leases, hand-offs and source-checked facts. Needs a running `python -m nodes up` and `nodes init` in each repo.",
+  "author": {
+    "name": "scorp2006"
+  },
+  "keywords": [
+    "coordination",
+    "multi-agent",
+    "falkordb"
+  ]
+}
