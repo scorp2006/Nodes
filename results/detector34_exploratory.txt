@@ -1,0 +1,9 @@
+primary rows: 51, failures: 14
+
+1. failure type by whether both patches edit >= 1 function:
+  both edit functions = True: n = 24, failures = 2, {'no failure': 22, 'conflicts': 2}
+  both edit functions = False: n = 27, failures = 12, {'no failure': 15, 'conflicts': 12}
+
+2. line-level overlap (EXPLORATORY, hypothesis from 4 case studies):
+  changed lines within 0 of each other in a shared file: AUC 1.000 [95% CI 1.000-1.000], precision 14.0/14, recall 14.0/14
+  changed lines within 3 of each other in a shared file: AUC 0.919 [95% CI 0.855-0.974], precision 14.0/20, recall 14.0/14
