@@ -73,3 +73,20 @@ Static results (`results/detector3_static.jsonl`, edit sets only, no outcomes):
   secondary subset: disjoint pairs where **both** patches edit at least one mapped function (29 heavy pairs,
   plus the light v2 rows that meet the same criterion), reported pooled.
 - **The primary analysis is unchanged.** All tests run in the same seeded order as pre-registered.
+
+## Amendment 2 (committed at 09:58 IST, after 19 of 109 pairs had run, before any score was viewed)
+- **Why.** At about 10 minutes per outlines pair, the pre-registered order would leave most of the pairs that can
+  test the graph untested at the cut-off.
+- **The new criterion is structural and outcome-blind.** A pair qualifies if both patches edit at least one
+  function in the graph, so it can test a call path (the amendment 1 subset; 29 pairs, from the static filter
+  alone). The 21 qualifying pairs not yet run go first, then the remaining non-qualifying pairs.
+- **Order and limits are otherwise unchanged.** Within each group: repos in seeded random order
+  (`random.Random(20261025)`), pairs shuffled within each repo by the same generator, one heavy repo at a time,
+  at most 2 containers. The cut-off (12:30 IST), the definitions and the analyses are unchanged.
+- **What had been viewed so far.** From `results/detector3_gt.jsonl`: only task, pair, finish time, and whether
+  an infrastructure error occurred (0 so far). No eligibility, merge status, interaction failure or predictor
+  score had been read, and the scorer had not run.
+- **Caveat on the pooled light rows.** They are v2's already-published results, so their scores were known
+  before v3. That pooling was part of the original pre-registration.
+- **Restart.** The run was stopped to reorder. Two pairs that were in progress were discarded unrecorded, and
+  they rerun in their new place in the order.

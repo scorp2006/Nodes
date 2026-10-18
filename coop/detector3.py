@@ -73,13 +73,18 @@ def gt(workers: int = 2):
     todo = [r for r in rows if r.get("disjoint")]
     done = {(r["repo"], r["task"], tuple(r["pair"])) for r in map(json.loads, GT.read_text(encoding="utf-8").splitlines())} \
         if GT.exists() else set()
-    rng = random.Random(20261025)
-    repos = sorted({r["repo"] for r in todo})
-    rng.shuffle(repos)
     total = len(todo)
-    for repo in repos:  # one heavy repo at a time
-        pairs = [r for r in todo if r["repo"] == repo]
-        rng.shuffle(pairs)
+    # Amendment 2: pairs where both patches edit a mapped function (structural, outcome-blind) run first
+    groups = []
+    for group in ([r for r in todo if all(r["funcs"])], [r for r in todo if not all(r["funcs"])]):
+        rng = random.Random(20261025)
+        repos = sorted({r["repo"] for r in group})
+        rng.shuffle(repos)
+        for repo in repos:
+            pairs = [r for r in group if r["repo"] == repo]
+            rng.shuffle(pairs)
+            groups.append((repo, pairs))
+    for repo, pairs in groups:  # one heavy repo at a time
         pairs = [r for r in pairs if (r["repo"], r["task"], tuple(r["pair"])) not in done]
         for task in sorted({r["task"] for r in pairs}):  # pull only the images needed
             image = "akhatua/cooperbench-" + repo.replace("_task", "").replace("_", "-") + f":task{task}"
