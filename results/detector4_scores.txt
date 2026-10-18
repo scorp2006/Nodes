@@ -1,0 +1,19 @@
+coverage status by task: {'pallets_jinja_task/1559': 'ok', 'pallets_jinja_task/1621': 'ok', 'dottxt_ai_outlines_task/1655': 'coverage unavailable (no test mapped)', 'dottxt_ai_outlines_task/1706': 'coverage unavailable (no test mapped)', 'dspy_task/8635': 'coverage unavailable (no test mapped)', 'huggingface_datasets_task/3997': 'coverage unavailable (no test mapped)'}
+
+PRIMARY: eligible disjoint pairs, pooled (same rows as v3 primary): n = 51, interaction failures = 14
+  same_fn  AUC 0.500   flag precision n/a (nothing flagged)   recall 0.00 (0/14)
+  cov      AUC 0.303   vs same_fn: -0.197 [95% CI -0.311 to -0.067]   flag precision 0.10 (2/21)   recall 0.14 (2/14)
+  cc       AUC 0.486   vs same_fn: -0.014 [95% CI -0.043 to +0.000]   flag precision 0.00 (0/1)   recall 0.00 (0/14)
+  risk     AUC 0.288   vs same_fn: -0.212 [95% CI -0.324 to -0.084]   flag precision 0.00 (0/7)   recall 0.00 (0/14)
+
+SECONDARY: pooled, tasks with coverage only: n = 34, interaction failures = 4   [fewer than 10 failures: descriptive only]
+  same_fn  AUC 0.500   flag precision n/a (nothing flagged)   recall 0.00 (0/4)
+  cov      AUC 0.383   vs same_fn: -0.117 [95% CI -0.355 to +0.188]   flag precision 0.10 (2/21)   recall 0.50 (2/4)
+  cc       AUC 0.500   vs same_fn: +0.000 [95% CI +0.000 to +0.000]   flag precision n/a (nothing flagged)   recall 0.00 (0/4)
+  risk     AUC 0.383   vs same_fn: -0.117 [95% CI -0.355 to +0.188]   flag precision 0.00 (0/6)   recall 0.00 (0/4)
+
+SECONDARY: pooled, both patches edit >= 1 mapped function: n = 24, interaction failures = 2   [fewer than 10 failures: descriptive only]
+  same_fn  AUC 0.500   flag precision n/a (nothing flagged)   recall 0.00 (0/2)
+  cov      AUC 0.432   vs same_fn: -0.068 [95% CI -0.326 to +0.217]   flag precision 0.10 (2/21)   recall 1.00 (2/2)
+  cc       AUC 0.477   vs same_fn: -0.023 [95% CI -0.071 to +0.000]   flag precision 0.00 (0/1)   recall 0.00 (0/2)
+  risk     AUC 0.386   vs same_fn: -0.114 [95% CI -0.364 to +0.174]   flag precision 0.00 (0/7)   recall 0.00 (0/2)
