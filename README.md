@@ -63,13 +63,31 @@ Checks:
 
 **dev** (20 tasks, used to build the board): board 13/20 vs baseline 2/20 (`results/dev1_summary.txt`).
 
-### 2. Two coding agents on one repo (CooperBench): pending
-A pre-registered blind batch is running:
-- design: `results/preregistration_cb1b.md`;
-- 135 runs, Claude Sonnet, light Python repos;
-- conditions: graph-coordinated vs the same procedure over chat vs plain coop.
+### 2. Two coding agents on one repo (CooperBench): their work combines far more often. Pre-registered, blind.
+The set-up:
+- 45 feature pairs from light Python repos (click, jinja, dirty-equals); Claude Sonnet, low effort.
+- One run per pair per condition; 0 infrastructure failures.
+- Three conditions:
+  - CooperBench's own chat (coop);
+  - our claim / hand-off procedure carried out over chat (protocol);
+  - the same procedure through the shared graph.
 
-Results will be added here after the single pre-registered analysis.
+| condition | merge success | both features pass |
+|---|---|---|
+| coop | 19/45 | 16/45 |
+| protocol (same procedure, chat) | 22/45 | 16/45 |
+| **graph** | **35/45** | **23/45** |
+
+- **Graph vs protocol, merge success:** better on 14 pairs, worse on 1, Holm p = 0.002.
+- **Graph vs coop, merge success:** better on 17, worse on 1, Holm p = 0.0003.
+- **Pass is not significant:** graph vs protocol p = 0.092, vs coop p = 0.118. Graph is ahead, but we don't
+  claim it.
+
+The procedure alone, over chat, barely helps (22 vs 19). The gain comes from the graph's atomic ownership and
+server-side state. No "identical" merge is empty (exploratory check).
+
+Sources: `results/cb1b_report.md`, `results/cb1b_primary.txt`; independent recompute
+`verify/cb1b_breakdown.py`.
 
 A note on comparing with published conflict rates: the published "no conflicts" figures used an older merge
 policy with a union fallback. Under the current evaluator, the same published patches conflict (5/5;
@@ -159,7 +177,7 @@ Tests: `python -m pytest nodes/test_nodes.py`.
   failures (result 3).
 - **The HiddenBench result is narrow.** One model (Haiku) and one benchmark. The board costs about 2× the
   output tokens. Two of five case studies are losses.
-- **The CooperBench result is not in yet.**
+- **The CooperBench result is narrow.** One run per pair, light repos only, one model at low effort. Merge success is significant; passing both features is not.
 
 ## Credits and AI use
 - HiddenBench (MIT) and CooperBench (MIT) are used as benchmarks, unmodified; they are cloned locally into `external/` and not redistributed here.

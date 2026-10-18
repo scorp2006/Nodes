@@ -1,0 +1,17 @@
+pairs: 45
+
+1. recompute of the pre-registered tests (raw p; Holm within each family of 2):
+  graph vs protocol on coordinated: better 14, worse 1, raw p = 0.0010, Holm p = 0.0020
+  graph vs protocol on pass: better 10, worse 3, raw p = 0.0923, Holm p = 0.0923
+  graph vs coop on coordinated: better 17, worse 1, raw p = 0.0001, Holm p = 0.0003
+  graph vs coop on pass: better 11, worse 4, raw p = 0.1185, Holm p = 0.1185
+
+2. merge status per condition (EXPLORATORY):
+  coop      {'conflicts': 26, 'clean': 19}   identical-but-empty: 0
+  protocol  {'conflicts': 23, 'clean': 20, 'identical': 2}   identical-but-empty: 0
+  graph     {'identical': 19, 'clean': 16, 'conflicts': 10}   identical-but-empty: 0
+
+3. per-feature pass, and pass by coordination (EXPLORATORY):
+  coop      feature1 passed 17/45, feature2 passed 18/45;  both passed: 14/19 when coordinated, 2/26 when not
+  protocol  feature1 passed 20/45, feature2 passed 18/45;  both passed: 14/22 when coordinated, 2/23 when not
+  graph     feature1 passed 31/45, feature2 passed 26/45;  both passed: 22/35 when coordinated, 1/10 when not
