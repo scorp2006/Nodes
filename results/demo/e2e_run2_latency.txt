@@ -1,0 +1,10 @@
+live demo run 2 (two Claude Code agents), server-side time per call, from .nodes/traces/shop.trace.jsonl
+  hook:post-tool-use           n= 13  p50   14.5 ms  p99   27.2 ms
+  hook:pre-tool-use            n= 19  p50   14.8 ms  p99  122.0 ms
+  hook:session-end             n=  2  p50    1.8 ms  p99    1.9 ms
+  hook:session-start           n=  2  p50   20.5 ms  p99   22.6 ms
+  hook:stop                    n=  2  p50    1.8 ms  p99    2.2 ms
+  tool:nodes:coordinate        n=  2  p50    2.1 ms  p99    2.2 ms
+  tool:nodes:declare_intent    n=  2  p50   14.5 ms  p99   19.5 ms
+  tool:nodes:status            n=  3  p50    3.8 ms  p99    4.6 ms
+  all FalkorDB queries inside those calls: n=212  p50 1.31 ms  p99 7.43 ms
