@@ -28,6 +28,17 @@ def git_common_dir(cwd: str) -> str:
         return ""
 
 
+@functools.lru_cache(maxsize=512)
+def branch_of(cwd: str) -> str:
+    """The checked-out branch, used to name a session; '' on the default branch or a detached HEAD."""
+    try:
+        out = subprocess.run(["git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True,
+                             timeout=5).stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return "" if out in ("", "HEAD", "main", "master") else out
+
+
 def workspace_for_cwd(r, cwd: str) -> str | None:
     common = git_common_dir(cwd) if cwd else ""
     if not common:
@@ -48,7 +59,8 @@ def session_for_hook(reg, body: dict) -> dict | None:
         return None
     agent_id, agent_type = body.get("agent_id") or "", body.get("agent_type") or ""
     uid = f"cc:{sid}" + (f":{agent_id}" if agent_id else "")
-    name = (agent_type or "main") + "-" + sid[:6] + (f"-{agent_id[:4]}" if agent_id else "")
+    main = branch_of(cwd) or "main-" + sid[:6]  # a session in worktree branch `alice` shows as alice
+    name = f"{agent_type or 'agent'}-{sid[:6]}-{agent_id[:4]}" if agent_id else main
     store = reg.store(ws)
     # Session.principal is MANDATORY and FalkorDB checks it when the node is created (before ON CREATE SET),
     # so each Session is created with all its properties at once.
@@ -65,6 +77,6 @@ def session_for_hook(reg, body: dict) -> dict | None:
         WITH p MATCH (s:Session {uid: $uid}) SET s.last_heartbeat = $now
         WITH s OPTIONAL MATCH (m:Session {uid: $parent})
         FOREACH (_ IN CASE WHEN m IS NULL THEN [] ELSE [1] END | MERGE (m)-[:SPAWNED]->(s))""",
-            {"pid": f"claude-session:{sid}", "pname": "main-" + sid[:6], "uid": uid, "name": name, "now": ops.now_ms(),
+            {"pid": f"claude-session:{sid}", "pname": main, "uid": uid, "name": name, "now": ops.now_ms(),
              "atype": agent_type, "cwd": cwd, "parent": f"cc:{sid}" if agent_id else ""})
     return {"session": uid, "name": name, "ws": ws}

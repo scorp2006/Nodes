@@ -1,4 +1,4 @@
-# Open two Claude Code sessions (alice, bob), each in its own worktree with its own Nodes token, plus the dashboard
+# Open two Claude Code sessions (alice, bob), each in its own worktree (the hooks identify them, no token), plus the dashboard
 # and a live event log. Run demo/setup_demo.py first.
 #   powershell -File demo/start_agents.ps1 [-Dir $HOME\nodes-demo] [-Port 8780]
 param([string]$Dir = "$HOME\nodes-demo", [int]$Port = 8780)
@@ -8,11 +8,10 @@ $nodesRepo = Split-Path -Parent $PSScriptRoot
 foreach ($name in "alice", "bob") {
     $a = $agents.$name
     $script = Join-Path $Dir "start_$name.ps1"
-    # The prompt goes through a file so quoting can't break it; the token stays in this process's environment.
+    # The prompt goes through a file so quoting can't break it.
     $promptFile = Join-Path $Dir "prompt_$name.txt"
     Set-Content -Path $promptFile -Value $a.prompt -Encoding utf8
     @"
-`$env:NODES_TOKEN = '$($a.token)'
 Set-Location '$($a.worktree)'
 `$Host.UI.RawUI.WindowTitle = 'Nodes demo: $name'
 claude (Get-Content '$promptFile' -Raw)

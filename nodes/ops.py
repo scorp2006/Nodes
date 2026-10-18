@@ -61,7 +61,8 @@ def join(store, name: str, task: str = "", client: str = "", worktree: str = "",
         """, {"pid": f"agent:{name}", "name": name, "sid": sid, "task": task, "client": client, "wt": worktree,
               "br": branch, "th": h(token, 64), "now": now_ms()})
     store.r.hset("nodes:tokens", h(token, 64), json.dumps({"ws": store.ws, "session": sid, "name": name}))
-    store.event("join", name, session=sid, task=task)
+    if client != "token":  # tokens minted ahead by `nodes init` are not agents yet
+        store.event("join", name, session=sid, task=task)
     return token, sid
 
 

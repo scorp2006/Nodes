@@ -1,7 +1,7 @@
 """End-to-end check of the demo with two real headless Claude Code agents running at the same time.
 
-Each agent runs `claude -p` in its own worktree with its own NODES_TOKEN, so it loads the same .mcp.json and hooks
-as an interactive session. Afterwards we check, from the graph and from git:
+Each agent runs `claude -p` in its own worktree (branch alice / bob), so it loads the same .mcp.json and hooks
+as an interactive session; the hooks identify it, no token. Afterwards we check, from the graph and from git:
   - which gate decisions happened (we expect the second agent to be deferred, then handed off)
   - both branches committed, both features present after merging, and the merged tree's tests pass
 Uses the person's Claude login (model and effort below). Run setup_demo.py first; needs `python -m nodes up`.
@@ -34,7 +34,7 @@ def main():
     procs = {}
     t0 = time.time()
     for name, info in agents.items():
-        env = os.environ | {"NODES_TOKEN": info["token"]}
+        env = dict(os.environ)
         env.pop("ANTHROPIC_API_KEY", None)
         log = open(base / f"{name}.claude.json", "w", encoding="utf-8")
         procs[name] = (subprocess.Popen(["claude", "-p", "--output-format", "json", "--model", a.model, "--effort",

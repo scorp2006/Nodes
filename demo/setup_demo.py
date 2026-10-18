@@ -1,5 +1,5 @@
 """Set up the two-agent demo: a fresh `shop` git repo, a venv with pytest, the Nodes workspace, and one git worktree +
-bearer token + launcher per agent. Needs a running server: `python -m nodes up` (port 8780).
+launcher per agent. Needs a running server: `python -m nodes up` (port 8780).
 
   python demo/setup_demo.py [--dir PATH] [--port 8780]
 Then: demo/start_agents.ps1 (two Claude Code windows) or `python demo/e2e_test.py` (headless, scripted check).
@@ -58,15 +58,18 @@ def main():
     subprocess.run([str(py), "-m", "pip", "install", "-q", "pytest"], check=True)
     nodes = [sys.executable, "-m", "nodes"]
     print(run(*nodes, "init", "--repo", str(repo), "--package", "src/shop", "--workspace", "shop",
-              "--port", str(a.port), cwd=NODES))
+              "--fresh", "--port", str(a.port), cwd=NODES))
     launch = {}
     for agent, task in AGENTS.items():
-        token = run(*nodes, "join", "--workspace", "shop", "--agent", agent, "--task", task, "--worktree",
-                    str(base / agent), "--branch", agent, "--quiet", cwd=NODES).splitlines()[-1]
+        # v1: no token. The hooks identify each Claude Code session; the worktree's branch names it on the dashboard
+        run("git", "worktree", "add", "-q", "-b", agent, str(base / agent), cwd=repo)
+        for f in (".mcp.json", ".claude/settings.json"):
+            (base / agent / f).parent.mkdir(exist_ok=True)
+            shutil.copyfile(repo / f, base / agent / f)
         for f in ("user.name", "user.email"):
             run("git", "config", f, agent if f == "user.name" else f"{agent}@example.com", cwd=base / agent)
         prompt = PROMPT.format(agent=agent, task=task, python=py.as_posix())
-        launch[agent] = {"token": token, "worktree": str(base / agent), "prompt": prompt}
+        launch[agent] = {"worktree": str(base / agent), "prompt": prompt}
     launch["_nodes_python"] = sys.executable  # the interpreter that has the Nodes dependencies (for `nodes watch`)
     (base / "agents.json").write_text(json.dumps(launch, indent=1), encoding="utf-8")
     print(f"demo ready in {base}\n  agents: {', '.join(AGENTS)} (worktrees {base / 'alice'}, {base / 'bob'})\n"
