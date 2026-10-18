@@ -115,8 +115,8 @@ stairs(700, 205, 12, 14, -14, YEL)
 stairs(190, 22, 5, 14, 0, CORAL, 10)
 for i, c in enumerate([YEL, SKY, YEL, CORAL, YEL]):  # bars, like a bus of messages
     rect(40 + i * 26, 8, 12, 48, c)
-for x, y, c in [(26, 366, CORAL), (470, 385, CORAL), (856, 46, CORAL), (686, 218, SKY), (950, 120, SKY), (900, 300, YEL),
-                (120, 300, SKY), (960, 380, CORAL)]:
+for x, y, c in [(856, 46, CORAL), (686, 218, SKY), (950, 120, SKY), (900, 300, YEL),
+                (120, 300, SKY)]:
     rect(x - 4, y - 4, 20, 20, INK)
     rect(x, y, 12, 12, c)
 for x0 in (880, 900, 920):  # a little pixel tower on the right
