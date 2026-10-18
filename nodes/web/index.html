@@ -12,77 +12,80 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system
 header{padding:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 h1{font-size:20px;margin:0}
 .mute{color:var(--mute);font-size:13px}
-main{display:grid;gap:12px;padding:0 16px 24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+main{display:grid;gap:12px;padding:0 16px 24px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.wide{grid-column:1/-1}
 h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
-.agent{border-top:1px solid var(--line);padding:8px 0}.agent:first-of-type{border-top:0}
+.row{border-top:1px solid var(--line);padding:8px 0}.row:first-of-type{border-top:0}
 .name{font-weight:600}
-code{font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all}
 .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font:12px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
-.own{border-color:var(--accent);color:var(--accent)}
-.path{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:6px 0 2px}
-.arrow{color:var(--mute)}
-.hops{font-weight:600;color:var(--warn)}.hops.zero{color:var(--bad)}
-.fact{border-top:1px solid var(--line);padding:8px 0}.fact:first-of-type{border-top:0}
-.tag{font-size:12px;font-weight:600;padding:1px 7px;border-radius:6px}
-.yes{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
-.no{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
-.empty{color:var(--mute);font-style:italic}
-a{color:var(--accent)}
-.wide{grid-column:1/-1}
 .dec{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
 .proceed{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
-.hand_off{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.handoff{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
 .defer{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
 .escalate{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
-.why{margin-top:4px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-word}
+.path{margin-top:4px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-word}
 .edge{color:var(--mute)}
+.empty{color:var(--mute);font-style:italic}
+table{width:100%;border-collapse:collapse;font-size:13px}td{padding:2px 4px;border-top:1px solid var(--line)}
+select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:2px 6px}
 </style>
 </head>
 <body>
 <header>
   <h1>Nodes <span class="mute">live team graph</span></h1>
-  <span class="mute" id="meta">connecting…</span>
+  <span class="mute"><select id="ws"></select> <span id="meta">connecting…</span></span>
 </header>
 <main>
-  <section class="wide"><h2>Action gate: every action passes through the graph first</h2><div id="actions"></div></section>
-  <section><h2>Agents, plans and claims</h2><div id="agents"></div></section>
-  <section><h2>Conflict paths</h2><div id="conflicts"></div></section>
-  <section><h2>Board: source-checked facts</h2><div id="facts"></div></section>
+  <section class="wide"><h2>Action gate: every edit passes through the graph first</h2><div id="decisions"></div></section>
+  <section><h2>Agents and what they own (lease epoch)</h2><div id="sessions"></div></section>
+  <section><h2>Hand-offs and waits</h2><div id="handoffs"></div></section>
+  <section><h2>Facts, checked against their source</h2><div id="facts"></div></section>
+  <section><h2>Event log</h2><div id="events"></div></section>
+  <section><h2>FalkorDB latency per query (this server)</h2><div id="latency"></div></section>
 </main>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const chips = (xs, cls = "") => xs.length ? `<div class="chips">${xs.map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join("")}</div>` : "";
+const pathHtml = p => esc(p).replace(/(-[A-Z_]+-&gt;)/g, '<span class="edge">$1</span>');
+const short = u => esc(String(u).replace(/^(fn|region|file):[^:]+:/, ""));
+let ws = new URLSearchParams(location.search).get("ws") || "";
 function render(s) {
-  $("meta").textContent = `${s.agents.length} agents · ${s.functions} functions · updated ${new Date().toLocaleTimeString()}`;
-  $("actions").innerHTML = (s.actions || []).map(x => `<div class="agent">
-      <span class="dec ${esc(x.decision)}">${esc(x.decision.replace("_", " "))}</span>
-      <span class="name">${esc(x.agent)}</span> <span class="mute">${esc(x.description)}</span>
-      <div class="why">${esc(x.explanation).replace(/(-[A-Z_]+->)/g, '<span class="edge">$1</span>')}</div>
-      ${x.cites.length ? `<div class="mute">cites ${x.cites.map(esc).join(", ")}</div>` : ""}</div>`).join("")
-    || '<div class="empty">No action has asked the gate yet.</div>';
-  $("agents").innerHTML = s.agents.map(a => `<div class="agent">
-      <span class="name">${esc(a.id)}</span>${a.commit ? ` <span class="tag yes">done ${esc(a.commit.slice(0, 10))}</span>` : ""}
-      <div class="mute">plans</div>${chips(a.plan) || '<div class="empty">no plan yet</div>'}
-      ${a.owns.length ? `<div class="mute">owns</div>${chips(a.owns, "own")}` : ""}</div>`).join("")
-    || '<div class="empty">No agent has connected yet.</div>';
-  $("conflicts").innerHTML = s.conflicts.map(c => `<div class="agent">
-      <span class="name">${esc(c.a)}</span> vs <span class="name">${esc(c.b)}</span>:
-      <span class="hops ${c.hops ? "" : "zero"}">${c.hops ? c.hops + " call(s) apart" : "same function"}</span>
-      <div class="path">${c.via.map(esc).map(v => `<code class="chip">${v}</code>`).join('<span class="arrow">→</span>')}</div></div>`).join("")
-    || '<div class="empty">No overlapping plans within 3 calls.</div>';
-  $("facts").innerHTML = s.facts.map(f => `<div class="fact">
-      <span class="tag ${f.checked ? "yes" : "no"}">${f.checked ? "source-checked" : "not checked"}</span>
-      <span class="name">${esc(f.agent)}</span> <span class="mute">${esc(f.source)}</span><div>${esc(f.text)}</div></div>`).join("")
-    || '<div class="empty">The board is empty.</div>';
+  if (!ws && s.workspace) ws = s.workspace;
+  $("ws").innerHTML = (s.workspaces || []).map(w => `<option ${w === ws ? "selected" : ""}>${esc(w)}</option>`).join("");
+  $("meta").textContent = `${(s.sessions || []).length} agents · updated ${new Date().toLocaleTimeString()}`;
+  $("decisions").innerHTML = (s.decisions || []).map(d => `<div class="row">
+      <span class="dec ${esc(d.verdict)}">${esc(d.verdict)}</span> <span class="name">${esc(d.agent)}</span>
+      <span class="mute">${esc(d.reason)}</span><div class="path">${pathHtml(d.path)}</div></div>`).join("")
+    || '<div class="empty">No action has passed the gate yet.</div>';
+  $("sessions").innerHTML = (s.sessions || []).map(a => `<div class="row"><span class="name">${esc(a.name)}</span>
+      <span class="mute">${esc(a.status)}${a.commit ? " · done at " + esc(a.commit) : ""}${a.task ? " · " + esc(a.task) : ""}</span>
+      <div class="chips">${a.owns.filter(o => o.uid).map(o => `<span class="chip">${short(o.uid)} · e${esc(o.epoch)}</span>`).join("")
+      || '<span class="empty">owns nothing</span>'}</div></div>`).join("") || '<div class="empty">No agent has joined.</div>';
+  const hand = (s.decisions || []).filter(d => d.verdict === "handoff");
+  $("handoffs").innerHTML = hand.map(d => `<div class="row"><span class="dec handoff">handoff</span>
+      <span class="name">${esc(d.agent)}</span><div class="path">${pathHtml(d.path)}</div>
+      <div class="mute">snapshot ${esc(d.snapshot)}</div></div>`).join("")
+    + (s.waits || []).map(w => `<div class="row"><span class="dec defer">waiting</span>
+      <span class="name">${esc(w.from)}</span> waits for <span class="name">${esc(w.to)}</span> on <span class="chip">${short(w.unit)}</span></div>`).join("")
+    || '<div class="empty">No hand-offs or waits.</div>';
+  $("facts").innerHTML = (s.facts || []).map(f => `<div class="row">
+      <span class="dec ${f.status === "source-checked" ? "proceed" : "escalate"}">${esc(f.status)}</span>
+      <span class="name">${esc(f.by)}</span> <span class="mute">${esc(f.source)}</span><div>${esc(f.text)}</div></div>`).join("")
+    || '<div class="empty">No facts posted.</div>';
+  $("events").innerHTML = (s.events || []).slice(0, 15).map(e => `<div class="row"><span class="mute">
+      ${new Date(e.t * 1000).toLocaleTimeString()}</span> <span class="name">${esc(e.agent)}</span> ${esc(e.kind)}
+      <span class="mute">${esc(e.verdict || e.unit || e.commit || "")}</span></div>`).join("") || '<div class="empty">No events.</div>';
+  $("latency").innerHTML = `<table>${Object.entries(s.latency || {}).map(([k, v]) =>
+      `<tr><td>${esc(k)}</td><td>${v.n}×</td><td>p50 ${v.p50_ms} ms</td><td>p99 ${v.p99_ms} ms</td></tr>`).join("")}</table>`;
 }
 async function tick() {
-  try { render(await (await fetch("/api/state")).json()); }
+  try { render(await (await fetch("/api/state" + (ws ? "?ws=" + encodeURIComponent(ws) : ""))).json()); }
   catch (e) { $("meta").textContent = "server not reachable, retrying…"; }
   setTimeout(tick, 1500);
 }
+$("ws").onchange = e => { ws = e.target.value; };
 tick();
 </script>
 </body>

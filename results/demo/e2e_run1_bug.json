@@ -1,0 +1,125 @@
+{
+ "wall_seconds": 169,
+ "model": "claude-sonnet-5-5",
+ "effort": "low",
+ "decisions": [
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> file:shop:src/shop/models.py, region:shop:src/shop/models.py#User.__body__"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> region:shop:src/shop/models.py#module@4"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> fn:shop:src/shop/models.py#order_total"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> fn:shop:src/shop/api.py#user_summary"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> file:planned:tests/test_points.py"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> file:planned:tests/test_verify.py"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> (no unit)"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> (no unit)"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> region:shop:src/shop/models.py#User.__body__"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> file:shop:src/shop/models.py"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> region:shop:src/shop/models.py#module@4"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> fn:shop:src/shop/models.py#order_total, fn:shop:src/shop/models.py#verify_email"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> file:shop:src/shop/api.py"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> fn:shop:src/shop/api.py#user_summary"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> (no unit)"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> (no unit)"
+  ]
+ ],
+ "verdict_counts": {
+  "proceed": 16,
+  "defer": 0,
+  "handoff": 0,
+  "escalate": 0
+ },
+ "sessions": [
+  [
+   "alice",
+   "done",
+   "008ba3cb228ee8fa22c0f9f05ddc117cf9934dc5"
+  ],
+  [
+   "bob",
+   "done",
+   "46ca592"
+  ]
+ ],
+ "branch_commits": {
+  "alice": [
+   "008ba3c add email verification"
+  ],
+  "bob": [
+   "46ca592 add loyalty points"
+  ]
+ },
+ "merged_cleanly": {
+  "alice": true,
+  "bob": false
+ },
+ "both_features_present": true,
+ "merged_tests": [
+  "3 errors in 0.27s"
+ ],
+ "agents_exit": {
+  "alice": 0,
+  "bob": 0
+ }
+}

@@ -142,7 +142,7 @@ def cmd_watch(a):
         for _, entries in r.xread({f"ws:{a.workspace}:events": last}, block=5000) or []:
             for eid, fields in entries:
                 last = eid
-                e = json.loads(fields[b"e"])
+                e = json.loads(fields.get("e") or fields.get(b"e"))
                 extra = {k: v for k, v in e.items() if k not in ("kind", "agent", "t", "notify")}
                 print(f"{time.strftime('%H:%M:%S', time.localtime(e['t']))} {e['agent']:>10} {e['kind']:<14} "
                       f"{json.dumps(extra)[:160]}", flush=True)

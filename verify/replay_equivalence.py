@@ -141,13 +141,17 @@ def cooperbench(log: Path, plan: dict):
 def main():
     t0 = time.time()
     hb = sorted(Path(p) for b in ("dev1", "test1", "hb_sonnet") for p in glob.glob(str(MAIN / "runs" / b / "graph" / "t*_d0.json")))
-    for p in hb:
+    import faulthandler
+    faulthandler.dump_traceback_later(180, repeat=True)  # a stall prints its stack to stderr
+    for k, p in enumerate(hb, 1):
         hiddenbench(p)
+        print(f"  hiddenbench {k}/{len(hb)}", file=sys.stderr, flush=True)
     hb_calls = counts["calls"]
     plan = {r["Name"]: r for r in csv.DictReader(open(ROOT / "coop" / "plans" / "test1b.csv", encoding="utf-8"))}
     logs = sorted(Path(p) for p in glob.glob(str(ROOT / "runs" / "cooperbench" / "t1b-*-graph.tool_calls.jsonl")))
-    for log in logs:
+    for k, log in enumerate(logs, 1):
         cooperbench(log, plan)
+        print(f"  cooperbench {k}/{len(logs)}", file=sys.stderr, flush=True)
     print(f"HiddenBench board runs replayed: {len(hb)} ({hb_calls} tool calls)")
     print(f"CooperBench cb1b graph runs replayed: {len(logs)} ({counts['calls'] - hb_calls} tool calls)")
     print(f"reply text identical (harness vs product): {counts['text_equal']}/{counts['calls']}")

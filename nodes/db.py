@@ -93,7 +93,7 @@ class Store:
         self.lat["event+notify"].append((time.perf_counter() - t0) * 1000)
 
     def events(self, count: int = 50) -> list[dict]:
-        return [json.loads(f[b"e"]) for _, f in self.r.xrevrange(f"ws:{self.ws}:events", count=count)]
+        return [json.loads(f.get("e") or f.get(b"e")) for _, f in self.r.xrevrange(f"ws:{self.ws}:events", count=count)]
 
     def snapshot(self, snap_id: str) -> str:
         name = f"ws:{self.ws}:snap:{snap_id}"

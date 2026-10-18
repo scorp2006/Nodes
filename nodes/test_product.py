@@ -59,6 +59,7 @@ def ws(tmp_path):
     indexer.index(st, tmp_path, "pkg", "t")
     yield st, tmp_path
     st.reset()
+    st.r.hdel("nodes:workspaces", st.ws)
 
 
 def agent(st, name):
@@ -186,5 +187,13 @@ def test_mcp_requires_a_bearer_token_and_hooks_deny_on_defer(ws, tmp_path):
         assert hook("not-a-token", edit) == {}                                           # unknown caller: never block
         trace = (tmp_path / f"{st.ws}.trace.jsonl").read_text(encoding="utf-8").splitlines()
         assert len(trace) == 2 and all(json.loads(t)["queries"] for t in trace)          # every hook call traced
+        # regression (first live demo run): when the owner finishes and its session ends, its leases must stay,
+        # so the next agent gets HANDOFF (merge first), not a plain proceed that skips the finished work
+        ops.coordinate(st, {"session": sa, "name": "alice"}, "done", text="c0ffee")
+        urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/hooks/session-end", data=b"{}",
+                                                      method="POST", headers={"Authorization": f"Bearer {ta}",
+                                                                              "Content-Type": "application/json"}))
+        ctx = hook(tb, edit)["hookSpecificOutput"]["additionalContext"]
+        assert "HANDOFF" in ctx and "c0ffee" in ctx
     finally:
         subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)

@@ -97,7 +97,8 @@ def traced_call(reg: Registry, ws: str, sess: dict, kind: str, name: str, reques
 
 def build(reg: Registry, profile: str = "nodes", public_url: str = "http://127.0.0.1:8780") -> MCPServer:
     server = MCPServer("nodes", token_verifier=Verifier(reg),
-                       auth=AuthSettings(issuer_url=public_url, resource_server_url=f"{public_url}/mcp"))
+                       auth=AuthSettings(issuer_url=public_url, resource_server_url=f"{public_url}/mcp",
+                                         validate_token_resource=False))  # tokens are opaque session handles
 
     def ctx():
         claims = get_access_token().claims
