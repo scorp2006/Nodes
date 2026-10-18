@@ -1,4 +1,4 @@
-// The Live view: the repository as a floor plan (files are rooms, functions and classes are desks) and every agent
+// The Live view: the agents ("nodes") at work. The repository is a floor plan (files are rooms, functions and classes are desks) and every agent
 // as an avatar that walks to the code it works on. It is driven only by the workspace's event stream, so a recorded
 // run replays exactly like a live one.
 const W = 1200, H = 720, LOBBY_W = 178, TOP = 58, PAD = 14;
@@ -115,7 +115,7 @@ export class Live {
     const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
     const mx = (from.x + to.x) / 2, my = Math.min(from.y, to.y) - 40;
     p.setAttribute("d", `M${from.x},${from.y} Q${mx},${my} ${to.x},${to.y}`);
-    p.setAttribute("stroke", color);
+    p.style.stroke = color;  // style, not attribute, so theme variables work
     p.setAttribute("class", `lv-ray ${dashed ? "dashed" : ""} ${cls}`);
     this.lines.appendChild(p);
     if (ttl) setTimeout(() => p.remove(), ttl);
@@ -163,7 +163,7 @@ export class Live {
         if (src && this.near(src, a)) this.move(a, this.near(src, a), animate);
         this.say(a, `${e.tool}: ${(e.summary || "").replace(/^[a-z_ ]+of [^:]+: /, "").replace(/^[a-z_]+: /, "")}`, "", animate);
         if (fx) hits.slice(0, 24).forEach((u, i) => setTimeout(() => {
-          this.line(this.desks[src] || a.at, this.desks[u] || this.roomAt[pathOf(u)], "#d6d6da", {ttl: 1800, cls: "thin"});
+          this.line(this.desks[src] || a.at, this.desks[u] || this.roomAt[pathOf(u)], "var(--ink2)", {ttl: 1800, cls: "thin"});
           this.pulse(u);
         }, 120 + i * 40));
         break;

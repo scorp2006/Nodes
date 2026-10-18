@@ -4,13 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nodes</title>
+<script>try { if (localStorage.getItem("nodes-theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch {}</script>
 <style>
-:root{color-scheme:dark;
+:root{color-scheme:light;
+  --bg:#f7f7f5;--panel:#ffffff;--panel2:#f3f3f0;--hover:#f0f0ec;--sel:#e8e8e3;
+  --line:#e5e5e0;--line2:#d6d6d0;--ink:#18181b;--ink2:#55555d;--ink3:#8b8b93;
+  --go:#2f9e6b;--wait:#c98a14;--block:#d64545;--hand:#2f7fd1;
+  --stage:#fbfbf9;--dot:#e4e4de;--room:#ffffff;--glass:rgba(255,255,255,.94);--ring:24,24,27;
+  --desk:#d9dbe0;--desk-fn:#a8d8c8;--desk-cls:#ecd49a;--bubble:#ffffff;--shadow:rgba(20,20,30,.12);
+  --edge-calls:#9aa9b4;--edge-contains:#d3d3cd;--edge-raw:#8a97a3;--spark:#c9c9c3;--spark-off:#ececea;
+  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+}
+:root[data-theme=dark]{color-scheme:dark;
   --bg:#0b0b0c;--panel:#111113;--panel2:#18181c;--hover:#17171b;--sel:#232329;
   --line:#232327;--line2:#303036;--ink:#f1f1f3;--ink2:#a7a7b0;--ink3:#6f6f78;
   --go:#4cc38a;--wait:#e8a93b;--block:#ef6461;--hand:#5aa9f0;
-  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --mono:ui-monospace,"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+  --stage:#0d0d0f;--dot:#1e1e23;--room:#111114;--glass:rgba(17,17,19,.92);--ring:241,241,243;
+  --desk:#2e3238;--desk-fn:#2f5752;--desk-cls:#5e5237;--bubble:#f1f1f3;--shadow:rgba(0,0,0,.45);
+  --edge-calls:#4a5b66;--edge-contains:#33333a;--edge-raw:#56626e;--spark:#3a3a42;--spark-off:#1c1c21;
 }
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
@@ -23,7 +35,7 @@ a{color:var(--ink);text-decoration:none}
 .cell:first-child{border-left:0}
 .logo{width:56px;justify-content:center;padding:0}
 .mark{width:20px;height:20px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
-.mark i{background:var(--ink);border-radius:2px}.mark i:nth-child(2),.mark i:nth-child(3){background:#5a5a62}
+.mark i{background:var(--ink);border-radius:2px}.mark i:nth-child(2),.mark i:nth-child(3){background:var(--ink3)}
 .wscell{width:216px;padding:0 14px;position:relative;cursor:pointer}
 .avatar{width:26px;height:26px;border-radius:50%;background:#e9b44c;color:#141414;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
 .wscell select{appearance:none;background:none;border:0;font-size:15px;color:var(--ink);cursor:pointer;width:100%;padding-right:18px;outline:none}
@@ -33,7 +45,7 @@ a{color:var(--ink);text-decoration:none}
 .grow{flex:1}
 .tbtn{background:none;border:0;cursor:pointer;color:var(--ink);font-size:14px;display:flex;align-items:center;gap:8px;padding:0}
 .tbtn:hover{color:#fff}
-.timeline input[type=range]{width:180px;accent-color:#c8c8cf}
+.timeline input[type=range]{width:180px;accent-color:var(--ink3)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--ink3);display:inline-block;flex:none}
 .dot.on{background:var(--go)}
 /* sidebar */
@@ -66,7 +78,7 @@ h2{font-size:20px;font-weight:600;margin:0 0 16px;letter-spacing:-.01em}
 .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--panel);border-radius:6px;padding:7px 13px;
   cursor:pointer;color:var(--ink);font-size:13.5px}
 .btn:hover{background:var(--hover)}
-.btn.primary{background:var(--ink);color:#0b0b0c;border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .card{border:1px solid var(--line);background:var(--panel);border-radius:8px}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:22px}
 .kpi{padding:20px 22px;border-left:1px solid var(--line)}.kpi:first-child{border-left:0}
@@ -80,7 +92,7 @@ h2{font-size:20px;font-weight:600;margin:0 0 16px;letter-spacing:-.01em}
 .agents{display:flex;flex-direction:column;gap:12px}
 .agent{padding:16px 18px;border:1px solid var(--line);background:var(--panel);border-radius:8px}
 .agent .top{display:flex;align-items:center;gap:10px}
-.agent .who{width:34px;height:34px;border-radius:50%;background:#1c1c21;border:2px solid var(--c);display:grid;place-items:center;overflow:hidden}
+.agent .who{width:34px;height:34px;border-radius:50%;background:var(--panel2);border:2px solid var(--c);display:grid;place-items:center;overflow:hidden}
 .agent .nm{font-weight:600;font-size:15px}
 .agent .task{color:var(--ink3);font:12px var(--mono);margin-left:auto}
 .agent .last{color:var(--ink2);font-size:13px;margin-top:10px}
@@ -96,7 +108,7 @@ h2{font-size:20px;font-weight:600;margin:0 0 16px;letter-spacing:-.01em}
 .story.go .bar{background:var(--go)}.story.wait .bar{background:var(--wait)}.story.block .bar{background:var(--block)}.story.hand .bar{background:var(--hand)}
 .story .when{color:var(--ink3);font:12px var(--mono);white-space:nowrap}
 .story.new{animation:fadein 1.4s ease}
-@keyframes fadein{from{background:#1d1d22}to{background:transparent}}
+@keyframes fadein{from{background:var(--sel)}to{background:transparent}}
 .more{display:block;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--ink2);padding:11px;cursor:pointer;font-size:13px}
 .more:hover{color:var(--ink)}
 .empty{padding:28px 24px;color:var(--ink2);font-size:14px;line-height:1.6}
@@ -141,20 +153,20 @@ details pre{border:0;border-top:1px solid var(--line);border-radius:0 0 6px 6px}
 .gtools{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .gwrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;height:calc(100vh - 56px - 44px - 64px - 150px);min-height:460px}
 .gstage{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;
-  background:radial-gradient(circle at 1px 1px,#1e1e23 1px,transparent 0) 0 0/24px 24px,#0e0e10}
+  background:radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 0) 0 0/24px 24px,var(--stage)}
 falkordb-canvas{display:block;width:100%;height:100%}
 .gside{overflow:auto;padding:20px 22px}
 .gsel{position:relative}.gsel select{appearance:none;background:var(--panel);border:1px solid var(--line2);border-radius:6px;padding:7px 30px 7px 12px;
   font:13px var(--mono);color:var(--ink);cursor:pointer;max-width:280px}
 .gsel:after{content:"";position:absolute;right:12px;top:15px;border:4px solid transparent;border-top-color:var(--ink2);pointer-events:none}
 .gpanel{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:8px;width:190px;max-height:calc(100% - 28px);overflow:auto}
-.gpanel .box{background:rgba(17,17,19,.92);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+.gpanel .box{background:var(--glass);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
 .gpanel .box .label{display:block;margin-bottom:8px}
 .toggle{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:3px 2px;cursor:pointer;font-size:12.5px;color:var(--ink);text-align:left}
 .toggle i{width:11px;height:11px;border-radius:50%;flex:none}.toggle.rel i{border-radius:2px;height:4px}
 .toggle small{margin-left:auto;color:var(--ink3);font:11.5px var(--mono)}.toggle.off{opacity:.38}
-.gtip{position:absolute;pointer-events:none;z-index:5;background:#141417;border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
-  max-width:340px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.gtip{position:absolute;pointer-events:none;z-index:5;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;
+  max-width:340px;font-size:12.5px;box-shadow:0 8px 24px var(--shadow)}
 .gtip .lbls{display:flex;gap:6px;margin-bottom:6px}.gtip .lbl{font:11px var(--mono);border-radius:4px;padding:2px 6px;color:#111}
 .gtip .row{display:flex;gap:10px;padding:2px 0}.gtip .row span:first-child{color:var(--ink3);font-family:var(--mono);min-width:76px}
 .gtip .row span:last-child{color:var(--ink);word-break:break-word}
@@ -166,38 +178,38 @@ falkordb-canvas{display:block;width:100%;height:100%}
 /* live */
 .lvhead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
 .lvwrap{position:relative;width:100%;height:calc(100vh - 56px - 230px);min-height:460px;border:1px solid var(--line);border-radius:8px;overflow:hidden;
-  background:radial-gradient(circle at 1px 1px,#1c1c21 1px,transparent 0) 0 0/22px 22px,#0d0d0f}
+  background:radial-gradient(circle at 1px 1px,var(--dot) 1px,transparent 0) 0 0/22px 22px,var(--stage)}
 .lvwrap:fullscreen{height:100vh;border:0;border-radius:0}
 .lvlegend{margin-top:14px}
 .lv-stage{position:absolute;left:0;top:0;width:1200px;height:720px;transform-origin:0 0}
 .lv-lines{position:absolute;left:0;top:0;width:1200px;height:720px;pointer-events:none;z-index:2;overflow:visible}
 .lv-lobby{position:absolute;left:12px;top:44px;width:160px;height:664px;border:1px dashed var(--line2);border-radius:10px;padding:12px 14px}
-.lv-room{position:absolute;border:1px solid var(--line2);border-radius:10px;background:#111114}
+.lv-room{position:absolute;border:1px solid var(--line2);border-radius:10px;background:var(--room)}
 .lv-rname{position:absolute;left:10px;top:9px;font:13px var(--mono);color:var(--ink2);max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lv-more{position:absolute;right:12px;top:10px;font:11px var(--mono);color:var(--ink3)}
-.lv-desk{position:absolute;width:12px;height:12px;border-radius:3px;background:#2e3238;border:2px solid transparent;z-index:1;
+.lv-desk{position:absolute;width:12px;height:12px;border-radius:3px;background:var(--desk);border:2px solid transparent;z-index:1;
   transition:background .35s,border-color .35s}
-.lv-desk.lv-function{background:#2f5752}.lv-desk.lv-class{background:#5e5237}
+.lv-desk.lv-function{background:var(--desk-fn)}.lv-desk.lv-class{background:var(--desk-cls)}
 .lv-desk[data-state=held]{background:var(--c);border-color:var(--c)}
 .lv-desk[data-state=planned],.lv-desk[data-state=worked]{border:2px dashed var(--c)}
 .lv-desk.lv-pulse{animation:lvring 1s ease-out}
-@keyframes lvring{from{box-shadow:0 0 0 0 rgba(241,241,243,.55)}to{box-shadow:0 0 0 12px rgba(241,241,243,0)}}
+@keyframes lvring{from{box-shadow:0 0 0 0 rgba(var(--ring),.5)}to{box-shadow:0 0 0 12px rgba(var(--ring),0)}}
 .lv-dlabel{position:absolute;transform:translateX(-50%);font:12px var(--sans);color:var(--ink2);white-space:nowrap;opacity:0;transition:opacity .35s;z-index:1}
 .lv-dlabel.show{opacity:1}
 .lv-agents{position:absolute;left:0;top:0;width:1200px;height:720px;z-index:3;pointer-events:none}
 .lv-agent{position:absolute;left:0;top:0;width:44px;transition:transform 1.1s cubic-bezier(.45,.05,.2,1)}
 .lv-agent.lv-instant{transition:none}
-.lv-avatar{width:54px;height:54px;margin:-5px 0 0 -5px;border-radius:50%;background:#18181d;border:3px solid var(--c);display:grid;place-items:center;
-  box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.lv-avatar{width:54px;height:54px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--panel2);border:3px solid var(--c);display:grid;place-items:center;
+  box-shadow:0 6px 16px var(--shadow)}
 .lv-name{position:absolute;left:22px;top:48px;transform:translateX(-50%);font:600 14px var(--sans);white-space:nowrap;color:var(--ink)}
 .lv-task{position:absolute;left:22px;top:67px;transform:translateX(-50%);font:12px var(--sans);color:var(--ink3);white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
 .lv-done .lv-avatar{opacity:.5}
-.lv-bubble{position:absolute;bottom:54px;left:22px;transform:translate(-50%,6px);background:#f1f1f3;color:#111;font:500 14px/1.35 var(--sans);
-  padding:7px 11px;border-radius:8px;width:max-content;max-width:300px;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.lv-bubble{position:absolute;bottom:54px;left:22px;transform:translate(-50%,6px);background:var(--bubble);color:#111;font:500 14px/1.35 var(--sans);
+  padding:7px 11px;border-radius:8px;width:max-content;max-width:300px;opacity:0;transition:opacity .25s,transform .25s;box-shadow:0 6px 18px var(--shadow);border:1px solid var(--line)}
 .lv-bubble:after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:inherit}
 .lv-bubble.show{opacity:1;transform:translate(-50%,0)}
 .lv-bubble.wait{background:var(--wait)}.lv-bubble.block{background:var(--block)}.lv-bubble.hand{background:var(--hand)}.lv-bubble.go{background:#d8f3e4}
-.lv-bubble{border-top-color:#f1f1f3}.lv-bubble.wait{border-top-color:var(--wait)}.lv-bubble.block{border-top-color:var(--block)}
+.lv-bubble{border-top-color:var(--bubble)}.lv-bubble.wait{border-top-color:var(--wait)}.lv-bubble.block{border-top-color:var(--block)}
 .lv-bubble.hand{border-top-color:var(--hand)}.lv-bubble.go{border-top-color:#d8f3e4}
 .lv-ray{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:900;stroke-dashoffset:900;animation:lvdraw .8s ease forwards}
 .lv-ray.thin{stroke-width:1.3;opacity:.75}
@@ -222,6 +234,8 @@ falkordb-canvas{display:block;width:100%;height:100%}
     <div class="grow"></div>
     <div class="cell timeline"><button class="tbtn" id="play" title="Replay this workspace from the start">▶&nbsp; Replay</button>
       <input type="range" id="slider" min="0" max="0" value="0" aria-label="Timeline"></div>
+    <div class="cell"><button class="tbtn" id="theme" title="Light / dark"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7">
+      <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button></div>
     <div class="cell"><button class="tbtn" id="livepill" title="Back to live"><span class="dot" id="dot"></span><span id="mode">connecting</span></button></div>
   </header>
   <aside>
@@ -273,10 +287,10 @@ falkordb-canvas{display:block;width:100%;height:100%}
     </section>
 
     <section class="view" id="v-live">
-      <div class="lvhead"><div><h1>Live</h1><p class="sub">Every agent at work: files are rooms, functions are desks, and each agent walks to the code it touches.</p></div>
+      <div class="lvhead"><div><h1>Live</h1><p class="sub">Every agent is a node: files are rooms, functions are desks, and each node walks to the code it touches.</p></div>
         <button class="btn" id="lvfull">Full screen</button></div>
       <div class="lvwrap" id="live"></div>
-      <div class="legend lvlegend"><span><i style="background:#f1f1f3"></i>graph lookup (rays)</span><span><i style="background:var(--wait)"></i>possible overlap or waiting</span>
+      <div class="legend lvlegend"><span><i style="background:var(--ink2)"></i>graph lookup (rays)</span><span><i style="background:var(--wait)"></i>possible overlap or waiting</span>
         <span><i style="background:var(--go)"></i>go ahead / confirmed / check passed</span><span><i style="background:var(--hand)"></i>hand-off</span>
         <span><i style="background:transparent;border:1.5px dashed #a7a7b0"></i>planned or finished work</span></div>
     </section>

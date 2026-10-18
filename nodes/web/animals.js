@@ -1,7 +1,7 @@
-// Cute animal avatars for agents: small inline SVG faces (no emoji, so they look the same everywhere), tinted with the
+// The "nodes": cute animal avatars for agents (the same family as the blog cover): small inline SVG faces (no emoji, so they look the same everywhere), tinted with the
 // agent's colour. Agents get animals and colours in order of appearance, so several subagents never look alike.
 export const PALETTE = ["#ff8a7a", "#5ab4ff", "#ffd166", "#4cd4a0", "#ffa94d", "#3bc9db", "#a9e34b", "#ff8fab", "#e9c46a", "#74c0fc"];
-export const ANIMALS = ["fox", "cat", "bear", "panda", "owl", "rabbit", "penguin", "frog"];
+export const ANIMALS = ["cat", "rabbit", "bear", "frog", "panda", "penguin"];  // only the cutest made the cut
 
 const order = [];
 export const slot = name => { let i = order.indexOf(name); if (i < 0) { order.push(name); i = order.length - 1; } return i; };
@@ -45,5 +45,5 @@ const FACES = {
 
 export function animalSVG(name, size = 44) {
   const c = colorFor(name);
-  return `<svg viewBox="0 0 44 44" width="${size}" height="${size}" aria-hidden="true">${FACES[animalFor(name)](c)}</svg>`;
+  return `<svg viewBox="0 0 44 44" width="${size}" height="${size}" role="img" aria-label="${animalFor(name)} node"><title>${animalFor(name)} node</title>${FACES[animalFor(name)](c)}</svg>`;
 }

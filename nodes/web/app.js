@@ -15,6 +15,15 @@ const short = u => { if (!u) return ""; const m = String(u).match(/#(.+)$/), f =
 const ago = t => { const s = Math.max(0, Date.now() / 1000 - t); return s < 60 ? `${s | 0}s ago` : s < 3600 ? `${s / 60 | 0}m ago` : `${s / 3600 | 0}h ago`; };
 const clock = t => new Date(t * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"});
 const UNIT_RE = /(fn|region|file|class):[^ ,]+/g;
+// theme: light by default, dark on request; the canvas reads its colours from the same CSS variables
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+let T = {};
+function readTheme() {
+  T = {ink: css("--ink"), ink2: css("--ink2"), calls: css("--edge-calls"), contains: css("--edge-contains"), raw: css("--edge-raw"),
+       spark: css("--spark"), sparkOff: css("--spark-off"),
+       stroke: document.documentElement.dataset.theme === "dark" ? "rgba(0,0,0,.35)" : "rgba(0,0,0,.18)"};
+}
+readTheme();
 
 let ws = new URLSearchParams(location.search).get("ws") || "", events = [], live = true, cursor = 0, es = null,
     state = {holds: {}, last: {}, done: {}, feed: []}, playing = null, showAll = false, laneTask = {}, facts = [],
@@ -100,13 +109,13 @@ function renderSpark() {  // calls per time slice as bars; each gate decision a 
   const cutoff = (!live || replay) && at ? (at.recorded_t ?? at.t) + .5 : Infinity;
   const cs = calls.filter(c => !quiet(c) && c.t <= cutoff), N = 60;
   $("spark-n").textContent = cs.length ? `${cs.length} calls` : "";
-  if (!cs.length) { $("spark").innerHTML = `<text x="500" y="50" text-anchor="middle" fill="#6c6c75" font-size="13">No calls yet. They appear here live.</text>`; return; }
+  if (!cs.length) { $("spark").innerHTML = `<text x="500" y="50" text-anchor="middle" fill="${T.ink2}" font-size="13">No calls yet. They appear here live.</text>`; return; }
   const t0 = Math.min(...cs.map(c => c.t)), t1 = Math.max(...cs.map(c => c.t), t0 + 1), w = 1000 / N;
   const bins = Array.from({length: N}, () => ({n: 0, v: []}));
   for (const c of cs) { const b = bins[Math.min(N - 1, ((c.t - t0) / (t1 - t0) * N) | 0)]; b.n++; if (c.verdict) b.v.push(c.verdict); }
   const max = Math.max(...bins.map(b => b.n));
   $("spark").innerHTML = bins.map((b, i) => { const h = b.n ? 6 + (b.n / max) * 58 : 2;
-    return `<rect x="${i * w + 2}" y="${82 - h}" width="${w - 4}" height="${h}" rx="2" fill="${b.n ? "#3a3a42" : "#1c1c21"}"><title>${b.n} calls</title></rect>`
+    return `<rect x="${i * w + 2}" y="${82 - h}" width="${w - 4}" height="${h}" rx="2" fill="${b.n ? T.spark : T.sparkOff}"><title>${b.n} calls</title></rect>`
       + b.v.slice(0, 3).map((v, j) => `<circle cx="${i * w + w / 2}" cy="${82 - h - 7 - j * 8}" r="3" fill="${VCOL[v]}"/>`).join(""); }).join("");
 }
 
@@ -181,7 +190,7 @@ const KIND = {file: "#7f95b5", function: "#4cc9a6", class: "#e9b44c", region: "#
 const canvas = $("canvas");
 let hover = null, ripples = {}, degree = {};
 canvas.setConfig({
-  backgroundColor: "rgba(0,0,0,0)", foregroundColor: "#d6d6da", captionsKeys: ["name"], layoutMode: "force",
+  backgroundColor: "rgba(0,0,0,0)", foregroundColor: T.ink, captionsKeys: ["name"], layoutMode: "force",
   nodeStyle: {fontFamily: "Inter, Segoe UI, system-ui, sans-serif"},
   linkStyle: {fontFamily: "Inter, Segoe UI, system-ui, sans-serif"},
   layoutOptions: {tree: {direction: "lr", levelDistance: 170, nodeSpacing: 46}},
@@ -211,7 +220,7 @@ function drawNode(n, ctx) {  // FalkorDB's engine and layouts; our node face: ki
   if (n.shape === "square") ctx.rect(n.x - r * .85, n.y - r * .85, r * 1.7, r * 1.7);
   else ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
   ctx.fillStyle = n.color; ctx.fill();
-  ctx.lineWidth = 1 / k; ctx.strokeStyle = on || hover === n.id ? "#f1f1f3" : "rgba(0,0,0,.35)"; ctx.stroke();
+  ctx.lineWidth = 1 / k; ctx.strokeStyle = on || hover === n.id ? T.ink : T.stroke; ctx.stroke();
   if (ring) {  // who holds it
     ctx.beginPath(); ctx.arc(n.x, n.y, r + 3.5 / k, 0, 2 * Math.PI);
     ctx.setLineDash(n.data.done ? [3 / k, 2.5 / k] : []); ctx.lineWidth = 2.2 / k; ctx.strokeStyle = ring; ctx.stroke(); ctx.setLineDash([]);
@@ -226,7 +235,7 @@ function drawNode(n, ctx) {  // FalkorDB's engine and layouts; our node face: ki
   if (!label || !show) return;
   ctx.font = `${agent || ring ? 600 : 400} ${(agent ? 12.5 : 11) / k}px Inter, Segoe UI, system-ui, sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "top";
-  ctx.fillStyle = agent || ring || on || hover === n.id || n.data?.raw ? "#e6e6ea" : "#9a9aa3";
+  ctx.fillStyle = agent || ring || on || hover === n.id || n.data?.raw ? T.ink : T.ink2;
   ctx.fillText(label.length > 28 ? label.slice(0, 27) + "…" : label, n.x, n.y + r + (ring ? 7 : 5) / k);
 }
 
@@ -263,7 +272,7 @@ function renderGraph() {
         ring: owners[n.id] || worked[n.id] ? color(owners[n.id] || worked[n.id]) : null, done: !owners[n.id] && !!worked[n.id]}}))
     .concat(agents.map(a => ({id: `agent:${a}`, labels: ["Session"], visible: true, color: color(a), size: 16, data: {name: nameOf(a)}})));
   const links = edges.map((e, i) => ({id: `e${i}`, relationship: "", source: canon(e.a), target: canon(e.b), visible: true,
-      color: e.rel === "CALLS" ? "#4a5b66" : "#33333a", data: {by: e.by, rel: e.rel}}))  // structure: lines, no captions
+      color: e.rel === "CALLS" ? T.calls : T.contains, data: {by: e.by, rel: e.rel}}))  // structure: lines, no captions
     .concat(agents.flatMap(a => [...new Set([...state.holds[a]].map(canon))].filter(u => ids.has(u)).map(u => ({id: `h:${a}:${u}`,
       relationship: "HOLDS", source: `agent:${a}`, target: u, visible: true, color: color(a), width: 1.6, data: {}}))));
   nodeCount = nodes.length;
@@ -282,7 +291,7 @@ function renderGraph() {
     + `<span><i style="background:${KIND.file};border-radius:2px"></i>file</span><span><i style="background:${KIND.region}"></i>block</span>`
     + (graph.scope === "active" ? `<span class="muted">active area of ${graph.total} units</span>` : "");
 }
-function light(ids, ms = 2600, c = "#ececee") {  // a traversal: ripple the nodes it touched, burst along their links
+function light(ids, ms = 2600, c = T.ink) {  // a traversal: ripple the nodes it touched, burst along their links
   lit = new Set(ids); const now = performance.now(); ids.forEach(id => { ripples[id] = {t: now, c}; });
   const g = canvas.getGraph?.(), set = new Set(ids);
   if (g) for (const l of canvas.getGraphData()?.links || []) {
@@ -359,7 +368,7 @@ function renderRaw() {
     color: lcol(n.labels[0]), size: 7, data: {name: shortCap(caption(n.props)), raw: n}}));
   const ids = new Set(nodes.map(n => n.id));
   const links = d.edges.filter(e => !rawOff.rels.has(e.type) && ids.has(`r${e.src}`) && ids.has(`r${e.dst}`))
-    .map(e => ({id: `re${e.id}`, relationship: e.type, source: `r${e.src}`, target: `r${e.dst}`, visible: true, color: "#56626e", data: {raw: e}}));
+    .map(e => ({id: `re${e.id}`, relationship: e.type, source: `r${e.src}`, target: `r${e.dst}`, visible: true, color: T.raw, data: {raw: e}}));
   degree = {}; links.forEach(l => { degree[l.source] = (degree[l.source] || 0) + 1; degree[l.target] = (degree[l.target] || 0) + 1; });
   nodes.forEach(n => { n.size = 6 + Math.min(6, Math.sqrt(degree[n.id] || 0) * 1.5); });
   nodeCount = nodes.length; shape = "raw"; canvas.setData({nodes, links}); setTimeout(animateLinks, 50);
@@ -435,6 +444,13 @@ function renderLive() {
   else if (n !== liveApplied) liveView.replay(graph, events.slice(0, n));            // a jump: rebuild, no animation
   liveApplied = n;
 }
+$("theme").onclick = () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  try { localStorage.setItem("nodes-theme", dark ? "dark" : "light"); } catch { /* private window: per-visit only */ }
+  readTheme(); canvas.setConfig({foregroundColor: T.ink}); shape = "";
+  source === "raw" ? renderRaw() : renderGraph(); renderSpark();
+};
 $("lvfull").onclick = () => document.fullscreenElement ? document.exitFullscreen() : $("live").requestFullscreen?.();
 
 // ---------------------------------------------------------------- facts
@@ -494,7 +510,7 @@ async function connect() {
     if (!live) return;
     $("slider").value = cursor = events.length; await refreshState(); render(true); renderCalls();
     if (e.kind === "decision") light(pathIds(e), 2600, e.advisory ? "#e8a93b" : VCOL[e.verdict]);
-    if (e.kind === "query") light(pathIds(e), 2600, "#ececee"); };
+    if (e.kind === "query") light(pathIds(e), 2600, T.ink); };
 }
 
 // ---------------------------------------------------------------- controls
