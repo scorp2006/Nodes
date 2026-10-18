@@ -1,0 +1,132 @@
+{
+ "wall_seconds": 176,
+ "model": "claude-sonnet-5-5",
+ "effort": "low",
+ "decisions": [
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> file:shop:src/shop/models.py, region:shop:src/shop/models.py#User.__body__"
+  ],
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> region:shop:src/shop/models.py#module@2"
+  ],
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> fn:shop:src/shop/models.py#order_total"
+  ],
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> fn:shop:src/shop/api.py#user_summary"
+  ],
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> file:planned:tests/test_verify.py"
+  ],
+  [
+   "main-eb79ea",
+   "proceed",
+   "main-eb79ea -HOLDS-> file:planned:tests/test_points.py"
+  ],
+  [
+   "main-469eb4",
+   "proceed",
+   "main-469eb4 -HOLDS-> fn:shop:tests/test_base.py#test_base"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> region:shop:src/shop/models.py#User.__body__ -TO-> main-eb79ea"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> file:shop:src/shop/models.py -TO-> main-eb79ea"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> region:shop:src/shop/models.py#module@2 -TO-> main-eb79ea"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> fn:shop:src/shop/models.py#order_total -TO-> main-eb79ea"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> fn:shop:src/shop/api.py#user_summary -TO-> main-eb79ea"
+  ],
+  [
+   "main-eb79ea",
+   "handoff",
+   "main-469eb4 -DONE_AT-> 283c443f5b083fb5dac3d467715dc40a8abf4fcc -HANDS-> fn:shop:tests/test_base.py#test_base -TO-> main-eb79ea"
+  ]
+ ],
+ "verdict_counts": {
+  "proceed": 7,
+  "defer": 0,
+  "handoff": 6,
+  "escalate": 0
+ },
+ "sessions": [
+  [
+   "agent1",
+   "active",
+   null
+  ],
+  [
+   "agent2",
+   "active",
+   null
+  ],
+  [
+   "alice",
+   "active",
+   null
+  ],
+  [
+   "bob",
+   "active",
+   null
+  ],
+  [
+   "main-469eb4",
+   "done",
+   "283c443f5b083fb5dac3d467715dc40a8abf4fcc"
+  ],
+  [
+   "main-eb79ea",
+   "done",
+   "25a7ab8b49631abf9e990b97ed4c31baad3ee0e5"
+  ]
+ ],
+ "branch_commits": {
+  "alice": [
+   "283c443 add email verification"
+  ],
+  "bob": [
+   "25a7ab8 add loyalty points: update base test",
+   "27c44a9 add loyalty points",
+   "283c443 add email verification"
+  ]
+ },
+ "merged_cleanly": {
+  "alice": true,
+  "bob": true
+ },
+ "both_features_present": true,
+ "merged_tests": [
+  "5 passed in 0.02s"
+ ],
+ "agents_exit": {
+  "alice": 0,
+  "bob": 0
+ }
+}
