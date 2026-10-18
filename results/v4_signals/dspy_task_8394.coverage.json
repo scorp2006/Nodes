@@ -1,0 +1,1 @@
+{"repo": "dspy_task", "task": "8394", "base": "3ded7a6266514c1569452b0e26bcd4e75c1ee6db", "test_files": ["tests/clients/test_cache.py", "tests/clients/test_cache_namespace.py", "tests/clients/test_cache_ttl.py"], "at_base": ["tests/clients/test_cache.py"], "status": "coverage unavailable", "exercises": {}}

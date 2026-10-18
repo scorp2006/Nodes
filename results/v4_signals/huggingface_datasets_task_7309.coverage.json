@@ -1,0 +1,1 @@
+{"repo": "huggingface_datasets_task", "task": "7309", "base": "b60ebb83cd668decaa21df66148beb44bce57739", "test_files": ["tests/io/test_parquet.py"], "at_base": ["tests/io/test_parquet.py"], "status": "ok", "tests": 0, "exercises": {}, "edge_props": {"resolved_by": "coverage", "confidence": 1.0}}

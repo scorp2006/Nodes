@@ -1,0 +1,1 @@
+{"repo": "dottxt_ai_outlines_task", "task": "1655", "base": "4dd7802a8a5021f31dac75bc652f88d410a28675", "test_files": ["tests/types/test_custom_types.py"], "at_base": ["tests/types/test_custom_types.py"], "status": "ok", "tests": 0, "exercises": {}, "edge_props": {"resolved_by": "coverage", "confidence": 1.0}}
