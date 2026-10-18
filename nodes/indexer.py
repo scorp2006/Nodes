@@ -96,6 +96,82 @@ def scan(repo_root: Path, package: str, repo: str) -> tuple[list[dict], list[dic
     return units, edges
 
 
+def extra_python_edges(repo_root: Path, package: str, repo: str, units: list[dict]) -> tuple[list[dict], list[dict]]:
+    """What the frozen parser leaves out, as separate edges (their own resolved_by, so the harness ignores them):
+    (file)-[:IMPORTS]->(file) for imports inside the repo; self.attr.m() where __init__ set self.attr = Class(...)
+    ('self-attr'); self.m() inherited from a base class defined in the repo ('inherited')."""
+    pkg_dir = repo_root / package
+    parent = pkg_dir.parent
+    fn = {u["qualname"]: u["uid"] for u in units if u["kind"] == "function" and u["qualname"]}
+    file_of = {}  # module name -> file uid
+    for path in sorted(pkg_dir.rglob("*.py")):
+        parts = list(path.relative_to(parent).with_suffix("").parts)
+        mod = ".".join(parts[:-1] if parts[-1] == "__init__" else parts)
+        file_of[mod] = f"file:{repo}:{path.relative_to(repo_root).as_posix()}"
+    imports, calls, classes = [], [], {}  # classes: qualname -> (bases, attr types)
+    for mod, fuid in file_of.items():
+        path = repo_root / fuid.split(":", 2)[2]
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        names = {}
+        pkg = mod if path.name == "__init__.py" else mod.rpartition(".")[0]  # the package relative imports start from
+        for n in ast.walk(tree):
+            if isinstance(n, ast.ImportFrom):
+                if n.level:  # from . import x / from ..a import b
+                    up = pkg.split(".")[: max(0, len(pkg.split(".")) - (n.level - 1))]
+                    base = ".".join(up + ([n.module] if n.module else []))
+                else:
+                    base = n.module or ""
+                for a in n.names:
+                    names[a.asname or a.name] = f"{base}.{a.name}"
+                    target = f"{base}.{a.name}" if f"{base}.{a.name}" in file_of else base
+                    if target in file_of and file_of[target] != fuid:
+                        imports.append({"src": fuid, "dst": file_of[target]})
+            elif isinstance(n, ast.Import):
+                for a in n.names:
+                    names[a.asname or a.name] = a.name
+                    if a.name in file_of and file_of[a.name] != fuid:
+                        imports.append({"src": fuid, "dst": file_of[a.name]})
+        for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
+            bases = [names.get(b.id, f"{mod}.{b.id}") for b in cls.bases if isinstance(b, ast.Name)]
+            attrs = {}
+            for f in (s for s in cls.body if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))):
+                for s in ast.walk(f):
+                    if (isinstance(s, ast.Assign) and len(s.targets) == 1 and isinstance(s.targets[0], ast.Attribute)
+                            and isinstance(s.targets[0].value, ast.Name) and s.targets[0].value.id == "self"
+                            and isinstance(s.value, ast.Call) and isinstance(s.value.func, ast.Name)):
+                        c = s.value.func.id
+                        attrs[s.targets[0].attr] = names.get(c, f"{mod}.{c}")
+            classes[f"{mod}.{cls.name}"] = (bases, attrs, cls, mod)
+
+    def method(cls_q, name, seen=()):  # look up a method on a class, then its bases in the repo
+        if f"{cls_q}.{name}" in fn:
+            return fn[f"{cls_q}.{name}"]
+        for b in classes.get(cls_q, ((), {}, None, None))[0]:
+            if b not in seen:
+                hit = method(b, name, seen + (cls_q,))
+                if hit:
+                    return hit
+        return None
+    for cls_q, (bases, attrs, cls, mod) in classes.items():
+        for f in (s for s in cls.body if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))):
+            src = fn.get(f"{cls_q}.{f.name}")
+            for s in ast.walk(f):
+                if not (src and isinstance(s, ast.Call) and isinstance(s.func, ast.Attribute)):
+                    continue
+                v = s.func.value
+                if isinstance(v, ast.Name) and v.id == "self" and f"{cls_q}.{s.func.attr}" not in fn:
+                    dst = method(cls_q, s.func.attr)  # inherited: the frozen parser only looks on the class itself
+                    if dst and dst != src:
+                        calls.append({"src": src, "dst": dst, "by": "inherited", "confidence": 0.7})
+                elif (isinstance(v, ast.Attribute) and isinstance(v.value, ast.Name) and v.value.id == "self"
+                      and v.attr in attrs):
+                    dst = method(attrs[v.attr], s.func.attr)
+                    if dst and dst != src:
+                        calls.append({"src": src, "dst": dst, "by": "self-attr", "confidence": 0.7})
+    dedup = {(e["src"], e["dst"]): e for e in calls}
+    return list({(e["src"], e["dst"]): e for e in imports}.values()), list(dedup.values())
+
+
 def python_packages(root: Path) -> list[str]:
     """Top-level Python packages: dirs with __init__.py whose parent has none (tracked files only)."""
     from .lang import tracked_files
@@ -106,22 +182,27 @@ def python_packages(root: Path) -> list[str]:
 def scan_all(repo_root: Path, package: str | None, repo: str) -> tuple[list[dict], list[dict], dict]:
     """Every language. Python packages use the precise resolver; all other files use tree-sitter (approximate calls)."""
     from .lang import scan_repo
-    units, edges, done = [], [], set()
+    units, edges, done, imports = [], [], set(), []
     for pkg in ([package] if package else python_packages(repo_root)):
         try:
             u, e = scan(repo_root, pkg, repo)
+            imp, extra = extra_python_edges(repo_root, pkg, repo, u)
         except SyntaxError:
             continue  # a package that doesn't parse as Python falls back to tree-sitter
+        have = {(x["src"], x["dst"]) for x in e}  # never relabel an edge the frozen parser made
         units += u
-        edges += e
+        edges += e + [x for x in extra if (x["src"], x["dst"]) not in have]
+        imports += imp
         done |= {x["path"] for x in u if x["kind"] == "file"}
     tu, te, langs = scan_repo(repo_root, repo, done)
     langs["python (precise resolver)"] = len(done)
+    langs["_imports"] = imports  # popped by index()
     return units + tu, edges + [{**e, "by": "name-match"} for e in te], langs
 
 
 def index(store, repo_root: Path, package: str | None, repo: str, batch: int = 1000, all_languages: bool = True) -> dict:
     units, edges, langs = scan_all(repo_root, package, repo) if all_languages else (*scan(repo_root, package, repo), {})
+    imports = langs.pop("_imports", [])
     seen = Counter()
     for u in units:  # same symbol twice in one file (property setters, try/except fallbacks): later ones get @2, @3
         seen[u["uid"]] += 1
@@ -162,7 +243,13 @@ def index(store, repo_root: Path, package: str | None, repo: str, batch: int = 1
             MERGE (a)-[d:DEPENDS_ON {kind: 'calls'}]->(b)
             SET d.resolved_by = r.by, d.confidence = r.confidence
             """, {"rows": edges[i:i + batch]})
-    return {"units": len(units), "functions": sum(u["kind"] == "function" for u in units),
+    for i in range(0, len(imports), batch):
+        store.q("index.imports", """
+            UNWIND $rows AS r
+            MATCH (a:Unit {uid: r.src}), (b:Unit {uid: r.dst})
+            MERGE (a)-[i:IMPORTS]->(b) SET i.resolved_by = 'ast-import'
+            """, {"rows": imports[i:i + batch]})
+    return {"units": len(units), "functions": sum(u["kind"] == "function" for u in units), "imports": len(imports),
             "classes": sum(u["kind"] == "class" for u in units), "regions": sum(u["kind"] == "region" for u in units),
             "calls": len(edges), "approximate_calls": sum(e["by"] == "name-match" for e in edges), "files_by_lang": langs,
             "changed_units": changed, "deleted_units": gone, "_units": units}

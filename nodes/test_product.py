@@ -100,7 +100,9 @@ def test_gate_four_decisions_and_handoff_snapshot(ws):
     r = ops.before_acting(st, b, "edit", ["pkg/m.py:2", "pkg.m.helper"])
     assert r["decision"] == "defer" and r["data"]["path"][-1] == "alice"
     assert st.q("t", "MATCH (u:Unit {uid: 'fn:t:pkg/m.py#helper'}) RETURN u.lease_owner", ro=True)[0][0] is None
-    assert ops.before_acting(st, b, "edit", ["pkg.m.helper"])["decision"] == "proceed"
+    r = ops.before_acting(st, b, "edit", ["pkg.m.helper"])  # alice's edit() calls helper: advisory, not a block
+    assert r["decision"] == "defer" and r["data"]["advisory"] and r["data"]["path"][-1] == "alice"
+    assert ops.before_acting(st, b, "edit", ["pkg.m.helper"], acknowledge="signature unchanged")["decision"] == "proceed"
     r = ops.before_acting(st, a, "edit", ["pkg.m.helper"])
     assert r["decision"] == "escalate" and r["data"]["path"] == ["alice", "-WAITS_FOR->", "bob", "-WAITS_FOR->", "alice"]
     ops.coordinate(st, a, "done", text="abc123")
@@ -108,7 +110,7 @@ def test_gate_four_decisions_and_handoff_snapshot(ws):
     assert r["decision"] == "handoff" and "abc123" in r["data"]["reason"] and r["data"]["snapshot"]
     assert st.db.select_graph(r["data"]["snapshot"]).ro_query("MATCH (u:Unit) RETURN count(u)").result_set[0][0] > 0
     assert [v for v, in st.q("t", "MATCH (d:Decision) RETURN d.verdict ORDER BY d.at", ro=True)] == \
-        ["proceed", "defer", "proceed", "escalate", "handoff"]
+        ["proceed", "defer", "defer", "acknowledged", "proceed", "escalate", "handoff"]
 
 
 def test_lease_race_one_winner_and_epochs(ws):

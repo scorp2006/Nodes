@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt pytest
-      - run: python -m pytest -q nodes/test_v1.py nodes/test_product.py nodes/test_audit.py
+      - run: python -m pytest -q nodes/test_v1.py nodes/test_product.py nodes/test_audit.py nodes/test_track1.py
 
   replay:
     # Every recorded harness tool call (4916) replayed into the frozen harness (FalkorDB :6379) and the product's

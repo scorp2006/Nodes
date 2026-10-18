@@ -104,8 +104,10 @@ def config_files(port: int, lan: bool = False, fail_mode: str = "closed") -> tup
             # Nodes tools first: the hook stamps the caller (session, subagent, cwd) into the call
             "PreToolUse": [{"matcher": "mcp__nodes__.*", "hooks": [http("pre-tool-use", 10, onFailure=on_fail)]},
                            {"matcher": "Edit|Write|MultiEdit|Bash",
-                            "hooks": [http("pre-tool-use", 15, onFailure=on_fail)]}],
-            "PostToolUse": [{"matcher": "Edit|Write|MultiEdit", "hooks": [http("post-tool-use", 30)]}],
+                            "hooks": [http("pre-tool-use", 15, onFailure=on_fail)]},
+                           # subagent dispatch: only records each task's description, never blocks spawning
+                           {"matcher": "Agent|Task", "hooks": [http("pre-tool-use", 5)]}],
+            "PostToolUse": [{"matcher": "Edit|Write|MultiEdit|Bash", "hooks": [http("post-tool-use", 30)]}],
             "SubagentStart": [{"hooks": [http("subagent-start", 5)]}],
             "SubagentStop": [{"hooks": [http("subagent-stop", 5)]}],
             "Stop": [{"hooks": [http("stop", 5)]}],
@@ -120,7 +122,8 @@ def plugin_files(port: int = 8780) -> tuple[dict, dict]:
     hooks/gate.sh, which fails closed only in repos that ran `nodes init` (a user-scope plugin sees every repo)."""
     mcp, settings = config_files(port, fail_mode="open")
     gate = {"type": "command", "command": 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/gate.sh"', "timeout": 20}
-    settings["hooks"]["PreToolUse"] = [{"matcher": m["matcher"], "hooks": [gate]} for m in settings["hooks"]["PreToolUse"]]
+    settings["hooks"]["PreToolUse"] = [m if m["matcher"] == "Agent|Task" else {"matcher": m["matcher"], "hooks": [gate]}
+                                       for m in settings["hooks"]["PreToolUse"]]  # dispatch is never gated
     return {"hooks": settings["hooks"]}, mcp
 
 
@@ -172,6 +175,9 @@ def cmd_init(a):
     if not tok_file.exists():
         toks = {f"agent{i + 1}": ops.join(st, f"agent{i + 1}", client="token")[0] for i in range(a.agents)}
         tok_file.write_text(json.dumps(toks, indent=1), encoding="utf-8")
+    if a.import_sessions and common:  # opt-in: past Claude Code rationale for this repo, at 'extracted' trust
+        from .sessions_import import import_sessions
+        gstats = gstats | {"session_facts": import_sessions(st, common)}
     if common:  # keep local Nodes files out of git
         excl = Path(common) / "info" / "exclude"
         excl.parent.mkdir(exist_ok=True)
@@ -276,6 +282,8 @@ def main():
     i.add_argument("--agents", type=int, default=2, help="agent tokens to mint for clients without hooks")
     i.add_argument("--fresh", action="store_true", help="wipe the workspace graph first (default: incremental)")
     i.add_argument("--no-git", action="store_true")
+    i.add_argument("--import-sessions", action="store_true",
+                   help="also import decision rationale from your past Claude Code sessions in this repo (local only)")
     i.add_argument("--fail-mode", choices=["closed", "open"], default="closed",
                    help="server unreachable: block gated tools (closed, default) or let them run ungated (open)")
     i.add_argument("--lan", action="store_true", help="config for a server bound beyond localhost (token required)")

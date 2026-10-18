@@ -44,8 +44,10 @@ def test_script_writing_unnamed_files_is_opaque():
 def test_hooks_fail_closed_by_default():
     for mode, want in (("closed", "block"), ("open", "continue")):
         _, settings = config_files(8780, fail_mode=mode)
-        pre = [h for m in settings["hooks"]["PreToolUse"] for h in m["hooks"]]
-        assert pre and all(h["onFailure"] == want for h in pre)
+        gates = [h for m in settings["hooks"]["PreToolUse"] if m["matcher"] != "Agent|Task" for h in m["hooks"]]
+        assert gates and all(h["onFailure"] == want for h in gates)
+        dispatch = [h for m in settings["hooks"]["PreToolUse"] if m["matcher"] == "Agent|Task" for h in m["hooks"]]
+        assert dispatch and all("onFailure" not in h for h in dispatch)  # spawning subagents is never blocked
 
 
 @pytest.fixture()
@@ -177,7 +179,9 @@ def test_nested_code_leases_block_each_other(ws):  # noqa: F811  (CooperBench na
     assert ops.before_acting(st, a, "edit", ["pkg.m.edit"])["decision"] == "proceed"       # alice: one function
     r = ops.before_acting(st, b, "edit", [file_uid])                                        # bob: the whole file
     assert r["decision"] == "defer" and r["data"]["path"][-1] == "alice"
-    assert ops.before_acting(st, b, "edit", ["pkg.m.helper"])["decision"] == "proceed"     # a different function: fine
+    r = ops.before_acting(st, b, "edit", ["pkg.m.helper"])                                   # a different function...
+    assert r["decision"] == "defer" and r["data"]["advisory"]                                # ...that alice's calls
+    assert ops.before_acting(st, b, "edit", ["pkg.m.helper"], acknowledge="no behaviour change")["decision"] == "proceed"
     ops.coordinate(st, a, "release")
     ops.coordinate(st, b, "release")
     assert ops.before_acting(st, a, "edit", [file_uid])["decision"] == "proceed"            # alice: the whole file
@@ -189,3 +193,23 @@ def test_nested_code_leases_block_each_other(ws):  # noqa: F811  (CooperBench na
     assert ops.before_acting(st, b, "edit", [method])["decision"] == "defer"               # bob: its method
     ops.coordinate(st, a, "done", text="abc")                                                # alice finishes
     assert ops.before_acting(st, b, "edit", [method])["decision"] in ("proceed", "handoff")  # done owners don't block
+
+
+def test_multi_hop_overlap_is_advisory_and_every_acknowledgment_is_recorded(ws):  # noqa: F811
+    st, _ = ws
+    a, b = ({"session": ops.join(st, n)[1], "name": n} for n in ("alice", "bob"))
+    assert ops.before_acting(st, a, "edit", ["pkg.m.helper"])["decision"] == "proceed"      # alice holds helper
+    r = ops.before_acting(st, b, "edit", ["pkg.m.Editor.edit_file"])  # edit_file -> edit -> helper: 2 hops
+    assert r["decision"] == "defer" and r["data"]["advisory"]
+    o = r["data"]["overlaps"][0]
+    assert o["theirs"].endswith("#helper") and o["hops"] == 2 and o["owner"] == "alice"
+    assert st.q("t", "MATCH (u:Unit) WHERE u.lease_owner = $b RETURN count(u)", {"b": b["session"]}, ro=True)[0][0] == 1
+    # (the lease is reserved for bob while he looks, so nobody else takes the code in the meantime)
+    r = ops.before_acting(st, b, "edit", ["pkg.m.Editor.edit_file"], acknowledge="only renames a local variable")
+    assert r["decision"] == "proceed"
+    ack = st.q("t", "MATCH (:Session {name: 'bob'})-[:MADE]->(d:Decision {verdict: 'acknowledged'})-[:CITES]->(u:Unit) "
+               "RETURN d.reason, d.pairs, collect(u.uid)", ro=True)
+    assert ack[0][0] == "only renames a local variable" and len(ack[0][1]) == 1 and len(ack[0][2]) == 2
+    assert ops.before_acting(st, b, "edit", ["pkg.m.Editor.edit_file"])["decision"] == "proceed"  # remembered
+    ops.coordinate(st, a, "done", text="abc")
+    assert ops.before_acting(st, b, "edit", ["pkg.m.edit"])["decision"] == "proceed"        # finished owners don't warn

@@ -60,7 +60,7 @@ def session_for_hook(reg, body: dict) -> dict | None:
     agent_id, agent_type = body.get("agent_id") or "", body.get("agent_type") or ""
     uid = f"cc:{sid}" + (f":{agent_id}" if agent_id else "")
     main = branch_of(cwd) or "main-" + sid[:6]  # a session in worktree branch `alice` shows as alice
-    name = f"{agent_type or 'agent'}-{sid[:6]}-{agent_id[:4]}" if agent_id else main
+    name = f"sub-{agent_id[:4]}" if agent_id else main  # distinct and short; its task is shown beside it
     store = reg.store(ws)
     # Session.principal is MANDATORY and FalkorDB checks it when the node is created (before ON CREATE SET),
     # so each Session is created with all its properties at once.

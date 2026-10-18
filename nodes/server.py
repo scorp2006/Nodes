@@ -21,7 +21,7 @@ from mcp.server.auth.provider import AccessToken
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.mcpserver import Context, MCPServer
 
-from . import harness, identity, ops, redact
+from . import graphtools, harness, identity, ops, redact
 from .db import LAST_RESULT, Store
 
 WEB = Path(__file__).with_name("web")
@@ -43,11 +43,11 @@ class Registry:
             st = Store(ws, self.host, self.port)
             orig = st.q
 
-            def q(name, cypher, params=None, ro=False, _orig=orig):  # per-query latency + effects into the trace
+            def q(name, cypher, params=None, ro=False, timeout=None, _orig=orig):  # latency + effects into the trace
                 t0 = time.perf_counter()
                 LAST_RESULT.set(None)
                 try:
-                    return _orig(name, cypher, params, ro)
+                    return _orig(name, cypher, params, ro, timeout)
                 finally:
                     calls = CALLS.get()
                     if calls is not None:
@@ -156,12 +156,16 @@ def build(reg: Registry, profile: str = "nodes", public_url: str = "http://127.0
 
         @server.tool(name="before_acting")
         def before_acting(action: str, targets: list[str], ctx: Context, relies_on_facts: list[str] | None = None,
-                          idempotency_key: str = "", caller: dict | None = None) -> str:
+                          acknowledge: str = "", idempotency_key: str = "", caller: dict | None = None) -> str:
             """The action gate. Call before every change: action (edit|commit|merge|delete|decide), targets (unit
             uids, qualnames, paths or 'path:10-20'). Returns proceed | defer | handoff | escalate, the reason, and
-            the graph path that explains it. Only act on proceed or handoff."""
-            return call("before_acting", lambda st, s, ws: ops.before_acting(st, s, action, targets, relies_on_facts),
-                        ctx, caller, action=action, targets=targets, relies_on_facts=relies_on_facts)
+            the graph path that explains it. Only act on proceed or handoff. A defer marked advisory means your change
+            reaches code a teammate holds or plans within 3 hops: if it can't affect theirs, call again with
+            acknowledge='<why>' (recorded), otherwise coordinate."""
+            return call("before_acting", lambda st, s, ws: ops.before_acting(st, s, action, targets, relies_on_facts,
+                                                                             acknowledge=acknowledge),
+                        ctx, caller, action=action, targets=targets, relies_on_facts=relies_on_facts,
+                        acknowledge=acknowledge)
 
         @server.tool(name="post_fact")
         def post_fact(text: str, source_ref: dict, ctx: Context, idempotency_key: str = "",
@@ -193,6 +197,37 @@ def build(reg: Registry, profile: str = "nodes", public_url: str = "http://127.0
             return call("status", lambda st, s, w: ops.envelope(ops.digest(st, s) | {"changes": changes},
                         "Act on anything that concerns you; call before_acting before each edit."),
                         ctx, caller, wait_seconds=wait_seconds)
+        # read-only graph reasoning: each answer carries the Cypher it ran (GRAPH.RO_QUERY, timeout, row cap)
+        @server.tool(name="impact_of")
+        def impact_of(unit: str, ctx: Context, max_hops: int = 3, caller: dict | None = None) -> str:
+            """Everything within max_hops (1-4) of a unit: callers, callees and importing files, each with its path
+            and who holds it. Use it to plan a change and to see whose work it could reach."""
+            return call("impact_of", lambda st, s, ws: graphtools.impact_of(st, s, unit, max_hops), ctx, caller,
+                        unit=unit, max_hops=max_hops)
+
+        @server.tool(name="path_between")
+        def path_between(a: str, b: str, ctx: Context, caller: dict | None = None) -> str:
+            """The shortest dependency path between two units (calls, imports, containment), or none within 8 hops."""
+            return call("path_between", lambda st, s, ws: graphtools.path_between(st, s, a, b), ctx, caller, a=a, b=b)
+
+        @server.tool(name="hotspots")
+        def hotspots(ctx: Context, limit: int = 15, caller: dict | None = None) -> str:
+            """The most central units (PageRank on the call graph): changes there reach the most code."""
+            return call("hotspots", lambda st, s, ws: graphtools.hotspots(st, s, limit), ctx, caller, limit=limit)
+
+        @server.tool(name="communities")
+        def communities(ctx: Context, limit: int = 12, caller: dict | None = None) -> str:
+            """Module clusters (label propagation over calls, imports, containment). Clusters that don't touch are
+            good boundaries for splitting work across parallel agents."""
+            return call("communities", lambda st, s, ws: graphtools.communities(st, s, limit), ctx, caller, limit=limit)
+
+        @server.tool(name="query_graph")
+        def query_graph(cypher: str, ctx: Context, caller: dict | None = None) -> str:
+            """Run read-only Cypher on this repository's graph (labels: Unit, Session, Intent, Decision, Fact, Source,
+            Revision, Principal; relationships: DEPENDS_ON, IMPORTS, CONTAINS, CO_CHANGES, OWNS_CODE, ...). Writes are
+            refused; 2 s timeout; at most 200 rows."""
+            return call("query_graph", lambda st, s, ws: graphtools.query_graph(st, s, cypher), ctx, caller,
+                        cypher=cypher)
         ctx_resolve = ctx
     elif profile == "harness-board":
         @server.tool(name="share_fact", description=harness.BOARD_TOOLS["share_fact"])

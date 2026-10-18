@@ -1,0 +1,40 @@
+{
+ "repo": "F",
+ "units": 277,
+ "functions": 113,
+ "classes": 23,
+ "edges_by_type": {
+  "IMPORTS": 16,
+  "DEPENDS_ON": 83,
+  "CONTAINS": 260
+ },
+ "call_edges_by_resolver": {
+  "name-match": 2,
+  "ast-static": 66,
+  "self-attr": 15
+ },
+ "files_by_lang": {
+  "python": 3,
+  "python (precise resolver)": 14
+ },
+ "python_call_sites": 560,
+ "resolved": 84,
+ "resolution_rate": 0.15,
+ "resolved_by_form": {
+  "self.method": 22,
+  "plain name": 42,
+  "attribute": 20
+ },
+ "unresolved_reasons": {
+  "method of a library/builtin object (str, list, dict, ...)": 183,
+  "external library call (np., cv2., ...)": 110,
+  "builtin": 109,
+  "resolved": 84,
+  "attribute call needing type info": 36,
+  "name not defined in the repo": 15,
+  "unresolved plain name": 13,
+  "external import": 7,
+  "self.method not in this class or its repo bases": 3
+ },
+ "in_repo_rate": 0.618
+}

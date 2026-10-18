@@ -22,6 +22,12 @@ let ws = new URLSearchParams(location.search).get("ws") || "", events = [], live
 // ---------------------------------------------------------------- the story: one event -> plain words
 function story(e, prev) {
   const p = (e.path || "").split(" "), A = nameOf(e.agent);
+  if (e.kind === "decision" && e.advisory) {  // multi-hop overlap: a warning to look, never a block
+    const theirs = p[p.length - 3], owner = p[p.length - 1];
+    return e.verdict === "acknowledged"
+      ? {cls: "go", text: `${A} confirmed its change can't affect ${short(theirs)} (${nameOf(owner)}'s): "${e.reason || ""}".`}
+      : {cls: "wait", text: `Possible overlap (advisory): ${A}'s change to ${short(p[0])} reaches ${short(theirs)}, which ${nameOf(owner)} ${p[p.length - 2] === "-HELD_BY->" ? "holds" : "plans to change"}. ${A} must confirm or coordinate.`};
+  }
   if (e.kind === "decision") {
     if (e.verdict === "proceed") { const units = ((e.path || "").split("-HOLDS-> ")[1] || "its change").split(", ").map(short).join(", ");
       return {cls: "go", text: prev[e.agent] === "defer" ? `${A} moved on to ${units}.` : `${A} went ahead with ${units}.`}; }
@@ -36,7 +42,11 @@ function story(e, prev) {
   if (e.kind === "done") return {cls: "hand", text: `${A} finished${e.commit ? ` (commit ${String(e.commit).slice(0, 7)})` : ""}. Its code can be handed on.`};
   if (e.kind === "release") return {cls: "hand", text: `${A} released ${(e.units || []).length || "its"} unit(s)${(e.notify || []).length ? `; ${e.notify.map(nameOf).join(", ")} told at once` : ""}.`};
   if (e.kind === "intent") return {cls: "", text: `${A} said what it plans to change.`};
-  if (e.kind === "join" || e.kind === "subagent-start") return {cls: "", text: `${A} joined.`};
+  if (e.kind === "query") return {cls: "", text: `${A} asked the graph: ${e.summary || e.tool}.`};
+  if (e.kind === "fact" && e.status === "observed") return {cls: /fail|error/i.test(e.text || "") ? "block" : "go",
+    text: `${A} ran checks. ${e.text || ""}`};
+  if (e.kind === "join") return {cls: "", text: `${A} joined.`};
+  if (e.kind === "subagent-start") return {cls: "", text: `${A} started${e.task ? `: ${e.task}` : ""}.`};
   if (e.kind === "merge-snapshot") return {cls: "hand", text: `${A} is merging; Nodes saved a snapshot of the graph first.`};
   if (e.kind === "stale-write") return {cls: "block", text: `${A} wrote code it no longer held. Nodes flagged it as stale.`};
   return null;
@@ -284,7 +294,7 @@ function light(ids, ms = 2600, c = "#ececee") {  // a traversal: ripple the node
   canvas.refresh(); clearTimeout(litTimer);
   litTimer = setTimeout(() => { lit = new Set(); (canvas.getGraphData()?.links || []).forEach(l => { if (l.data?.burst) delete l.data.burst; }); canvas.refresh(); }, ms);
 }
-const pathIds = e => [`agent:${e.agent}`, ...((e.path || "").match(UNIT_RE) || [])];
+const pathIds = e => [`agent:${e.agent}`, ...((e.path || "").match(UNIT_RE) || []), ...(e.units || [])];
 
 function travText(e) {  // "alice -DONE_AT-> 0fe00a8… -HANDS-> order_total -TO-> bob", with readable names
   return (e.path || "").split(" ").map(t => /^-[A-Z_]+->$/.test(t) ? `<span class="muted mono" style="font-size:11px">${esc(t.slice(1, -2))}</span>`
@@ -293,11 +303,12 @@ function travText(e) {  // "alice -DONE_AT-> 0fe00a8… -HANDS-> order_total -TO
 }
 
 function renderGside() {
-  const recent = events.slice(0, live ? events.length : cursor).filter(e => e.kind === "decision").slice(-6).reverse();
+  const recent = events.slice(0, live ? events.length : cursor).filter(e => e.kind === "decision" || e.kind === "query").slice(-8).reverse();
   $("gside").innerHTML = `<span class="label">Recent traversals</span>
     <p class="muted" style="font-size:13px;margin:8px 0 14px">Each gate decision walks the graph from an agent to the code it wants. Click one to light its path.</p>
     ${recent.map((e, i) => `<div class="story ${VERDICT[e.verdict] || ""}" data-i="${events.indexOf(e)}" style="padding:10px 0;grid-template-columns:10px 1fr"><span class="bar"></span>
-      <span style="font-size:13px;line-height:1.7">${travText(e)}</span></div>`).join("")
+      <span style="font-size:13px;line-height:1.7">${e.kind === "query" ? `<b style="font-weight:500">${esc(nameOf(e.agent))}</b> <span class="muted mono" style="font-size:11px">${esc(e.tool)}</span> ${esc((e.summary || "").replace(/^[a-z_]+: /, ""))}`
+        : (e.advisory ? '<span class="tag t-wait" style="margin-right:6px">advisory</span>' : "") + travText(e)}</span></div>`).join("")
       || '<div class="muted" style="font-size:13px">No decisions yet.</div>'}
     <div class="sect"><span class="label">Node</span><p class="muted" style="font-size:13px;margin:8px 0 0">Click a node for its lease, authors, last change and the facts on it.</p></div>`;
 }
@@ -414,7 +425,7 @@ $("gsource").onclick = async e => { const b = e.target.closest("button"); if (!b
 
 // ---------------------------------------------------------------- facts
 function renderFacts() {
-  $("facts").innerHTML = facts.map(f => `<div class="fact"><div class="meta"><span class="tag ${f.status === "source-checked" ? "t-go" : f.status === "extracted" ? "t-hand" : "t-block"}">${esc(f.status === "unverified" ? "unverified" : f.status)}</span>
+  $("facts").innerHTML = facts.map(f => `<div class="fact"><div class="meta"><span class="tag ${f.status === "source-checked" || f.status === "observed" ? "t-go" : f.status === "extracted" ? "t-hand" : "t-block"}">${esc(f.status === "unverified" ? "unverified" : f.status)}</span>
       <span>${esc(nameOf(f.by))}</span><span class="mono">${esc(f.source)}</span></div><div>${esc(f.text)}</div></div>`).join("")
     || `<div class="empty"><b>No facts shared yet</b>When an agent tells the team something with <code>post_fact</code>, it lands here with its trust level: <b style="display:inline;color:var(--go)">source-checked</b> when Nodes found it in the cited code, unverified when it could not.</div>`;
 }
@@ -467,7 +478,8 @@ async function connect() {
   es.onmessage = async m => { const e = JSON.parse(m.data); events.push(e); $("slider").max = events.length; refreshCalls();
     if (!live) return;
     $("slider").value = cursor = events.length; await refreshState(); render(true); renderCalls();
-    if (e.kind === "decision") light(pathIds(e), 2600, VCOL[e.verdict]); };
+    if (e.kind === "decision") light(pathIds(e), 2600, e.advisory ? "#e8a93b" : VCOL[e.verdict]);
+    if (e.kind === "query") light(pathIds(e), 2600, "#ececee"); };
 }
 
 // ---------------------------------------------------------------- controls

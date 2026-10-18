@@ -86,10 +86,14 @@ COOP_TOOLS = {
     "impact_of": "List the functions that call, or are called by, `function` within 2 calls.",
 }
 
+# The study harness only knew these call edges; later resolvers add edges with other resolved_by values,
+# which these profiles must not see (the replay check holds them to the recorded replies).
+STUDY_EDGES = ["ast-static", "name-match"]
+
 CONFLICTS = """
 MATCH (me:Session {name: $me})-[:DECLARED]->(:Intent {status: 'declared', task: 'harness-plan'})-[:TOUCHES]->(f:Unit)
 MATCH p = (f)-[:DEPENDS_ON*0..3]-(g:Unit)<-[:TOUCHES]-(:Intent {status: 'declared', task: 'harness-plan'})<-[:DECLARED]-(other:Session)
-WHERE other <> me
+WHERE other <> me AND all(r IN relationships(p) WHERE type(r) <> 'DEPENDS_ON' OR r.resolved_by IN $study_edges)
 RETURN other.name, f.qualname AS mine, g.qualname AS theirs, length(p) - 2 AS call_hops,
        [n IN nodes(p) | coalesce(n.qualname, n.name)] AS via
 ORDER BY call_hops LIMIT 20
@@ -139,7 +143,7 @@ def set_plan(store, sess: dict, found: list[str]) -> None:
 
 
 def overlaps(store, name: str) -> list:
-    return store.q("harness.conflicts", CONFLICTS, {"me": name}, ro=True)
+    return store.q("harness.conflicts", CONFLICTS, {"me": name, "study_edges": STUDY_EDGES}, ro=True)
 
 
 def claim(store, sess: dict, found: list[str]) -> tuple[list[str], dict[str, str]]:
@@ -275,10 +279,13 @@ def impact_text(store, function: str) -> str:
         return f"No unique function named {function}. " + (f"Candidates: {', '.join(cands)}" if cands else "Nothing matches.")
     file, line, callers, callees = store.q("harness.impact", """
         MATCH (f:Unit {kind: 'function', qualname: $q})
-        OPTIONAL MATCH (caller:Unit)-[:DEPENDS_ON*1..2]->(f)
+        OPTIONAL MATCH p1 = (caller:Unit)-[:DEPENDS_ON*1..2]->(f)
+        WHERE all(r IN relationships(p1) WHERE r.resolved_by IN $study_edges)
         WITH f, collect(DISTINCT caller.qualname) AS callers
-        OPTIONAL MATCH (f)-[:DEPENDS_ON*1..2]->(callee:Unit)
-        RETURN f.file, f.line, callers, collect(DISTINCT callee.qualname)""", {"q": found[0]}, ro=True)[0]
+        OPTIONAL MATCH p2 = (f)-[:DEPENDS_ON*1..2]->(callee:Unit)
+        WHERE all(r IN relationships(p2) WHERE r.resolved_by IN $study_edges)
+        RETURN f.file, f.line, callers, collect(DISTINCT callee.qualname)""",
+        {"q": found[0], "study_edges": STUDY_EDGES}, ro=True)[0]
     return (f"{found[0]} ({file}:{line})\n  called by (<=2 calls): {', '.join(callers[:25]) or 'nothing found'}\n"
             f"  calls (<=2 calls): {', '.join(callees[:25]) or 'nothing found'}\n"
             "Note: calls made through attributes, parameters or inheritance are not tracked.")

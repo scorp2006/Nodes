@@ -147,8 +147,46 @@ def import_git(store, root: Path, units: list[dict], batch: int = 500) -> dict:
     for i in range(0, len(last), batch):
         store.q("git.rationale", "UNWIND $rows AS l MATCH (u:Unit {uid: l.uid}) SET u.last_rev = l.sha, u.rationale = l.rationale",
                 {"rows": last[i:i + batch]})
+    facts = commit_facts(store, cs)
     head = git(root, "rev-parse", "HEAD").strip()
     store.r.hset("nodes:git", store.ws, head)
     return {"new_commits": len(cs), "prs": len(prs), "merges": sum(len(c["parents"]) > 1 for c in cs),
             "cochange_edges": len(edges), "branches": len(refs), "owned_units": len({o["uid"] for o in owners}),
-            "no_rationale_units": sum(lr["rationale"].startswith("no recorded") for lr in last), "head": head[:10]}
+            "no_rationale_units": sum(lr["rationale"].startswith("no recorded") for lr in last), "head": head[:10],
+            "commit_facts": facts}
+
+
+MAX_COMMIT_FACTS = 500
+TRIVIAL = re.compile(r"^(merge|wip|fix(es)?|update[sd]?|typo|minor|cleanup|bump|initial commit|\.)\b.{0,12}$", re.I)
+
+
+def commit_facts(store, cs: list[dict]) -> int:
+    """Each meaningful commit message becomes a Fact SOURCED_FROM Source{kind:'commit', ref:<sha>}, ABOUT the files
+    it changed. Nodes read it from git itself, so it is source-checked (the agents didn't claim it)."""
+    rows = []
+    for c in cs[:MAX_COMMIT_FACTS]:  # newest first
+        subject = (c["message"].splitlines() or [""])[0].strip()
+        if len(c["parents"]) > 1 or len(subject) < 12 or TRIVIAL.match(subject):
+            continue
+        rows.append({"fid": "fact:commit:" + c["sha"][:16], "text": " ".join(c["message"].split())[:600],
+                     "src": "commit:" + c["sha"], "sha": c["sha"], "files": c["files"][:30], "at": c["at"] * 1000})
+    if not rows:
+        return 0
+    store.q("git.facts.session", """
+        MERGE (p:Principal {uid: 'nodes:git'}) ON CREATE SET p.kind = 'service', p.name = 'git history'
+        WITH p OPTIONAL MATCH (s0:Session {uid: 'import:git'})
+        FOREACH (_ IN CASE WHEN s0 IS NULL THEN [1] ELSE [] END |
+            CREATE (p)-[:RUNS]->(:Session {uid: 'import:git', principal: 'nodes:git', name: 'git history',
+                    status: 'done', started_at: timestamp(), task: 'commit facts', client: 'nodes', token_hash: ''}))""")
+    for i in range(0, len(rows), 200):
+        store.q("git.facts", """
+            UNWIND $rows AS r
+            MERGE (src:Source {uid: r.src}) ON CREATE SET src.kind = 'commit', src.ref = r.sha
+            WITH r, src OPTIONAL MATCH (f0:Fact {uid: r.fid})
+            FOREACH (_ IN CASE WHEN f0 IS NULL THEN [1] ELSE [] END |
+                CREATE (:Fact {uid: r.fid, text: r.text, source_uid: r.src, status: 'source-checked', recorded_at: r.at}))
+            WITH r, src MATCH (f:Fact {uid: r.fid}) MERGE (f)-[:SOURCED_FROM]->(src)
+            WITH r, f MATCH (s:Session {uid: 'import:git'}) MERGE (s)-[a:ASSERTED]->(f) ON CREATE SET a.seq = -1
+            WITH r, f UNWIND r.files AS path
+            MATCH (u:Unit {kind: 'file', path: path}) MERGE (f)-[:ABOUT]->(u)""", {"rows": rows[i:i + 200]})
+    return len(rows)

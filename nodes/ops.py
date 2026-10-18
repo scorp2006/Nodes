@@ -106,6 +106,7 @@ def declare_intent(store, sess: dict, task: str, summary: str, touches: list[dic
     iid = f"intent:{sess['name']}:{uuid.uuid4().hex[:8]}"
     store.q("declare_intent", """
         MATCH (s:Session {uid: $sid})
+        SET s.task = CASE WHEN coalesce(s.task, '') = '' THEN $task ELSE s.task END
         CREATE (s)-[:DECLARED]->(i:Intent {uid: $iid, task: $task, summary: $summary, status: 'declared', created_at: $now})
         WITH i UNWIND $rows AS r
         MERGE (u:Unit {uid: r.uid}) ON CREATE SET u.kind = 'planned', u.status = 'planned', u.path = r.path,
@@ -169,8 +170,48 @@ RETURN u.uid, prev, ok, u.lease_epoch, u.lease_expires
 """
 
 
+REACH = """
+UNWIND $uids AS id MATCH (u:Unit {uid: id})
+MATCH p = (u)-[:DEPENDS_ON|IMPORTS*1..3]-(v:Unit)
+WHERE NOT v.uid IN $uids AND v.lease_owner IS NOT NULL AND v.lease_owner <> $me AND v.lease_expires >= $now
+MATCH (o:Session {uid: v.lease_owner}) WHERE o.status <> 'done'
+WITH u, v, o, p ORDER BY length(p)
+WITH u, v, o, collect(p)[0] AS p
+RETURN u.uid AS mine, v.uid AS theirs, o.name AS owner, 'holds' AS how, length(p) AS hops, [n IN nodes(p) | n.uid] AS via
+UNION
+UNWIND $uids AS id MATCH (u:Unit {uid: id})
+MATCH p = (u)-[:DEPENDS_ON|IMPORTS*1..3]-(v:Unit)
+WHERE NOT v.uid IN $uids
+MATCH (v)<-[:TOUCHES]-(i:Intent)<-[:DECLARED]-(o:Session)
+WHERE o.uid <> $me AND o.status <> 'done' AND i.status IN ['declared', 'active']
+WITH u, v, o, p ORDER BY length(p)
+WITH u, v, o, collect(p)[0] AS p
+RETURN u.uid AS mine, v.uid AS theirs, o.name AS owner, 'plans to change' AS how, length(p) AS hops, [n IN nodes(p) | n.uid] AS via
+"""
+
+
+def reach(store, me: str, uids: list[str], now: int) -> list[dict]:
+    """Code another active agent holds or has declared, within 3 hops of these units over calls and imports."""
+    if not uids:
+        return []
+    rows = store.q("gate.reach", REACH, {"uids": uids, "me": me, "now": now}, ro=True, timeout=1500)
+    best = {}
+    for mine, theirs, owner, how, hops, via in rows:
+        if (mine, theirs) not in best or hops < best[(mine, theirs)]["hops"]:
+            best[(mine, theirs)] = {"mine": mine, "theirs": theirs, "owner": owner, "how": how, "hops": hops, "via": via,
+                                    "path": [mine] + [x for n in via[1:] for x in ("-REACHES->", n)]
+                                    + ["-HELD_BY->" if how == "holds" else "-PLANNED_BY->", owner]}
+    return sorted(best.values(), key=lambda o: o["hops"])[:10]
+
+
+def acked(store, me: str) -> set[str]:
+    """'mine|theirs' pairs this agent has already acknowledged as unaffected."""
+    return {x for (ps,) in store.q("gate.acked", "MATCH (:Session {uid: $me})-[:MADE]->(d:Decision {verdict: 'acknowledged'}) "
+                                   "RETURN d.pairs", {"me": me}, ro=True) for x in (ps or [])}
+
+
 def before_acting(store, sess: dict, action: str, targets: list[str], relies_on_facts: list[str] | None = None,
-                  ttl_ms: int = LEASE_TTL_MS, workspace_root: Path | None = None) -> dict:
+                  ttl_ms: int = LEASE_TTL_MS, workspace_root: Path | None = None, acknowledge: str = "") -> dict:
     me, name, t = sess["session"], sess["name"], now_ms()
     uids, unknown = resolve_targets(store, targets)
     out = {"action": action, "targets": uids, "unknown_targets": unknown, "impact": [], "lease": []}
@@ -206,6 +247,22 @@ def before_acting(store, sess: dict, action: str, targets: list[str], relies_on_
                            f"{pname} finished; you now own {', '.join(prev)}. Merge {pname}'s commit {commit} first, "
                            f"then build on top.", [pname, "-DONE_AT->", str(commit), "-HANDS->", u0, "-TO->", name],
                            uids, facts, snapshot=snap)
+        overlaps = [o for o in reach(store, me, uids, t) if f"{o['mine']}|{o['theirs']}" not in acked(store, me)]
+        if overlaps and acknowledge.strip():  # the agent says why its change can't affect theirs: record it, go on
+            o0 = overlaps[0]
+            _decide(store, sess, out, "acknowledged", acknowledge.strip()[:500], o0["path"],
+                    sorted({u for o in overlaps for u in (o["mine"], o["theirs"])}), facts,
+                    pairs=[f"{o['mine']}|{o['theirs']}" for o in overlaps], advisory=True)
+            out["acknowledged"] = overlaps
+        elif overlaps:  # advisory: never a hard block, but the agent must look before it edits
+            o0 = overlaps[0]
+            out["overlaps"] = overlaps
+            store.event("overlap", name, units=[o0["mine"], o0["theirs"]], notify=[o0["owner"]])
+            return _decide(store, sess, out, "defer",
+                           f"possible overlap (advisory): your change to {o0['mine']} reaches {o0['theirs']}, which "
+                           f"{o0['owner']} {o0['how']}, {o0['hops']} hop(s) away. If your change can't affect it, call "
+                           f"before_acting again with acknowledge='<why>'; otherwise coordinate with {o0['owner']}",
+                           o0["path"], uids, facts, advisory=True)
         expired = [u for u in taken if u not in prev]
         return _decide(store, sess, out, "proceed", "every target is yours (lease granted or renewed)"
                        + (f"; took over expired lease(s) on {', '.join(expired)}" if expired else ""),
@@ -228,12 +285,12 @@ def before_acting(store, sess: dict, action: str, targets: list[str], relies_on_
                    [name, "-NEEDS->", u0, "-LEASED_BY->", owners[s0]], uids, facts)
 
 
-def _decide(store, sess, out, verdict, reason, path, uids, facts, snapshot=None) -> dict:
+def _decide(store, sess, out, verdict, reason, path, uids, facts, snapshot=None, pairs=None, advisory=False) -> dict:
     did = f"dec:{uuid.uuid4().hex[:12]}"
     store.q("gate.decision", """
         MATCH (s:Session {uid: $sid})
         CREATE (s)-[:MADE]->(d:Decision {uid: $did, verdict: $v, reason: $r, path: $p, action: $a, at: $now,
-                                          snapshot: $snap})
+                                          snapshot: $snap, advisory: $adv, pairs: $pairs})
         WITH d OPTIONAL MATCH (s2:Session {uid: $sid})-[:DECLARED]->(i:Intent) WHERE i.status IN ['declared', 'active']
         WITH d, i ORDER BY i.created_at DESC LIMIT 1
         FOREACH (_ IN CASE WHEN i IS NULL THEN [] ELSE [1] END | MERGE (d)-[:FOR]->(i))
@@ -241,15 +298,22 @@ def _decide(store, sess, out, verdict, reason, path, uids, facts, snapshot=None)
         OPTIONAL MATCH (u:Unit {uid: uid})
         FOREACH (_ IN CASE WHEN u IS NULL THEN [] ELSE [1] END | MERGE (d)-[:CITES]->(u))
         """, {"sid": sess["session"], "did": did, "v": verdict, "r": reason, "p": " ".join(path),
-              "a": out["action"], "now": now_ms(), "snap": snapshot or "", "u": uids})
+              "a": out["action"], "now": now_ms(), "snap": snapshot or "", "u": uids, "adv": advisory,
+              "pairs": pairs or []})
     if facts:
         store.q("gate.cites", "MATCH (d:Decision {uid: $d}) UNWIND $f AS id MATCH (x:Fact {uid: id}) "
                 "MERGE (d)-[:CITES]->(x)", {"d": did, "f": facts})
-    store.event("decision", sess["name"], verdict=verdict, decision=did, path=" ".join(path))
+    store.event("decision", sess["name"], verdict=verdict, decision=did, path=" ".join(path),
+                **({"advisory": True, "reason": reason[:300]} if advisory else {}))
     nxt = {"proceed": "Make the change now. Call before_acting again before the next one.",
            "handoff": "Merge the finished owner's commit first, then make your change on top.",
            "defer": "Work on something else, or call status(wait_seconds=60) to be told when it frees up.",
-           "escalate": "Stop and ask a human (or your lead) to resolve this before acting."}[verdict]
+           "escalate": "Stop and ask a human (or your lead) to resolve this before acting.",
+           "acknowledged": "Recorded. Make the change now."}[verdict]
+    if advisory and verdict == "defer":
+        nxt = ("Possible overlap (advisory): if your change can't affect their code, call before_acting again with the "
+               "same targets and acknowledge='<why>'; otherwise coordinate with the owner first.")
+        out["advisory"] = True
     out |= {"decision": verdict, "reason": reason, "path": path, "decision_uid": did, "snapshot": snapshot}
     return envelope(out, nxt, decision=verdict)
 
@@ -378,17 +442,45 @@ def _fulltext(query: str) -> str:
 
 
 def context_for(store, sess: dict, query: str, budget: int = 1500) -> dict:
-    units = store.q("read.context_units", """
-        MATCH (u:Unit) WHERE u.kind <> 'file' AND (u.uid CONTAINS $q OR u.path CONTAINS $q OR u.symbol CONTAINS $q)
+    # exact ids and paths first, then plain English over unit names, paths and their git rationale
+    exact = store.q("read.context_units", """
+        MATCH (u:Unit) WHERE u.kind <> 'file' AND u.status = 'active'
+          AND (u.uid CONTAINS $q OR u.path CONTAINS $q OR u.symbol CONTAINS $q)
+        RETURN u.uid LIMIT 25""", {"q": query}, ro=True) if query.strip() else []
+    hits = store.q("read.context_units_text", """
+        CALL db.idx.fulltext.queryNodes('Unit', $q) YIELD node, score
+        WHERE node.kind <> 'file' AND node.status = 'active'
+        RETURN node.uid, node.symbol, node.path, node.kind, score ORDER BY score DESC LIMIT 60""",
+                   {"q": _fulltext(query)}, ro=True) if _fulltext(query) else []
+    # a word in the unit's own name counts most, then its path; rationale alone (shared by many units) least
+    qw = {w.lower() for w in re.findall(r"\w+", query) if len(w) > 2}
+    def rank(h):
+        uid, sym, path, kind, score = h
+        name = set(re.findall(r"[a-z0-9]+", re.sub(r"([a-z])([A-Z])", r" ", sym or "").lower()))
+        return (-(3 * len(qw & name) + len(qw & set(re.findall(r"[a-z0-9]+", (path or "").lower())))),
+                {"function": 0, "class": 1}.get(kind, 2), -score)
+    words = [[h[0]] for h in sorted(hits, key=rank)[:25]]
+    if not query.strip():  # no query: the code that is in play right now
+        exact = store.q("read.context_active", "MATCH (u:Unit) WHERE u.lease_owner IS NOT NULL AND u.kind <> 'file' "
+                        "RETURN u.uid LIMIT 25", ro=True)
+    ids = list(dict.fromkeys([u for (u,) in exact + words]))[:25]
+    units = store.q("read.context_unit_rows", """
+        UNWIND $ids AS id MATCH (u:Unit {uid: id})
         OPTIONAL MATCH (o:Session {uid: u.lease_owner})
-        RETURN u.uid, u.kind, o.name, u.lease_expires LIMIT 25""", {"q": query}, ro=True)
+        RETURN u.uid, u.kind, o.name, u.lease_expires, u.rationale, u.last_rev, u.path""", {"ids": ids}, ro=True)
     matching = store.q("read.context_facts", """
         CALL db.idx.fulltext.queryNodes('Fact', $q) YIELD node, score
         OPTIONAL MATCH (s:Session)-[:ASSERTED]->(node)
         RETURN s.name, node.text, node.status, node.source_uid, score ORDER BY score DESC LIMIT 10""",
                        {"q": _fulltext(query)}, ro=True) if _fulltext(query) else []
-    data = digest(store, sess) | {"units": [{"uid": u, "kind": k, "owner": o if (x or 0) >= now_ms() else None}
-                                            for u, k, o, x in units],
+    files = sorted({p for *_, p in units if p})
+    about = store.q("read.context_about", """
+        UNWIND $p AS path MATCH (f:Fact)-[:ABOUT]->(:Unit {kind: 'file', path: path})
+        RETURN DISTINCT f.text, f.status, f.source_uid LIMIT 10""", {"p": files}, ro=True) if files else []
+    data = digest(store, sess) | {"units": [{"uid": u, "kind": k, "owner": o if (x or 0) >= now_ms() else None,
+                                             "rationale": why, "last_commit": (rev or "")[:10] or None}
+                                            for u, k, o, x, why, rev, _ in units],
+                                  "facts_about_these_files": [{"text": t, "status": s_, "source": src} for t, s_, src in about],
                                   "facts_matching": [{"by": a, "text": t, "status": s, "source": src}
                                                      for a, t, s, src, _ in matching],
                                   "recent": store.events(15)}

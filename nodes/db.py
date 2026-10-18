@@ -46,6 +46,7 @@ class Store:
         for label, prop in EXTRA_INDEXES:
             self._try(f"CREATE INDEX FOR (n:{label}) ON (n.{prop})")
         self._try("CALL db.idx.fulltext.createNodeIndex('Fact', 'text')")  # context_for searches fact text
+        self._try("CALL db.idx.fulltext.createNodeIndex('Unit', 'symbol', 'path', 'rationale')")  # plain-English lookups
         for label, prop in MANDATORY:
             self._try_cmd("GRAPH.CONSTRAINT", "CREATE", self.g.name, "MANDATORY", "NODE", label, "PROPERTIES", 1, prop)
         for _ in range(100):
@@ -76,9 +77,9 @@ class Store:
         self.r.delete(f"ws:{self.ws}:events")
 
     # ------------------------------------------------------------------ queries -------
-    def q(self, name: str, cypher: str, params: dict | None = None, ro: bool = False):
+    def q(self, name: str, cypher: str, params: dict | None = None, ro: bool = False, timeout: int | None = None):
         t0 = time.perf_counter()
-        res = (self.g.ro_query if ro else self.g.query)(cypher, params or {})
+        res = (self.g.ro_query if ro else self.g.query)(cypher, params or {}, **({"timeout": timeout} if timeout else {}))
         self.lat[name].append((time.perf_counter() - t0) * 1000)
         LAST_RESULT.set(res)  # the server's trace reads the real write counts from it
         return res.result_set

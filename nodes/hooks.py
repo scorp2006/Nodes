@@ -35,7 +35,12 @@ PROTOCOL = """You are {name} on a team of coding agents coordinated by Nodes (a 
   else, or call status(wait_seconds=60) to be told when it frees up. If it says HANDOFF, merge the named commit
   first and build on top. If it says ESCALATE, stop and ask the user.
 - When your work is committed, call coordinate(op='done', text='<commit sha>') so teammates can build on it.
-- Share facts teammates need with post_fact, citing the file they come from."""
+- Share facts teammates need with post_fact, citing the file they come from.
+- Plan with the graph: impact_of(unit) shows what a change reaches within 3 hops and who holds it; hotspots() and
+  communities() show central code and clusters. A DEFER marked "possible overlap (advisory)" is not a block: if your
+  change can't affect their code, call before_acting again with acknowledge='<why>'.
+- Several independent tasks? Work in parallel: dispatch one subagent per task in a single message (each declares its
+  intent and goes through the gate). You can keep editing yourself too."""
 
 
 def _auth(reg, request: Request) -> dict | None:
@@ -108,6 +113,33 @@ def gate_targets(store, files) -> list[str]:
     return targets
 
 
+CHECK = re.compile(r"\b(pytest|unittest|tox|nox|npm (run )?test|yarn test|pnpm test|jest|vitest|mocha|go test|cargo test|"
+                   r"ruff|flake8|pylint|mypy|pyright|eslint|tsc|black --check|gradle test|mvn test|rspec)\b")
+SUMMARY = re.compile(r"(\d+ (passed|failed|errors?)\b.*|All checks passed.*|Found \d+ errors?.*|\d+ problems?.*|"
+                     r"Success: no issues.*|FAIL\b.*|PASS\b.*|error\b.*)", re.I)
+
+
+def observed_fact(store, sess, command: str, response) -> None:
+    """A test or lint run the hook saw: a Fact whose source is the command's own output, at trust 'observed'."""
+    if isinstance(response, dict):
+        out = "\n".join(str(response.get(k) or "") for k in ("stdout", "stderr", "output"))
+    else:
+        out = response if isinstance(response, str) else ""
+    lines = [ln.strip() for ln in out.splitlines() if ln.strip()]
+    summary = next((ln for ln in reversed(lines) if SUMMARY.search(ln)), lines[-1] if lines else "no output")
+    cmd = " ".join(command.split())[:160]
+    text = redact.text(f"`{cmd}`: {summary[:200]}")
+    fid = "fact:run:" + ops.h(f"{sess['session']}|{cmd}|{ops.now_ms()}")
+    store.q("hook.observed_fact", """
+        MERGE (src:Source {uid: $src}) ON CREATE SET src.kind = 'command', src.ref = $cmd, src.output = $tail
+        CREATE (f:Fact {uid: $fid, text: $text, source_uid: $src, status: 'observed', recorded_at: $now})
+        MERGE (f)-[:SOURCED_FROM {quote: $quote}]->(src)
+        WITH f MATCH (s:Session {uid: $sid}) MERGE (s)-[:ASSERTED {seq: $now, status: 'observed'}]->(f)""",
+            {"src": "command:" + fid[9:], "cmd": cmd, "tail": redact.text("\n".join(lines[-15:]))[:1500], "fid": fid,
+             "text": text, "now": ops.now_ms(), "quote": redact.text(summary)[:300], "sid": sess["session"]})
+    store.event("fact", sess["name"], fact=fid, status="observed", text=text[:200])
+
+
 def register(server, reg) -> None:
     from .server import traced_call  # local import: server imports this module
 
@@ -144,6 +176,11 @@ def register(server, reg) -> None:
             return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow",
                                            "permissionDecisionReason": "Nodes tool, caller stamped",
                                            "updatedInput": {**ti, "caller": caller}}}
+        if tool in ("Agent", "Task") and not body.get("agent_id"):  # a dispatch: remember its task for SubagentStart
+            k = f"ws:{sess['ws']}:pending_tasks:{sess['session']}"
+            store.r.rpush(k, " ".join(str(ti.get("description") or ti.get("prompt") or "").split())[:60])
+            store.r.expire(k, 3600)
+            return {}
         wt = Path(_session_row(store, sess["session"])["worktree"] or body.get("cwd", "."))
         extra = ""
         if tool == "Bash":
@@ -173,13 +210,18 @@ def register(server, reg) -> None:
                             json.dumps({"t": ops.now_ms(), "epochs": {x["uid"]: x["epoch"] for x in r["lease"]}}),
                             ex=3600)
             return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "additionalContext": note}}
-        nxt = ("Work on something else, or call the status tool with wait_seconds=60 to be told when it frees up."
+        nxt = (f"If your change can't affect their code, call the Nodes before_acting tool with targets={targets} and "
+               "acknowledge='<why>', then retry this edit; otherwise coordinate with them first."
+               if r.get("advisory") else
+               "Work on something else, or call the status tool with wait_seconds=60 to be told when it frees up."
                if r["decision"] == "defer" else "Stop and ask the user to resolve this.")
         return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
                                        "permissionDecisionReason": f"{note}. Next: {nxt}"}}
 
     def post_tool_use(store, sess, body):
         tool, ti = body.get("tool_name", ""), body.get("tool_input") or {}
+        if tool == "Bash" and CHECK.search(ti.get("command", "")):
+            observed_fact(store, sess, ti["command"], body.get("tool_response"))
         info = reg.workspace(sess["ws"])
         wt = Path(_session_row(store, sess["session"])["worktree"] or body.get("cwd", "."))
         if tool == "Bash":
@@ -259,7 +301,11 @@ def register(server, reg) -> None:
         return {}
 
     def subagent_start(store, sess, body):
-        store.event("subagent-start", sess["name"], agent_type=body.get("agent_type", ""))
+        # the parent's Agent call recorded the task description; attach the oldest one waiting to this subagent
+        task = store.r.lpop(f"ws:{sess['ws']}:pending_tasks:cc:{body.get('session_id', '')}")
+        task = (task.decode() if isinstance(task, bytes) else task) or body.get("agent_type", "")
+        store.q("hook.subagent_task", "MATCH (s:Session {uid: $s}) SET s.task = $t", {"s": sess["session"], "t": task})
+        store.event("subagent-start", sess["name"], agent_type=body.get("agent_type", ""), task=task)
         return {"hookSpecificOutput": {"hookEventName": "SubagentStart", "additionalContext":
                 PROTOCOL.format(name=sess["name"])}}
 
@@ -427,8 +473,11 @@ def register(server, reg) -> None:
                      {"u": uid}, ro=True)
         callers = st.q("dash.node.callers", "MATCH (a:Unit)-[:DEPENDS_ON]->(:Unit {uid: $u}) RETURN a.symbol LIMIT 12",
                        {"u": uid}, ro=True)
-        facts = st.q("dash.node.facts", "MATCH (f:Fact)-[:SOURCED_FROM]->(src:Source) WHERE src.ref STARTS WITH $p "
-                     "RETURN f.text, f.status, src.ref LIMIT 6", {"p": path or "\x00"}, ro=True) if path else []
+        facts = st.q("dash.node.facts", """
+            MATCH (f:Fact)-[:SOURCED_FROM]->(src:Source) WHERE src.ref STARTS WITH $p RETURN f.text, f.status, src.ref
+            UNION
+            MATCH (f:Fact)-[:ABOUT]->(:Unit {kind: 'file', path: $p}) MATCH (f)-[:SOURCED_FROM]->(src:Source)
+            RETURN f.text, f.status, src.ref""", {"p": path}, ro=True)[:8] if path else []
         return JSONResponse({
             "uid": uid, "kind": k, "path": path, "symbol": sym, "lines": [s, e], "lang": lang, "status": status,
             "lease": {"owner": owner, "epoch": epoch, "expires": exp} if owner else None,
@@ -464,7 +513,8 @@ def register(server, reg) -> None:
         return JSONResponse({
             "server": {"profile": "nodes", "mcp": f"{request.url.scheme}://{request.url.netloc}/mcp",
                        "started_at": started, "uptime_s": round(time.time() - started),
-                       "tools": ["context_for", "declare_intent", "before_acting", "post_fact", "coordinate", "status"],
+                       "tools": ["context_for", "declare_intent", "before_acting", "post_fact", "coordinate", "status",
+                                 "impact_of", "path_between", "hotspots", "communities", "query_graph"],
                        "hooks": ["SessionStart", "PreToolUse", "PostToolUse", "SubagentStart", "SubagentStop", "Stop",
                                  "SessionEnd"]},
             "falkordb": {"host": reg.host, "port": reg.port, "module_version": ver, "ping_ms": ping,
