@@ -14,7 +14,9 @@ harness; regions and line spans come from this module's own AST pass.
 from __future__ import annotations
 
 import ast
+import hashlib
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "coop"))
@@ -69,6 +71,9 @@ def scan(repo_root: Path, package: str, repo: str) -> tuple[list[dict], list[dic
         tree = ast.parse(path.read_text(encoding="utf-8"))
         units.append({"uid": f"file:{repo}:{rel}", "kind": "file", "path": rel, "symbol": "", "qualname": "",
                       "start": 1, "end": len(path.read_text(encoding="utf-8").splitlines()), "file": "", "line": 0})
+        for cls in (n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)):
+            units.append({"uid": f"class:{repo}:{rel}#{cls.name}", "kind": "class", "path": rel, "symbol": cls.name,
+                          "qualname": "", "start": cls.lineno, "end": cls.end_lineno, "file": "", "line": 0})
         spans = _function_spans(tree)
         for sym, (start, end) in spans.items():
             qual = f"{module}.{sym}"
@@ -82,21 +87,63 @@ def scan(repo_root: Path, package: str, repo: str) -> tuple[list[dict], list[dic
     for f in funcs:  # the study parser's file/line, used verbatim by the harness profile's impact_of text
         if f["qualname"] in by_qual:
             by_qual[f["qualname"]].update(file=f["file"], line=f["line"])
-    edges = [{"src": by_qual[c["src"]]["uid"], "dst": by_qual[c["dst"]]["uid"]}
+    edges = [{"src": by_qual[c["src"]]["uid"], "dst": by_qual[c["dst"]]["uid"], "by": "ast-static", "confidence": 0.8}
              for c in calls if c["src"] in by_qual and c["dst"] in by_qual]
+    for u in units:
+        u["lang"] = "python"
     return units, edges
 
 
-def index(store, repo_root: Path, package: str, repo: str, batch: int = 1000) -> dict:
-    units, edges = scan(repo_root, package, repo)
+def python_packages(root: Path) -> list[str]:
+    """Top-level Python packages: dirs with __init__.py whose parent has none (tracked files only)."""
+    from .lang import tracked_files
+    inits = {str(Path(f).parent.as_posix()) for f in tracked_files(root) if f.endswith("__init__.py")}
+    return sorted(d for d in inits if d != "." and str(Path(d).parent.as_posix()) not in inits)
+
+
+def scan_all(repo_root: Path, package: str | None, repo: str) -> tuple[list[dict], list[dict], dict]:
+    """Every language. Python packages use the precise resolver; all other files use tree-sitter (approximate calls)."""
+    from .lang import scan_repo
+    units, edges, done = [], [], set()
+    for pkg in ([package] if package else python_packages(repo_root)):
+        try:
+            u, e = scan(repo_root, pkg, repo)
+        except SyntaxError:
+            continue  # a package that doesn't parse as Python falls back to tree-sitter
+        units += u
+        edges += e
+        done |= {x["path"] for x in u if x["kind"] == "file"}
+    tu, te, langs = scan_repo(repo_root, repo, done)
+    langs["python (precise resolver)"] = len(done)
+    return units + tu, edges + [{**e, "by": "name-match"} for e in te], langs
+
+
+def index(store, repo_root: Path, package: str | None, repo: str, batch: int = 1000, all_languages: bool = True) -> dict:
+    units, edges, langs = scan_all(repo_root, package, repo) if all_languages else (*scan(repo_root, package, repo), {})
+    texts = {}
+    for u in units:  # content hash per unit: re-indexing only touches units whose text changed
+        if u["path"] not in texts:
+            texts[u["path"]] = (repo_root / u["path"]).read_bytes().decode("utf-8", "replace").splitlines()
+        body = "\n".join(texts[u["path"]][u["start"] - 1:u["end"]])
+        u["hash"] = hashlib.sha256(body.encode("utf-8")).hexdigest()[:16]
+    now = int(time.time() * 1000)
+    changed = 0
     for i in range(0, len(units), batch):
-        store.q("index.units", """
+        changed += store.q("index.units", """
             UNWIND $rows AS r
             MERGE (u:Unit {uid: r.uid})
             ON CREATE SET u.status = 'active', u.lease_epoch = 0
-            SET u.kind = r.kind, u.path = r.path, u.symbol = r.symbol, u.qualname = r.qualname,
-                u.start = r.start, u.end = r.end, u.file = r.file, u.line = r.line
-            """, {"rows": units[i:i + batch]})
+            WITH u, r, (u.hash IS NULL OR u.hash <> r.hash OR u.status <> 'active') AS changed
+            SET u.kind = r.kind, u.path = r.path, u.symbol = r.symbol, u.qualname = r.qualname, u.lang = r.lang,
+                u.start = r.start, u.end = r.end, u.file = r.file, u.line = r.line, u.hash = r.hash, u.status = 'active',
+                u.updated_at = CASE WHEN changed THEN $now ELSE u.updated_at END
+            RETURN sum(CASE WHEN changed THEN 1 ELSE 0 END)
+            """, {"rows": units[i:i + batch], "now": now})[0][0]
+    gone = store.q("index.deleted", """
+        MATCH (u:Unit) WHERE u.kind IN ['file', 'function', 'class', 'region'] AND u.status = 'active'
+              AND NOT u.uid IN $uids
+        SET u.status = 'deleted', u.updated_at = $now RETURN count(u)""",
+        {"uids": [u["uid"] for u in units], "now": now})[0][0]
     store.q("index.contains", """
         MATCH (f:Unit {kind: 'file'}) MATCH (u:Unit) WHERE u.path = f.path AND u.kind <> 'file'
         MERGE (f)-[:CONTAINS]->(u)
@@ -106,10 +153,12 @@ def index(store, repo_root: Path, package: str, repo: str, batch: int = 1000) ->
             UNWIND $rows AS r
             MATCH (a:Unit {uid: r.src}), (b:Unit {uid: r.dst})
             MERGE (a)-[d:DEPENDS_ON {kind: 'calls'}]->(b)
-            SET d.resolved_by = 'ast-static', d.confidence = 0.8
+            SET d.resolved_by = r.by, d.confidence = r.confidence
             """, {"rows": edges[i:i + batch]})
     return {"units": len(units), "functions": sum(u["kind"] == "function" for u in units),
-            "regions": sum(u["kind"] == "region" for u in units), "calls": len(edges)}
+            "classes": sum(u["kind"] == "class" for u in units), "regions": sum(u["kind"] == "region" for u in units),
+            "calls": len(edges), "approximate_calls": sum(e["by"] == "name-match" for e in edges), "files_by_lang": langs,
+            "changed_units": changed, "deleted_units": gone, "_units": units}
 
 
 def units_for_lines(store, path: str, lines: set[int]) -> list[str]:

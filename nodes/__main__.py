@@ -11,6 +11,7 @@
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import socket
 import subprocess
@@ -20,7 +21,7 @@ from pathlib import Path
 
 from falkordb import FalkorDB
 
-from . import indexer, ops
+from . import gitimport, indexer, ops
 from .db import Store
 
 IMAGE = "falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a"  # v4.22.1
@@ -63,42 +64,76 @@ def cmd_up(a):
             old = json.loads(stamp.read_text()) if stamp.exists() else {}
             raise SystemExit(f"port {a.port} is busy (server code {old.get('code', '?')}, this code {fingerprint()}). "
                              "Stop it first.")
+    lan = a.host not in ("127.0.0.1", "localhost")
+    token = os.environ.get("NODES_SERVER_TOKEN", "")
+    if lan and len(token) < 24:
+        raise SystemExit("Binding beyond localhost requires NODES_SERVER_TOKEN (24+ chars); every endpoint, "
+                         "including the dashboard, will require it.")
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text(json.dumps({"code": fingerprint(), "profile": a.profile, "t": time.time()}))
     from .server import Registry, run
-    print(f"Nodes {a.profile} on http://127.0.0.1:{a.port}  (MCP /mcp, dashboard /, hooks /hooks/*); "
-          f"FalkorDB {a.db_host}:{a.db_port}", flush=True)
-    run(Registry(a.db_host, a.db_port, Path(a.trace_dir)), a.profile, a.host, a.port)
+    print(f"Nodes {a.profile} on http://{a.host}:{a.port}  (MCP /mcp, dashboard /, hooks /hooks/*); "
+          f"FalkorDB {a.db_host}:{a.db_port}" + ("; LAN mode: token required everywhere" if lan else ""), flush=True)
+    run(Registry(a.db_host, a.db_port, Path(a.trace_dir)), a.profile, a.host, a.port, server_token=token if lan else "")
 
 
-def config_files(port: int) -> tuple[dict, dict]:
+def config_files(port: int, lan: bool = False) -> tuple[dict, dict]:
+    """MCP + hook config. Local mode needs no token: hooks carry session/agent ids and the server routes by the git
+    root of cwd. LAN mode adds the server token (from NODES_SERVER_TOKEN) to every request."""
     base = f"http://127.0.0.1:{port}"
+    auth = {"headers": {"Authorization": "Bearer $NODES_SERVER_TOKEN"}, "allowedEnvVars": ["NODES_SERVER_TOKEN"]} \
+        if lan else {}
     mcp = {"mcpServers": {"nodes": {"type": "http", "url": f"{base}/mcp",
-                                    "headers": {"Authorization": "Bearer ${NODES_TOKEN}"}}}}
-    auth = {"headers": {"Authorization": "Bearer $NODES_TOKEN"}, "allowedEnvVars": ["NODES_TOKEN"]}
-    start = (f'curl -s -X POST -H "Authorization: Bearer $NODES_TOKEN" -H "Content-Type: application/json" '
-             f'--data-binary @- {base}/hooks/session-start')
+                                    **({"headers": {"Authorization": "Bearer ${NODES_SERVER_TOKEN}"}} if lan else {})}}}
+    start = ('curl -s -X POST -H "Content-Type: application/json" '
+             + ('-H "Authorization: Bearer $NODES_SERVER_TOKEN" ' if lan else "")
+             + f'--data-binary @- {base}/hooks/session-start')
+
+    def http(path, timeout, **extra):
+        return {"type": "http", "url": f"{base}/hooks/{path}", "timeout": timeout, **auth, **extra}
     settings = {
         "enabledMcpjsonServers": ["nodes"],
         "permissions": {"allow": ["mcp__nodes__*"]},
         "hooks": {
             "SessionStart": [{"hooks": [{"type": "command", "command": start, "timeout": 15}]}],
-            "PreToolUse": [{"matcher": "Edit|Write|MultiEdit|Bash", "hooks": [
-                {"type": "http", "url": f"{base}/hooks/pre-tool-use", "timeout": 15, "onFailure": "continue", **auth}]}],
-            "PostToolUse": [{"matcher": "Edit|Write|MultiEdit", "hooks": [
-                {"type": "http", "url": f"{base}/hooks/post-tool-use", "timeout": 30, **auth}]}],
-            "Stop": [{"hooks": [{"type": "http", "url": f"{base}/hooks/stop", "timeout": 5, **auth}]}],
-            "SessionEnd": [{"hooks": [{"type": "http", "url": f"{base}/hooks/session-end", "timeout": 5, **auth}]}],
+            # Nodes tools first: the hook stamps the caller (session, subagent, cwd) into the call
+            "PreToolUse": [{"matcher": "mcp__nodes__.*", "hooks": [http("pre-tool-use", 10)]},
+                           {"matcher": "Edit|Write|MultiEdit|Bash",
+                            "hooks": [http("pre-tool-use", 15, onFailure="continue")]}],
+            "PostToolUse": [{"matcher": "Edit|Write|MultiEdit", "hooks": [http("post-tool-use", 30)]}],
+            "SubagentStart": [{"hooks": [http("subagent-start", 5)]}],
+            "SubagentStop": [{"hooks": [http("subagent-stop", 5)]}],
+            "Stop": [{"hooks": [http("stop", 5)]}],
+            "SessionEnd": [{"hooks": [http("session-end", 5)]}],
         },
     }
     return mcp, settings
 
 
-def write_config(target: Path, port: int) -> None:
-    mcp, settings = config_files(port)
+def write_config(target: Path, port: int, lan: bool = False) -> None:
+    mcp, settings = config_files(port, lan)
     (target / ".mcp.json").write_text(json.dumps(mcp, indent=2), encoding="utf-8")
     (target / ".claude").mkdir(exist_ok=True)
     (target / ".claude" / "settings.json").write_text(json.dumps(settings, indent=2), encoding="utf-8")
+
+
+def write_user_config(port: int, lan: bool = False, settings_path: Path | None = None) -> str:
+    """User scope: merge the hooks into ~/.claude/settings.json and register the MCP server for every project.
+    Sessions in repos that were never `nodes init`-ed are ignored by the server (nothing is stored)."""
+    mcp, settings = config_files(port, lan)
+    path = settings_path or Path.home() / ".claude" / "settings.json"
+    cur = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    cur.setdefault("hooks", {}).update(settings["hooks"])
+    allow = cur.setdefault("permissions", {}).setdefault("allow", [])
+    if "mcp__nodes__*" not in allow:
+        allow.append("mcp__nodes__*")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(cur, indent=2), encoding="utf-8")
+    if settings_path is None:
+        srv = mcp["mcpServers"]["nodes"]
+        subprocess.run(["claude", "mcp", "add", "--scope", "user", "--transport", "http", "nodes", srv["url"]]
+                       + sum((["--header", f"{k}: {v}"] for k, v in srv.get("headers", {}).items()), []), check=False)
+    return str(path)
 
 
 def cmd_init(a):
@@ -106,13 +141,33 @@ def cmd_init(a):
     repo = Path(a.repo).resolve()
     ws = a.workspace or repo.name
     st = Store(ws, a.db_host, a.db_port)
-    st.reset()
+    if a.fresh:
+        st.reset()
+        st.r.hdel("nodes:git", ws)
     st.setup()
+    t0 = time.perf_counter()
     stats = indexer.index(st, repo, a.package, ws)
+    units = stats.pop("_units")
+    gstats = gitimport.import_git(st, repo, units) if not a.no_git else {"git": "skipped"}
+    common = subprocess.run(["git", "-C", str(repo), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                            capture_output=True, text=True).stdout.strip()
     st.r.hset("nodes:workspaces", ws, json.dumps({"root": str(repo), "repo": ws, "package": a.package,
-                                                    "team_size": a.team_size}))
-    write_config(repo, a.port)
-    print(f"workspace {ws}: {stats}; wrote {repo / '.mcp.json'} and {repo / '.claude' / 'settings.json'}")
+                                                    "team_size": a.team_size, "git_common_dir": common}))
+    (repo / ".nodes").mkdir(exist_ok=True)  # agent tokens for clients without hooks; Claude Code needs none
+    tok_file = repo / ".nodes" / "tokens.json"
+    if not tok_file.exists():
+        toks = {f"agent{i + 1}": ops.join(st, f"agent{i + 1}", client="token")[0] for i in range(a.agents)}
+        tok_file.write_text(json.dumps(toks, indent=1), encoding="utf-8")
+    if common:  # keep local Nodes files out of git
+        excl = Path(common) / "info" / "exclude"
+        excl.parent.mkdir(exist_ok=True)
+        have = excl.read_text(encoding="utf-8") if excl.exists() else ""
+        add = [x for x in (".nodes/", ".mcp.json", ".claude/settings.json") if x not in have.split()]
+        if add:
+            excl.write_text(have.rstrip("\n") + "\n" + "\n".join(add) + "\n", encoding="utf-8")
+    where = write_user_config(a.port, a.lan) if a.scope == "user" else (write_config(repo, a.port, a.lan) or str(repo))
+    print(json.dumps({"workspace": ws, "seconds": round(time.perf_counter() - t0, 2), "index": stats, "git": gstats,
+                      "config": f"{a.scope} scope -> {where}", "tokens": str(tok_file)}, indent=1))
 
 
 def cmd_join(a):
@@ -159,8 +214,13 @@ def main():
     u.add_argument("--host", default="127.0.0.1")
     u.add_argument("--trace-dir", default=".nodes/traces")
     i = sub.add_parser("init")
-    i.add_argument("--repo", required=True)
-    i.add_argument("--package", required=True, help="package dir relative to the repo, e.g. src/shop")
+    i.add_argument("--repo", default=".")
+    i.add_argument("--package", help="Python package dir for the precise resolver (default: auto-detect)")
+    i.add_argument("--scope", choices=["project", "user"], default="project", help="where to write MCP + hook config")
+    i.add_argument("--agents", type=int, default=2, help="agent tokens to mint for clients without hooks")
+    i.add_argument("--fresh", action="store_true", help="wipe the workspace graph first (default: incremental)")
+    i.add_argument("--no-git", action="store_true")
+    i.add_argument("--lan", action="store_true", help="config for a server bound beyond localhost (token required)")
     i.add_argument("--workspace")
     i.add_argument("--team-size", type=int, default=2)
     i.add_argument("--port", type=int, default=8780)

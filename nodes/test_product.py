@@ -169,10 +169,7 @@ def test_mcp_requires_a_bearer_token_and_hooks_deny_on_defer(ws, tmp_path):
                 break
             except Exception:  # noqa: BLE001
                 time.sleep(0.2)
-        with pytest.raises(urllib.error.HTTPError) as e:  # no token -> 401 on /mcp
-            urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/mcp", data=b"{}", method="POST",
-                                                          headers={"Content-Type": "application/json"}))
-        assert e.value.code == 401
+        # v1 local mode: no SDK auth on /mcp; identity is the hook stamp or a bearer token (LAN mode is tested below)
 
         def hook(token, body):
             req = urllib.request.Request(f"http://127.0.0.1:{port}/hooks/pre-tool-use", data=json.dumps(body).encode(),
@@ -195,5 +192,33 @@ def test_mcp_requires_a_bearer_token_and_hooks_deny_on_defer(ws, tmp_path):
                                                                               "Content-Type": "application/json"}))
         ctx = hook(tb, edit)["hookSpecificOutput"]["additionalContext"]
         assert "HANDOFF" in ctx and "c0ffee" in ctx
+    finally:
+        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+
+
+def test_lan_mode_requires_the_token_on_every_endpoint(tmp_path):
+    port, token = free_port(), "t" * 32
+    code = (f"import sys; sys.path.insert(0, r'{Path(__file__).resolve().parents[1]}'); from pathlib import Path; "
+            f"from nodes.server import Registry, run; run(Registry('localhost', {PORT}, Path(r'{tmp_path}')), "
+            f"'nodes', '127.0.0.1', {port}, server_token='{token}')")
+    proc = subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        def get(path, method="GET", hdr=None):
+            req = urllib.request.Request(f"http://127.0.0.1:{port}{path}", method=method, headers=hdr or {},
+                                         data=b"{}" if method == "POST" else None)
+            try:
+                return urllib.request.urlopen(req).status
+            except urllib.error.HTTPError as e:
+                return e.code
+            except urllib.error.URLError:
+                return 0  # not listening yet
+        for _ in range(50):
+            if get("/") in (200, 401):
+                break
+            time.sleep(0.2)
+        for path, method in (("/", "GET"), ("/api/state", "GET"), ("/mcp", "POST"), ("/hooks/pre-tool-use", "POST")):
+            assert get(path, method, {"Content-Type": "application/json"}) == 401, path      # no token: refused
+        assert get("/api/state", hdr={"Authorization": f"Bearer {token}"}) == 200            # header works
+        assert get(f"/?token={token}") == 200                                                # browser link works
     finally:
         subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)

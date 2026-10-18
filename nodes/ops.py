@@ -77,7 +77,7 @@ def resolve_targets(store, targets: list[str]) -> tuple[list[str], list[str]]:
     uids, unknown = [], []
     for t in targets:
         t = str(t)
-        m = re.match(r"^(.*\.py):(\d+)(?:-(\d+))?$", t)
+        m = re.match(r"^(.*\.[A-Za-z0-9]+):(\d+)(?:-(\d+))?$", t)  # path:line in any language
         if m:
             got = units_for_lines(store, m.group(1), set(range(int(m.group(2)), int(m.group(3) or m.group(2)) + 1)))
         else:

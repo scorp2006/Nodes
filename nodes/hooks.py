@@ -21,7 +21,8 @@ from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse, Response
 
-from . import indexer, ops
+from . import identity, indexer, ops
+from .lang import EXT
 
 PROTOCOL = """You are {name} on a team of coding agents coordinated by Nodes (a shared FalkorDB graph).
 - Before you start, call declare_intent with the functions/files you plan to change.
@@ -73,10 +74,11 @@ def register(server, reg) -> None:
 
     def hook(path, handler):
         async def endpoint(request: Request) -> Response:
-            sess = _auth(reg, request)
             body = await request.json() if request.headers.get("content-length", "0") != "0" else {}
+            # identity: a bearer token (non-Claude clients), else the hook input routed by the git root of its cwd
+            sess = _auth(reg, request) or identity.session_for_hook(reg, body)
             if not sess:
-                return JSONResponse({})  # unknown caller: not on the team, never block
+                return JSONResponse({})  # not an initialized repo / not on a team: store nothing, never block
             store = reg.store(sess["ws"])
             out = traced_call(reg, sess["ws"], sess, "hook", path, body, lambda: handler(store, sess, body))
             return JSONResponse(out if isinstance(out, dict) and "error" not in out else {})
@@ -96,6 +98,13 @@ def register(server, reg) -> None:
 
     def pre_tool_use(store, sess, body):
         tool, ti = body.get("tool_name", ""), body.get("tool_input") or {}
+        if tool.startswith("mcp__nodes__"):
+            # stamp the caller (session, subagent, cwd) into the Nodes tool call, so the server knows which
+            # session or subagent made it without any token (updatedInput replaces the whole input)
+            caller = {k: body.get(k) or "" for k in ("session_id", "agent_id", "agent_type", "cwd")}
+            return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "allow",
+                                           "permissionDecisionReason": "Nodes tool, caller stamped",
+                                           "updatedInput": {**ti, "caller": caller}}}
         if tool == "Bash":
             cmd = ti.get("command", "")
             if any(k in cmd for k in ("git merge", "git pull")):
@@ -108,7 +117,7 @@ def register(server, reg) -> None:
             return {}
         wt = Path(_session_row(store, sess["session"])["worktree"] or body.get("cwd", "."))
         rel, lines, exists = edit_targets(tool, ti, wt)
-        if not rel or not rel.endswith(".py"):
+        if not rel or Path(rel).suffix.lower() not in EXT:  # any indexed language
             return {}
         info = reg.workspace(sess["ws"])
         if exists and rel.startswith(info.get("package", "") + "/"):
@@ -134,7 +143,7 @@ def register(server, reg) -> None:
         info = reg.workspace(sess["ws"])
         wt = Path(_session_row(store, sess["session"])["worktree"] or body.get("cwd", "."))
         rel, _, _ = edit_targets(tool, {"file_path": ti.get("file_path")}, wt)
-        if not rel or not rel.endswith(".py") or not info:
+        if not rel or Path(rel).suffix.lower() not in EXT or not info:
             return {}
         try:  # incremental enough for small repos: re-scan the package from this agent's worktree
             indexer.index(store, wt, info["package"], info["repo"])
@@ -184,8 +193,21 @@ def register(server, reg) -> None:
         store.event("session-end", sess["name"], released=rel[0][0] if rel else 0)
         return {}
 
+    def subagent_start(store, sess, body):
+        store.event("subagent-start", sess["name"], agent_type=body.get("agent_type", ""))
+        return {"hookSpecificOutput": {"hookEventName": "SubagentStart", "additionalContext":
+                PROTOCOL.format(name=sess["name"])}}
+
+    def subagent_stop(store, sess, body):
+        # a finished subagent is like a finished owner: its leases stay so the next claimant gets a HANDOFF
+        store.q("hook.subagent_stop", "MATCH (s:Session {uid: $s}) SET s.status = 'done', s.done_at = $now",
+                {"s": sess["session"], "now": ops.now_ms()})
+        store.event("subagent-stop", sess["name"], agent_type=body.get("agent_type", ""))
+        return {}
+
     for path, fn in (("session-start", session_start), ("pre-tool-use", pre_tool_use),
-                     ("post-tool-use", post_tool_use), ("stop", stop), ("session-end", session_end)):
+                     ("post-tool-use", post_tool_use), ("stop", stop), ("session-end", session_end),
+                     ("subagent-start", subagent_start), ("subagent-stop", subagent_stop)):
         hook(path, fn)
 
     # ------------------------------------------------------------------ dashboard -------
