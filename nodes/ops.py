@@ -85,8 +85,30 @@ def resolve_targets(store, targets: list[str]) -> tuple[list[str], list[str]]:
             got = [r[0] for r in store.q("resolve", "MATCH (u:Unit) WHERE u.uid = $t OR u.qualname = $t "
                                          "OR (u.kind = 'file' AND u.path = $t) RETURN u.uid LIMIT 1",
                                          {"t": t}, ro=True)]
+        if not got:  # how agents name code in practice: 'Voice.say', 'speech.py:Voice.say', a unique bare name
+            hit = by_name(store, t)
+            got = [hit] if hit else []
         (uids.extend(got) if got else unknown.append(t))
     return sorted(set(uids)), unknown
+
+
+def by_name(store, target: str) -> str | None:
+    """A unit from how agents actually name code: uid, qualname, path, 'path:10-20', 'Voice.say', 'speech.py:Voice.say',
+    'blindspot/speech.py::Voice.say', 'path#symbol', or a bare function name when it is unique."""
+    t = target.strip().strip("`")
+    path, sym = "", t
+    for sep in ("::", "#", ":", " "):
+        if sep in t and "." in t.split(sep)[0]:
+            path, sym = (x.strip() for x in t.split(sep, 1))
+            break
+    sym = sym.removesuffix("()")
+    rows = store.q("tool.resolve", """
+        MATCH (u:Unit) WHERE u.status = 'active' AND u.kind IN ['function', 'class']
+          AND (u.symbol = $s OR u.symbol ENDS WITH ('.' + $s) OR u.qualname ENDS WITH ('.' + $s))
+          AND ($p = '' OR u.path = $p OR u.path ENDS WITH ('/' + $p))
+        RETURN u.uid ORDER BY size(u.symbol) LIMIT 2""", {"s": sym, "p": path}, ro=True)
+    return rows[0][0] if len(rows) == 1 or (rows and path) else None
+
 
 
 # ------------------------------------------------------------------ intents -------

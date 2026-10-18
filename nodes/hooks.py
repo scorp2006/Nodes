@@ -113,7 +113,7 @@ def gate_targets(store, files) -> list[str]:
     return targets
 
 
-CHECK = re.compile(r"\b(pytest|unittest|tox|nox|npm (run )?test|yarn test|pnpm test|jest|vitest|mocha|go test|cargo test|"
+CHECK = re.compile(r"\b(py_compile|compileall|pytest|unittest|tox|nox|npm (run )?test|yarn test|pnpm test|jest|vitest|mocha|go test|cargo test|"
                    r"ruff|flake8|pylint|mypy|pyright|eslint|tsc|black --check|gradle test|mvn test|rspec)\b")
 SUMMARY = re.compile(r"(\d+ (passed|failed|errors?)\b.*|All checks passed.*|Found \d+ errors?.*|\d+ problems?.*|"
                      r"Success: no issues.*|FAIL\b.*|PASS\b.*|error\b.*)", re.I)
@@ -126,7 +126,7 @@ def observed_fact(store, sess, command: str, response) -> None:
     else:
         out = response if isinstance(response, str) else ""
     lines = [ln.strip() for ln in out.splitlines() if ln.strip()]
-    summary = next((ln for ln in reversed(lines) if SUMMARY.search(ln)), lines[-1] if lines else "no output")
+    summary = next((ln for ln in reversed(lines) if SUMMARY.search(ln)), lines[-1] if lines else "ok (no output)")
     cmd = " ".join(command.split())[:160]
     text = redact.text(f"`{cmd}`: {summary[:200]}")
     fid = "fact:run:" + ops.h(f"{sess['session']}|{cmd}|{ops.now_ms()}")

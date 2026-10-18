@@ -37,14 +37,14 @@ function story(e, prev) {
       ? {cls: "block", text: `${A} relied on a claim the code doesn't back up. Nodes stopped and asked a human.`}
       : {cls: "block", text: `${nameOf(p[0])} and ${nameOf(p[2])} were waiting on each other. Nodes asked a human to decide.`};
   }
+  if (e.kind === "fact" && e.status === "observed") return {cls: /fail|error/i.test(e.text || "") ? "block" : "go",
+    text: `${A} ran checks. ${e.text || ""}`};
   if (e.kind === "fact") return e.status === "source-checked" ? {cls: "go", text: `${A} shared a fact; Nodes checked it against the code.`}
     : e.status === "extracted" ? null : {cls: "block", text: `${A} shared a claim Nodes could not verify. It is marked unverified.`};
   if (e.kind === "done") return {cls: "hand", text: `${A} finished${e.commit ? ` (commit ${String(e.commit).slice(0, 7)})` : ""}. Its code can be handed on.`};
   if (e.kind === "release") return {cls: "hand", text: `${A} released ${(e.units || []).length || "its"} unit(s)${(e.notify || []).length ? `; ${e.notify.map(nameOf).join(", ")} told at once` : ""}.`};
   if (e.kind === "intent") return {cls: "", text: `${A} said what it plans to change.`};
   if (e.kind === "query") return {cls: "", text: `${A} asked the graph: ${e.summary || e.tool}.`};
-  if (e.kind === "fact" && e.status === "observed") return {cls: /fail|error/i.test(e.text || "") ? "block" : "go",
-    text: `${A} ran checks. ${e.text || ""}`};
   if (e.kind === "join") return {cls: "", text: `${A} joined.`};
   if (e.kind === "subagent-start") return {cls: "", text: `${A} started${e.task ? `: ${e.task}` : ""}.`};
   if (e.kind === "merge-snapshot") return {cls: "hand", text: `${A} is merging; Nodes saved a snapshot of the graph first.`};
