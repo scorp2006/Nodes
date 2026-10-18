@@ -46,6 +46,12 @@ FONT = {  # 5x7 pixel glyphs
     "+": "00000 00100 00100 11111 00100 00100 00000", ".": "00000 00000 00000 00000 00000 01100 01100",
     "!": "00100 00100 00100 00100 00100 00000 00100", "&": "01100 10010 10100 01000 10101 10010 01101",
     "/": "00001 00010 00010 00100 01000 01000 10000", "'": "00100 00100 01000 00000 00000 00000 00000", "·": "00000 00000 00000 01100 01100 00000 00000",
+    "a": "00000 00000 01110 00001 01111 10001 01111", "c": "00000 00000 01110 10000 10000 10001 01110",
+    "d": "00001 00001 01101 10011 10001 10001 01111", "e": "00000 00000 01110 10001 11111 10000 01110",
+    "g": "00000 00000 01111 10001 01111 00001 01110", "h": "10000 10000 10110 11001 10001 10001 10001",
+    "i": "00100 00000 01100 00100 00100 00100 01110", "l": "01100 00100 00100 00100 00100 00100 01110",
+    "n": "00000 00000 10110 11001 10001 10001 10001", "o": "00000 00000 01110 10001 10001 10001 01110",
+    "s": "00000 00000 01111 10000 01110 00001 11110", "t": "01000 01000 11100 01000 01000 01001 00110",
 }
 
 
@@ -118,24 +124,27 @@ for x0 in (880, 900, 920):  # a little pixel tower on the right
         rect(x0, 330 + k * 14, 12, 10, [RED, CORAL, PINK][(x0 // 20 + k) % 3])
 
 # the card
-cx, cy, cw, ch = 262, 92, 476, 236
+cx, cy, cw, ch = 245, 85, 510, 250
 rect(cx + 8, cy + 8, cw, ch, DARK)                     # hard pixel shadow
-rect(cx - 4, cy - 4, cw + 8, ch + 8, INK)
+rect(cx - 5, cy - 5, cw + 10, ch + 10, INK)
 rect(cx, cy, cw, ch, CREAM)
-text("AI AGENTS", cx + 22, cy + 20, 3, INK)
-right = "FALKORDB + MCP"
-text(right, cx + cw - 22 - width(right, 3), cy + 20, 3, INK)
+parts = ["AI AGENTS", "FALKORDB", "MCP"]               # header, split by red dots
+hw = sum(width(t, 3) for t in parts) + 40 * (len(parts) - 1)
+x = cx + (cw - hw) / 2
+for i, t in enumerate(parts):
+    x = text(t, x, cy + 22, 3, INK) - 3
+    if i < len(parts) - 1:
+        rect(x + 16, cy + 29, 8, 8, RED)
+        x += 40
 title = "NODES"
-tx = cx + (cw - width(title, 14)) / 2
-text(title, tx + 6, cy + 64 + 6, 14, YEL)               # offset shade
-text(title, tx, cy + 64, 14, DARK)
-pill = "AGENTS THAT DON'T COLLIDE"
-pw = width(pill, 3) + 20
-px0 = cx + (cw - pw) / 2
-rect(px0 + 5, cy + 178 + 5, pw, 34, INK)
-rect(px0, cy + 178, pw, 34, CORAL)
-rect(px0 + 3, cy + 181, pw - 6, 28, CORAL)
-text(pill, px0 + 10, cy + 186, 3, (255, 255, 255))
+tx = cx + (cw - width(title, 15) - 7) / 2
+for dx, dy, c in [(6, 6, YEL), (0, 0, DARK)]:          # bold: each glyph drawn twice, half a cell apart; yellow shade behind
+    for ox, oy in [(0, 0), (7, 0), (0, 7), (7, 7)]:
+        text(title, tx + dx + ox, cy + 60 + dy + oy, 15, c)
+pill = "Agents that don't collide"
+rect(cx + 14, cy + 194, cw - 28, 42, CORAL)
+for ox in (0, 1.5):                                     # bold, like the title
+    text(pill, cx + (cw - width(pill, 3)) / 2 + ox, cy + 204, 3, (255, 255, 255))
 
 # the nodes: four mascots on the graph, talking like the gate
 sprite("cat", 120, 225, 5, SKY)
