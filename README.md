@@ -30,6 +30,8 @@ Across 107k agent pull requests on GitHub, **27.67%** hit merge conflicts ([Agen
 > 22/45 with the same procedure over chat, Holm **p = 0.002**
 > ([result](results/cb1b_primary.txt), [pre-registration](results/preregistration_cb1b.md)).
 
+**Every proof in one place:** [results/README.md](results/README.md): pre-registrations, outputs and recomputes for each number.
+
 <details><summary>Scope and what didn't move</summary>
 
 - Both features passing their tests: 23/45 vs 16/45, p = 0.092, not significant ([cb1b_primary.txt](results/cb1b_primary.txt)).
@@ -137,7 +139,8 @@ alice -DONE_AT-> a1b2c3d -HANDS-> models.py#User.__body__ -TO-> bob  → handoff
 .venv/Scripts/python demo/gate_demo.py                # all four verdicts, watch at :8780/?ws=gatedemo
 ```
 
-Every result, its pre-registration and its script: [docs/reproduce.md](docs/reproduce.md).
+Every result, its pre-registration and its script: [docs/reproduce.md](docs/reproduce.md). All proofs, including the
+results that came out negative: [results/README.md](results/README.md).
 
 ## Tracks
 
