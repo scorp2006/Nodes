@@ -8,11 +8,12 @@ param(
     [string]$Repo = "pallets_click_task",
     [string]$Task = "2068",
     [string]$Features = "1,2",
-    [ValidateSet("coop", "protocol", "graph")][string]$Condition = "coop",
+    [ValidateSet("coop", "protocol", "graph", "native")][string]$Condition = "coop",
     [string]$Model = "anthropic/claude-haiku-5-5",
     [string]$Effort = "",
     [switch]$Remember,
     [int]$ProductPort = 0,  # reproduction stage 2: route the graph tools to the Nodes product (harness-coop profile)
+    [string]$Redis = "redis://localhost:6379/1",  # CooperBench messaging (step 7 uses 6380/1)
     [switch]$NoEval   # batch mode: skip CooperBench's per-pair auto-eval; evaluate everything at the end (no peeking)
 )
 $ErrorActionPreference = "Stop"
@@ -64,13 +65,13 @@ if ($Effort) { $launcher += @("--effort", $Effort) }
 if ($Condition -ne "coop") {
     $prep = & (Join-Path $root "..\..\.venv\Scripts\python.exe") -I (Join-Path $root "coop\prepare_repo.py") $Repo $Task
     $repoDir, $src = $prep.Trim().Split("|")
-    $world = "cbw_" + $Condition + "_" + ($Repo -replace "_task", "") + "_" + $Task + "_" + ($Features -replace ",", "_")
+    $world = $(if ($Condition -eq "native") { "native-cb-" } else { "cbw_" + $Condition + "_" }) + ($Repo -replace "_task", "") + "_" + $Task + "_" + ($Features -replace ",", "_")
     $launcher += @("--world-graph", $world, "--repo-dir", $repoDir, "--src", $src,
                    "--tool-log", (Join-Path $logDir "$Name.tool_calls.jsonl"))
     if ($ProductPort) { $launcher += @("--product-port", $ProductPort) }
 }
 $cbArgs = @("run", "-n", $Name, "-r", $Repo, "-t", $Task, "-f", $Features, "-m", $Model, "-a", "claude_code",
-            "--setting", "coop", "--git", "--backend", "docker", "-c", "1", "--redis", "redis://localhost:6379/1",
+            "--setting", "coop", "--git", "--backend", "docker", "-c", "1", "--redis", $Redis,
             "--dataset-dir", (Join-Path $root "external\CooperBench\dataset"), "--log-dir", $logDir)
 if ($NoEval) { $cbArgs += "--no-auto-eval" }
 $start = Get-Date
