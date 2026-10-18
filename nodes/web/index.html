@@ -6,9 +6,9 @@
 <title>Nodes</title>
 <style>
 :root{color-scheme:dark;
-  --bg:#0a0a0b;--side:#0d0d0f;--panel:#111113;--panel2:#16161a;--hover:#1b1b20;
-  --line:#222226;--line2:#2e2e34;--ink:#ececee;--ink2:#a3a3ab;--ink3:#6c6c75;
-  --go:#5fb88a;--wait:#d9a54a;--block:#e06c6c;--hand:#6aa6e8;
+  --bg:#0b0b0c;--panel:#111113;--panel2:#18181c;--hover:#17171b;--sel:#232329;
+  --line:#232327;--line2:#303036;--ink:#f1f1f3;--ink2:#a7a7b0;--ink3:#6f6f78;
+  --go:#4cc38a;--wait:#e8a93b;--block:#ef6461;--hand:#5aa9f0;
   --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:ui-monospace,"JetBrains Mono","Cascadia Mono",Consolas,monospace;
 }
@@ -16,169 +16,195 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
 button,select,input{font:inherit;color:inherit}
 a{color:var(--ink);text-decoration:none}
-.app{display:grid;grid-template-columns:240px 1fr;height:100vh}
-/* sidebar */
-aside{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 14px;font-weight:600;font-size:16px;letter-spacing:-.01em}
-.mark{width:22px;height:22px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
-.mark i{background:var(--ink);border-radius:2px}.mark i:nth-child(2),.mark i:nth-child(3){background:var(--ink3)}
-.wsbox{margin:0 12px 14px;position:relative}
-.wsbox select{width:100%;appearance:none;background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:8px 30px 8px 10px;cursor:pointer}
-.wsbox:after{content:"";position:absolute;right:12px;top:15px;border:4px solid transparent;border-top-color:var(--ink2)}
-nav{display:flex;flex-direction:column;gap:2px;padding:0 10px}
-nav button{display:flex;align-items:center;gap:10px;background:none;border:0;border-radius:7px;padding:8px 10px;text-align:left;
-  color:var(--ink2);cursor:pointer;transition:background .15s,color .15s}
-nav button:hover{background:var(--hover);color:var(--ink)}
-nav button.on{background:var(--panel2);color:var(--ink);box-shadow:inset 2px 0 0 var(--ink)}
-nav svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6}
-.label{font:11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
-.sidesec{padding:22px 20px 0}
-.kv{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:12.5px;color:var(--ink2)}
-.kv b{font-weight:500;color:var(--ink);font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
-.side-foot b{color:var(--ink2);font-weight:500;font-family:var(--mono)}.side-foot code{font:11px var(--mono)}
-.side-foot{margin-top:auto;padding:14px 12px 16px;border-top:1px solid var(--line)}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--panel);border-radius:8px;padding:7px 12px;
-  cursor:pointer;color:var(--ink);font-size:13px;transition:background .15s,border-color .15s}
-.btn:hover{background:var(--hover);border-color:#3a3a42}
-.btn.primary{background:var(--ink);color:#0a0a0b;border-color:var(--ink)}.btn.primary:hover{background:#fff}
-.btn.block{width:100%;justify-content:center}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--ink3);display:inline-block}
-.dot.on{background:var(--go);box-shadow:0 0 0 3px color-mix(in srgb,var(--go) 18%,transparent)}
-/* main */
-main{display:flex;flex-direction:column;min-width:0;min-height:0}
-.topbar{height:52px;flex:none;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid var(--line)}
-.crumb{color:var(--ink2);font-size:13px}.crumb b{color:var(--ink);font-weight:500}
+.app{display:grid;grid-template-columns:272px 1fr;grid-template-rows:56px 1fr;height:100vh}
+/* top bar: cells split by full-height dividers, like Render */
+.topbar{grid-column:1/-1;display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+.cell{display:flex;align-items:center;gap:10px;padding:0 20px;border-left:1px solid var(--line)}
+.cell:first-child{border-left:0}
+.logo{width:56px;justify-content:center;padding:0}
+.mark{width:20px;height:20px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.mark i{background:var(--ink);border-radius:2px}.mark i:nth-child(2),.mark i:nth-child(3){background:#5a5a62}
+.wscell{width:216px;padding:0 14px;position:relative;cursor:pointer}
+.avatar{width:26px;height:26px;border-radius:50%;background:#e9b44c;color:#141414;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.wscell select{appearance:none;background:none;border:0;font-size:15px;color:var(--ink);cursor:pointer;width:100%;padding-right:18px;outline:none}
+.wscell select option{background:var(--panel)}
+.wscell:after{content:"";position:absolute;right:16px;top:25px;border:4px solid transparent;border-top-color:var(--ink2)}
+.crumb{color:var(--ink2);font-size:14px}.crumb b{color:var(--ink);font-weight:500}
 .grow{flex:1}
-.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink2)}
-.timeline{display:flex;align-items:center;gap:10px}
-.timeline input[type=range]{width:220px;accent-color:var(--ink2)}
-.view{flex:1;overflow:auto;padding:36px 44px 48px;display:none}
+.tbtn{background:none;border:0;cursor:pointer;color:var(--ink);font-size:14px;display:flex;align-items:center;gap:8px;padding:0}
+.tbtn:hover{color:#fff}
+.timeline input[type=range]{width:180px;accent-color:#c8c8cf}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink3);display:inline-block;flex:none}
+.dot.on{background:var(--go)}
+/* sidebar */
+aside{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;overflow:auto}
+nav{display:flex;flex-direction:column;gap:2px;padding:14px 12px 6px}
+nav button{display:flex;align-items:center;gap:12px;background:none;border:0;border-radius:6px;padding:9px 12px;text-align:left;
+  color:var(--ink);font-size:15.5px;cursor:pointer;transition:background .12s}
+nav button:hover{background:var(--hover)}
+nav button.on{background:var(--sel)}
+nav svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;opacity:.8}
+.label{font:11.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.sidesec{padding:18px 24px 6px}
+.sidecard{margin:10px 14px;border:1px solid var(--line2);border-radius:8px;padding:16px 16px 12px;background:var(--panel)}
+.sidecard h4{margin:0 0 4px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sidecard p{margin:0 0 10px;color:var(--ink2);font-size:13px}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:13px;color:var(--ink2)}
+.kv b{font-weight:500;color:var(--ink);font-family:var(--mono);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.side-foot{margin-top:auto;border-top:1px solid var(--line);padding:12px}
+.side-foot a{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:6px;color:var(--ink);font-size:14.5px}
+.side-foot a:hover{background:var(--hover)}
+.side-foot .hint{font-size:12px;color:var(--ink3);padding:0 12px 4px 42px;line-height:1.5}
+.side-foot .hint b{color:var(--ink2);font-weight:500;font-family:var(--mono)}.side-foot code{font:11.5px var(--mono)}
+/* main */
+main{min-width:0;min-height:0;overflow:auto}
+.view{display:none;padding:44px 64px 64px;max-width:1440px}
 .view.on{display:block}
-h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px}
-.sub{color:var(--ink3);font-size:13px;margin:0 0 30px;font-family:var(--mono)}
-h2{font-size:17px;font-weight:600;margin:0 0 14px;letter-spacing:-.01em}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:34px}
-.kpi{padding:18px 20px;border-left:1px solid var(--line)}.kpi:first-child{border-left:0}
-.kpi .n{font-size:28px;font-weight:500;letter-spacing:-.02em;margin-top:10px;font-variant-numeric:tabular-nums}
+h1{font-size:34px;font-weight:500;letter-spacing:-.02em;margin:0 0 6px}
+.sub{color:var(--ink3);font-size:13px;margin:0 0 34px;font-family:var(--mono)}
+h2{font-size:20px;font-weight:600;margin:0 0 16px;letter-spacing:-.01em}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--panel);border-radius:6px;padding:7px 13px;
+  cursor:pointer;color:var(--ink);font-size:13.5px}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--ink);color:#0b0b0c;border-color:var(--ink)}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:22px}
+.kpi{padding:20px 22px;border-left:1px solid var(--line)}.kpi:first-child{border-left:0}
+.kpi .n{font-size:30px;font-weight:500;letter-spacing:-.02em;margin-top:12px;font-variant-numeric:tabular-nums}
 .kpi .n small{font-size:13px;color:var(--ink3);margin-left:4px}
-.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:28px}
-.card{border:1px solid var(--line);background:var(--panel);border-radius:12px}
+.spark{padding:18px 22px 14px;margin-bottom:40px}.sparkhead{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+#spark{width:100%;height:90px;display:block}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--ink2);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:7px}.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px}
 .agents{display:flex;flex-direction:column;gap:12px}
-.agent{padding:16px 18px;border:1px solid var(--line);background:var(--panel);border-radius:12px;position:relative;overflow:hidden}
-.agent:before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--c)}
+.agent{padding:16px 18px;border:1px solid var(--line);background:var(--panel);border-radius:8px}
 .agent .top{display:flex;align-items:center;gap:10px}
-.agent .nm{font-weight:600}
+.agent .who{width:26px;height:26px;border-radius:50%;background:var(--c);color:#111;display:grid;place-items:center;font-weight:700;font-size:12px}
+.agent .nm{font-weight:600;font-size:15px}
 .agent .task{color:var(--ink3);font:12px var(--mono);margin-left:auto}
-.agent .last{color:var(--ink2);font-size:13px;margin-top:8px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{font:12px var(--mono);color:var(--ink2);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
-.tag{font:11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:4px 6px;border:1px solid currentColor;opacity:.9}
-.t-go{color:var(--go)}.t-wait{color:var(--wait)}.t-block{color:var(--block)}.t-hand{color:var(--hand)}.t-mute{color:var(--ink3)}
-.feed{padding:4px 0}
-.story{display:grid;grid-template-columns:10px 1fr auto;gap:14px;align-items:start;padding:12px 18px;cursor:pointer;border-top:1px solid var(--line);transition:background .15s}
+.agent .last{color:var(--ink2);font-size:13px;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{font:12px var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line2);border-radius:5px;padding:2px 8px}
+.chip i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--c)}
+.tag{font:11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:4px 7px;font-weight:600}
+.t-go{color:#0d2a1c;background:var(--go)}.t-wait{color:#2e1f05;background:var(--wait)}.t-block{color:#2e0c0b;background:var(--block)}
+.t-hand{color:#0a1f33;background:var(--hand)}.t-mute{color:var(--ink2);background:var(--panel2)}
+.story{display:grid;grid-template-columns:8px 1fr auto;gap:14px;align-items:start;padding:13px 20px;cursor:pointer;border-top:1px solid var(--line);transition:background .12s}
 .story:first-child{border-top:0}.story:hover{background:var(--hover)}
-.story .bar{width:3px;height:100%;min-height:18px;border-radius:2px;background:var(--line2);justify-self:center}
+.story .bar{width:8px;height:8px;border-radius:50%;margin-top:7px;background:var(--line2)}
 .story.go .bar{background:var(--go)}.story.wait .bar{background:var(--wait)}.story.block .bar{background:var(--block)}.story.hand .bar{background:var(--hand)}
 .story .when{color:var(--ink3);font:12px var(--mono);white-space:nowrap}
-.story.new{animation:fadein 1.6s ease}
-@keyframes fadein{from{background:color-mix(in srgb,var(--ink) 7%,transparent)}to{background:transparent}}
-.more{display:block;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--ink2);padding:10px;cursor:pointer;font-size:13px}
+.story.new{animation:fadein 1.4s ease}
+@keyframes fadein{from{background:#1d1d22}to{background:transparent}}
+.more{display:block;width:100%;background:none;border:0;border-top:1px solid var(--line);color:var(--ink2);padding:11px;cursor:pointer;font-size:13px}
 .more:hover{color:var(--ink)}
-.empty{padding:28px 22px;color:var(--ink2);font-size:13.5px;line-height:1.6}
-.empty b{color:var(--ink);font-weight:500;display:block;margin-bottom:4px;font-size:14px}
-.empty code{font:12px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--ink)}
-/* activity */
-.split{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start}.split>div{min-width:0}
-.tablecard{overflow-x:auto}td.fx{white-space:normal;min-width:120px}
-.filters{display:flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;width:max-content;margin-bottom:16px}
-.filters button{background:none;border:0;border-left:1px solid var(--line2);padding:6px 12px;color:var(--ink2);cursor:pointer;font-size:13px}
-.filters button:first-child{border-left:0}.filters button.on{background:var(--panel2);color:var(--ink)}
+.empty{padding:28px 24px;color:var(--ink2);font-size:14px;line-height:1.6}
+.empty b{color:var(--ink);font-weight:600;display:block;margin-bottom:4px;font-size:15px}
+.empty code,.banner code{font:12.5px var(--mono);background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:1px 6px;color:var(--ink)}
+/* intro banner (Render's "Get organized" card) */
+.banner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden;margin-bottom:34px}
+.banner .copy{padding:38px 40px}.banner h3{font-size:24px;font-weight:500;margin:0 0 10px;letter-spacing:-.01em}
+.banner p{color:var(--ink2);margin:0 0 20px;max-width:440px}
+.banner .art{border-left:1px solid var(--line);background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/40px 40px;
+  position:relative;min-height:220px}
+.banner .art .win{position:absolute;inset:36px 30px 0 40px;border:1px solid var(--line2);border-bottom:0;background:#0d0d0f;border-radius:6px 6px 0 0;padding:16px}
+/* tables */
+.tabs{display:flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden;width:max-content}
+.tabs button{background:none;border:0;border-left:1px solid var(--line2);padding:7px 14px;color:var(--ink2);cursor:pointer;font-size:14px}
+.tabs button:first-child{border-left:0}.tabs button.on{background:var(--sel);color:var(--ink)}
+.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);border-radius:6px;padding:0 14px;margin:14px 0 18px;background:var(--bg)}
+.search input{flex:1;background:none;border:0;outline:none;padding:11px 0;font-size:14px}
+.search svg{width:16px;height:16px;stroke:var(--ink3);fill:none;stroke-width:1.8}
 table{width:100%;border-collapse:collapse}
-th{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:left;font-weight:400;padding:10px 12px;border-bottom:1px solid var(--line)}
-td{white-space:nowrap;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
-tbody tr{cursor:pointer;transition:background .15s}tbody tr:hover,tbody tr.sel{background:var(--hover)}
-tbody tr.new{animation:fadein 1.6s ease}
+th{font:11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);text-align:left;font-weight:400;padding:12px 14px;border-bottom:1px solid var(--line)}
+td{white-space:nowrap;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+td.fx{white-space:normal;min-width:120px}
+tbody tr{cursor:pointer;transition:background .12s}tbody tr:hover,tbody tr.sel{background:var(--hover)}
+tbody tr.new{animation:fadein 1.4s ease}
 .mono{font-family:var(--mono);font-size:12.5px}.muted{color:var(--ink3)}.num{text-align:right;font-variant-numeric:tabular-nums}
-.kind{font:10.5px/1 var(--mono);letter-spacing:.06em;color:var(--ink3);border:1px solid var(--line2);border-radius:4px;padding:3px 5px;margin-right:8px}
-.fx{font:12px var(--mono);color:var(--ink2)}.fx .w{color:var(--go)}
-.detail{position:sticky;top:0;padding:20px 22px;max-height:calc(100vh - 140px);overflow:auto}
-.detail h3{margin:0 0 4px;font-size:16px;font-weight:600}
+.kind{font:10.5px/1 var(--mono);letter-spacing:.06em;color:var(--ink2);border:1px solid var(--line2);border-radius:4px;padding:3px 5px;margin-right:8px}
+.fx{font:12.5px var(--mono);color:var(--ink2)}.fx .w{color:var(--go)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start}.split>div{min-width:0}
+.tablecard{overflow-x:auto}
+.detail{position:sticky;top:0;padding:20px 22px;max-height:calc(100vh - 120px);overflow:auto}
+.detail h3{margin:0 0 4px;font-size:17px;font-weight:600}
 .sect{margin-top:22px}.sect .label{display:block;margin-bottom:10px}
-.pat{display:inline-flex;align-items:center;gap:6px;font:12px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 8px;margin:0 6px 6px 0;color:var(--ink2)}
+.pat{display:inline-flex;align-items:center;gap:6px;font:12px var(--mono);background:var(--panel2);border:1px solid var(--line2);border-radius:5px;padding:3px 8px;margin:0 6px 6px 0;color:var(--ink)}
 .pat i{font-style:normal;color:var(--ink3)}
-pre{margin:0;white-space:pre-wrap;word-break:break-word;font:12px/1.55 var(--mono);color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-height:260px;overflow:auto}
-details{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--bg)}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font:12px/1.55 var(--mono);color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;max-height:260px;overflow:auto}
+details{border:1px solid var(--line);border-radius:6px;margin-bottom:8px;background:var(--bg)}
 details summary{cursor:pointer;padding:9px 12px;font-size:12.5px;display:flex;gap:10px;align-items:center;list-style:none}
 details summary::-webkit-details-marker{display:none}
-details pre{border:0;border-top:1px solid var(--line);border-radius:0 0 8px 8px}
+details pre{border:0;border-top:1px solid var(--line);border-radius:0 0 6px 6px}
 /* graph */
-.gwrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;height:calc(100vh - 52px - 36px - 48px - 76px)}
-.gstage{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);min-height:420px}
+.gtools{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.gwrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;height:calc(100vh - 56px - 44px - 64px - 150px);min-height:460px}
+.gstage{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:radial-gradient(circle at 1px 1px,#1e1e23 1px,transparent 0) 0 0/24px 24px,#0e0e10}
 falkordb-canvas{display:block;width:100%;height:100%}
-.gtools{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink2);font-size:12.5px}
-.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .gside{overflow:auto;padding:20px 22px}
 .gempty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
-.facts .fact{padding:14px 18px;border-top:1px solid var(--line)}.facts .fact:first-child{border-top:0}
-.fact .meta{display:flex;gap:10px;align-items:center;color:var(--ink3);font-size:12px;margin-bottom:6px}
-@media (max-width:1100px){.cols,.split,.gwrap{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}}
+.facts .fact{padding:16px 20px;border-top:1px solid var(--line)}.facts .fact:first-child{border-top:0}
+.fact .meta{display:flex;gap:10px;align-items:center;color:var(--ink3);font-size:12.5px;margin-bottom:6px}
+@media (max-width:1150px){.cols,.split,.gwrap,.banner{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}.view{padding:32px 28px}}
 </style>
 </head>
 <body>
 <div class="app">
+  <header class="topbar">
+    <div class="cell logo"><span class="mark"><i></i><i></i><i></i><i></i></span></div>
+    <label class="cell wscell"><span class="avatar" id="ws-avatar">N</span><select id="ws" aria-label="Workspace"></select></label>
+    <div class="cell crumb">Workspaces&nbsp;/&nbsp;<b id="crumb-ws">–</b>&nbsp;/&nbsp;<span id="crumb-view">Overview</span></div>
+    <div class="grow"></div>
+    <div class="cell timeline"><button class="tbtn" id="play" title="Replay this workspace from the start">▶&nbsp; Replay</button>
+      <input type="range" id="slider" min="0" max="0" value="0" aria-label="Timeline"></div>
+    <div class="cell"><button class="tbtn" id="livepill" title="Back to live"><span class="dot" id="dot"></span><span id="mode">connecting</span></button></div>
+  </header>
   <aside>
-    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>Nodes</div>
-    <div class="wsbox"><select id="ws" aria-label="Workspace"></select></div>
     <nav id="nav">
       <button data-view="overview" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Overview</button>
       <button data-view="activity"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Activity</button>
       <button data-view="graph"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="M8.2 7.2l7.5 1M7 8.3l1.6 7.4M16.6 10.1l-5.7 6.3"/></svg>Graph</button>
       <button data-view="facts"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>Facts</button>
     </nav>
-    <div class="sidesec">
-      <div class="label">MCP server</div>
-      <div style="margin-top:12px">
-        <div class="kv"><span><span class="dot" id="srvdot"></span>&nbsp; Status</span><b id="srv-status">connecting</b></div>
-        <div class="kv"><span>Endpoint</span><b id="srv-url" title="">/mcp</b></div>
-        <div class="kv"><span>Uptime</span><b id="srv-up">–</b></div>
-        <div class="kv"><span>Tools</span><b id="srv-tools">–</b></div>
-      </div>
+    <div class="sidesec"><span class="label">Local MCP server</span></div>
+    <div class="sidecard">
+      <h4><span class="dot" id="srvdot"></span><span id="srv-status">connecting</span></h4>
+      <p>Claude Code talks to it over MCP and hooks.</p>
+      <div class="kv"><span>Endpoint</span><b id="srv-url" title="">/mcp</b></div>
+      <div class="kv"><span>Uptime</span><b id="srv-up">–</b></div>
+      <div class="kv"><span>Tools</span><b id="srv-tools">–</b></div>
     </div>
-    <div class="sidesec">
-      <div class="label">FalkorDB</div>
-      <div style="margin-top:12px">
-        <div class="kv"><span>Version</span><b id="db-ver">–</b></div>
-        <div class="kv"><span>Graph</span><b id="db-graph">–</b></div>
-        <div class="kv"><span>Nodes · edges</span><b id="db-size">–</b></div>
-        <div class="kv"><span>Ping</span><b id="db-ping">–</b></div>
-      </div>
+    <div class="sidesec"><span class="label">FalkorDB</span></div>
+    <div class="sidecard">
+      <div class="kv"><span>Version</span><b id="db-ver">–</b></div>
+      <div class="kv"><span>Graph</span><b id="db-graph">–</b></div>
+      <div class="kv"><span>Nodes · edges</span><b id="db-size">–</b></div>
+      <div class="kv"><span>Ping</span><b id="db-ping">–</b></div>
     </div>
-    <div class="side-foot"><a class="btn block" id="browser" target="_blank" rel="noopener">Open in FalkorDB Browser ↗</a>
-      <div id="browser-hint" style="font-size:11.5px;color:var(--ink3);margin-top:8px;line-height:1.5"></div></div>
+    <div class="side-foot">
+      <a id="browser" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/></svg>Open in FalkorDB Browser</a>
+      <div class="hint" id="browser-hint"></div>
+    </div>
   </aside>
   <main>
-    <div class="topbar">
-      <div class="crumb">Workspaces / <b id="crumb-ws">–</b> / <span id="crumb-view">Overview</span></div>
-      <div class="grow"></div>
-      <div class="timeline" id="timeline">
-        <button class="btn" id="play" title="Replay this workspace's events from the start">Replay</button>
-        <input type="range" id="slider" min="0" max="0" value="0" aria-label="Timeline">
-        <span class="pill" id="livepill"><span class="dot" id="dot"></span><span id="mode">connecting</span></span>
-      </div>
-    </div>
-
     <section class="view on" id="v-overview">
       <h1>Overview</h1><p class="sub" id="ws-root">&nbsp;</p>
+      <div id="intro"></div>
       <div class="kpis">
         <div class="kpi"><div class="label">Agents</div><div class="n" id="k-agents">0</div></div>
         <div class="kpi"><div class="label">Hand-offs</div><div class="n" id="k-hand">0</div></div>
         <div class="kpi"><div class="label">Conflicts prevented</div><div class="n" id="k-conf">0</div></div>
         <div class="kpi"><div class="label">Gate latency p50</div><div class="n" id="k-lat">–<small>ms</small></div></div>
       </div>
+      <div class="card spark"><div class="sparkhead"><span class="label">Calls to the MCP server</span><span class="muted" id="spark-n"></span>
+        <span class="grow"></span><span class="legend"><span><i style="background:var(--go)"></i>go ahead</span><span><i style="background:var(--wait)"></i>wait</span>
+        <span><i style="background:var(--block)"></i>blocked</span><span><i style="background:var(--hand)"></i>hand-off</span></span></div>
+        <svg id="spark" preserveAspectRatio="none" viewBox="0 0 1000 90"></svg></div>
       <div class="cols">
         <div><h2>Agents</h2><div class="agents" id="lanes"></div></div>
-        <div><h2>What happened</h2><div class="card"><div class="feed" id="feed"></div><button class="more" id="more" hidden>Show everything</button></div></div>
+        <div><h2>What happened</h2><div class="card"><div id="feed"></div><button class="more" id="more" hidden>Show everything</button></div></div>
       </div>
     </section>
 
@@ -186,7 +212,8 @@ falkordb-canvas{display:block;width:100%;height:100%}
       <h1>Activity</h1><p class="sub">Every call into the local MCP server and every Claude Code hook, with what it did to the graph.</p>
       <div class="split">
         <div>
-          <div class="filters" id="cfilter"><button data-f="all" class="on">All</button><button data-f="tool">MCP tools</button><button data-f="hook">Hooks</button><button data-f="write">Wrote to graph</button></div>
+          <div class="tabs" id="cfilter"><button data-f="all" class="on">All</button><button data-f="tool">MCP tools</button><button data-f="hook">Hooks</button><button data-f="write">Wrote to graph</button></div>
+          <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="csearch" placeholder="Search calls by tool, hook or agent"></label>
           <div class="card tablecard"><table><thead><tr><th>Time</th><th>Caller</th><th>Call</th><th>Result</th><th>Graph</th><th class="num">Latency</th></tr></thead><tbody id="calls"></tbody></table><div id="calls-empty"></div></div>
         </div>
         <div class="card detail" id="calldetail"></div>
@@ -194,9 +221,9 @@ falkordb-canvas{display:block;width:100%;height:100%}
     </section>
 
     <section class="view" id="v-graph">
-      <h1>Graph</h1><p class="sub">The code the agents are touching right now, and how it connects. Colour = who holds the lease.</p>
+      <h1>Graph</h1><p class="sub">Your code as FalkorDB stores it, coloured by kind. A ring shows which agent holds it.</p>
       <div class="gtools">
-        <div class="filters" id="layout" style="margin:0"><button data-l="force" class="on">Force</button><button data-l="tree">Tree</button><button data-l="radial">Radial</button></div>
+        <div class="tabs" id="layout"><button data-l="force" class="on">Force</button><button data-l="tree">Tree</button><button data-l="radial">Radial</button></div>
         <button class="btn" id="fit">Fit</button>
         <div class="legend" id="legend"></div>
       </div>

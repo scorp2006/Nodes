@@ -387,13 +387,24 @@ def register(server, reg) -> None:
             UNWIND $u AS id MATCH (f:Unit {kind: 'file'})-[:CONTAINS]->(x:Unit {uid: id})
             RETURN DISTINCT f.uid, f.path, x.uid""", {"u": uids}, ro=True)
         nodes = {u: {"id": u, "kind": k, "label": s or p, "owner": o} for u, k, s, p, o in active}
+        total = st.q("dash.size", "MATCH (u:Unit {status: 'active'}) RETURN count(u)", ro=True)[0][0]
+        if request.query_params.get("scope", "auto") != "active" and total <= 400:
+            # small enough to show whole: the repo is the map, the active code is lit on top of it
+            for u, k, s, p in st.q("dash.all", "MATCH (u:Unit) WHERE u.status = 'active' OR u.status IS NULL "
+                                   "RETURN u.uid, u.kind, u.symbol, u.path", ro=True):
+                nodes.setdefault(u, {"id": u, "kind": k, "label": s or p, "owner": None, "context": True})
+            ids = list(nodes)
+            edges = [{"a": a, "b": b, "rel": "CALLS" if r == "DEPENDS_ON" else r, "by": by} for a, b, r, by in st.q(
+                "dash.all_edges", "UNWIND $u AS id MATCH (a:Unit {uid: id})-[d:DEPENDS_ON|CONTAINS]->(b:Unit) "
+                "WHERE b.uid IN $u RETURN a.uid, b.uid, type(d), d.resolved_by", {"u": ids}, ro=True)]
+            return JSONResponse({"nodes": list(nodes.values()), "edges": edges, "scope": "all", "total": total})
         for _, _, b, k, s, p, _ in nbr:
             nodes.setdefault(b, {"id": b, "kind": k, "label": s or p, "owner": None, "context": True})
         edges = [{"a": a, "b": b, "rel": "CALLS", "by": by} for a, b, _, _, _, _, by in nbr]
         for f, p, x in files:  # files as parents: the tree layout reads repo -> file -> unit
             nodes.setdefault(f, {"id": f, "kind": "file", "label": p, "owner": None, "context": True})
             edges.append({"a": f, "b": x, "rel": "CONTAINS"})
-        return JSONResponse({"nodes": list(nodes.values()), "edges": edges})
+        return JSONResponse({"nodes": list(nodes.values()), "edges": edges, "scope": "active", "total": total})
 
     async def node(request: Request) -> Response:
         """Everything about one unit: where it is, who leases it, who wrote it and why, facts and decisions on it."""

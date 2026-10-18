@@ -4,7 +4,7 @@ import "/static/vendor/falkordb-canvas/falkordb-canvas.js";
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const q = s => encodeURIComponent(s);
-const AGENT_COLORS = ["#6aa6e8", "#e0a35c", "#5fb88a", "#d77a6a", "#5bb8b0", "#c9c26a", "#9aa4b2"];  // no purple, by request
+const AGENT_COLORS = ["#ff6b6b", "#4dabf7", "#ffd43b", "#ff922b", "#3bc9db", "#e9ecef", "#94d82d"];  // no purple, by request
 const colors = {};
 const color = a => colors[a] ??= AGENT_COLORS[Object.keys(colors).length % AGENT_COLORS.length];
 const nameOf = a => String(a || "").replace(/-[0-9a-f]{6}(-[0-9a-f]{4})?$/, m => m.length > 7 ? " (subagent)" : "");
@@ -43,7 +43,7 @@ function story(e, prev) {
 }
 
 function rebuild(n) {
-  const holds = {}, last = {}, prev = {}, done = {}, feed = []; let conf = 0, hand = 0;
+  const holds = {}, last = {}, prev = {}, done = {}, feed = [], touched = {}; let conf = 0, hand = 0;
   for (const e of events.slice(0, n)) {
     const s = story(e, prev); if (s) feed.push({...s, e});
     if (e.agent && !(e.agent in last) && e.agent !== "importer") last[e.agent] = "";
@@ -53,12 +53,12 @@ function rebuild(n) {
       if (e.verdict === "handoff") hand++;
       const units = e.verdict === "proceed" ? ((e.path || "").split("-HOLDS-> ")[1] || "").split(", ")
         : e.verdict === "handoff" ? [(e.path || "").split(" ")[4]] : [];
-      for (const u of units.filter(Boolean)) { for (const a in holds) holds[a].delete(u); (holds[e.agent] ??= new Set()).add(u); }
+      for (const u of units.filter(Boolean)) { for (const a in holds) holds[a].delete(u); (holds[e.agent] ??= new Set()).add(u); touched[u] = e.agent; }
     }
     if (e.kind === "done") done[e.agent] = e.commit || true;
     if (e.kind === "release" || e.kind === "session-end") holds[e.agent]?.clear();
   }
-  return {holds, last, done, feed, conf, hand};
+  return {holds, last, done, feed, conf, hand, touched};
 }
 const ownerOf = u => { for (const a in state.holds) if (state.holds[a].has(u)) return a; return null; };
 
@@ -66,10 +66,15 @@ const ownerOf = u => { for (const a in state.holds) if (state.holds[a].has(u)) r
 function renderOverview(fresh) {
   const agents = Object.keys(state.last);
   $("k-agents").textContent = agents.length; $("k-hand").textContent = state.hand; $("k-conf").textContent = state.conf;
+  $("intro").innerHTML = agents.length || events.length ? "" : `<div class="banner"><div class="copy"><h3>Coordinate your coding agents</h3>
+      <p>Open Claude Code in this repository. Every session and subagent appears here, and Nodes gates each edit against the shared code graph.</p>
+      <button class="btn primary" onclick="navigator.clipboard?.writeText('claude')">Copy: <code style="background:none;border:0">claude</code></button></div>
+      <div class="art"><div class="win"><span class="label">Workspace</span><div style="margin-top:12px;display:flex;gap:10px">${["proceed", "defer", "handoff"].map(v =>
+      `<span class="tag t-${VERDICT[v]}">${v}</span>`).join("")}</div></div></div></div>`;
   $("lanes").innerHTML = agents.map(a => `<div class="agent" style="--c:${color(a)}">
-      <div class="top"><span class="nm">${esc(nameOf(a))}</span>${state.done[a] ? '<span class="tag t-go">done</span>' : ""}
+      <div class="top"><span class="who">${esc(nameOf(a)[0]?.toUpperCase() || "?")}</span><span class="nm">${esc(nameOf(a))}</span>${state.done[a] ? '<span class="tag t-go">done</span>' : ""}
       <span class="task">${esc(laneTask[a] || "")}</span></div>
-      <div class="chips">${[...(state.holds[a] || [])].map(u => `<span class="chip">${esc(short(u))}</span>`).join("") || '<span class="muted" style="font-size:13px">holds nothing</span>'}</div>
+      <div class="chips">${[...(state.holds[a] || [])].map(u => `<span class="chip"><i></i>${esc(short(u))}</span>`).join("") || '<span class="muted" style="font-size:13px">holds nothing</span>'}</div>
       ${state.last[a] ? `<div class="last">${esc(state.last[a])}</div>` : ""}</div>`).join("")
     || `<div class="card empty"><b>No agents yet</b>Open Claude Code in this repository. Each session, and each subagent it starts, shows up here the moment it acts.</div>`;
   const items = state.feed.slice().reverse(), shown = showAll ? items : items.slice(0, 8);
@@ -77,6 +82,21 @@ function renderOverview(fresh) {
       <span class="bar"></span><span>${esc(f.text)}</span><span class="when" title="${esc(clock(f.e.t))}">${esc(live ? ago(f.e.t) : clock(f.e.t))}</span></div>`).join("")
     || `<div class="empty"><b>Nothing has happened yet</b>Decisions, hand-offs and shared facts appear here in plain words as they happen. Click any line for the raw call.</div>`;
   $("more").hidden = items.length <= 8; $("more").textContent = showAll ? "Show less" : `Show all ${items.length}`;
+}
+
+function renderSpark() {  // calls per time slice as bars; each gate decision a dot in its verdict colour
+  const at = events[(live ? events.length : cursor) - 1], replay = events.some(e => e.recorded_t);
+  const cutoff = (!live || replay) && at ? (at.recorded_t ?? at.t) + .5 : Infinity;
+  const cs = calls.filter(c => !quiet(c) && c.t <= cutoff), N = 60;
+  $("spark-n").textContent = cs.length ? `${cs.length} calls` : "";
+  if (!cs.length) { $("spark").innerHTML = `<text x="500" y="50" text-anchor="middle" fill="#6c6c75" font-size="13">No calls yet. They appear here live.</text>`; return; }
+  const t0 = Math.min(...cs.map(c => c.t)), t1 = Math.max(...cs.map(c => c.t), t0 + 1), w = 1000 / N;
+  const bins = Array.from({length: N}, () => ({n: 0, v: []}));
+  for (const c of cs) { const b = bins[Math.min(N - 1, ((c.t - t0) / (t1 - t0) * N) | 0)]; b.n++; if (c.verdict) b.v.push(c.verdict); }
+  const max = Math.max(...bins.map(b => b.n));
+  $("spark").innerHTML = bins.map((b, i) => { const h = b.n ? 6 + (b.n / max) * 58 : 2;
+    return `<rect x="${i * w + 2}" y="${82 - h}" width="${w - 4}" height="${h}" rx="2" fill="${b.n ? "#3a3a42" : "#1c1c21"}"><title>${b.n} calls</title></rect>`
+      + b.v.slice(0, 3).map((v, j) => `<circle cx="${i * w + w / 2}" cy="${82 - h - 7 - j * 8}" r="3" fill="${VCOL[v]}"/>`).join(""); }).join("");
 }
 
 // ---------------------------------------------------------------- activity (MCP + hooks)
@@ -87,6 +107,7 @@ const effectsText = fx => { if (!fx) return '<span class="muted">not measured</s
   if (fx.nodes_deleted || fx.relationships_deleted) w.push(`−${(fx.nodes_deleted || 0) + (fx.relationships_deleted || 0)}`);
   return w.length ? `<span class="w">${w.join(" · ")}</span>` : `read · ${fx.rows || 0} rows`; };
 const VERDICT = {proceed: "go", defer: "wait", escalate: "block", handoff: "hand"};
+const VCOL = {proceed: "#4cc38a", defer: "#e8a93b", escalate: "#ef6461", handoff: "#5aa9f0"};
 const writes = c => !!c.effects && ["nodes_created", "relationships_created", "properties_set", "nodes_deleted", "relationships_deleted"].some(k => c.effects[k]);
 const quiet = c => !c.queries && !c.verdict && !c.error;  // a hook for a tool Nodes ignores (reads, searches)
 const pat = p => { const m = p.match(/^(.+?)-\[:(\w+)\]->(.+)$/); return m ? `<span class="pat">${esc(m[1] === "?" ? "node" : m[1])} <i>→</i> ${esc(m[2])} <i>→</i> ${esc(m[3] === "?" ? "node" : m[3])}</span>` : ""; };
@@ -97,7 +118,13 @@ function renderCalls(newIds = new Set()) {
   const cutoff = (!live || replay) && at ? (at.recorded_t ?? at.t) + .5 : Infinity;
   const inTime = calls.filter(c => c.t <= cutoff);
   const shown = inTime.filter(c => !quiet(c)), hidden = inTime.length - shown.length;
-  const rows = shown.filter(c => callFilter === "all" || (callFilter === "write" ? writes(c) : c.kind.startsWith(callFilter)));
+  const match = c => callFilter === "all" || (callFilter === "write" ? writes(c) : c.kind.startsWith(callFilter));
+  const needle = ($("csearch").value || "").toLowerCase();
+  const rows = shown.filter(match).filter(c => !needle || `${c.name} ${c.agent} ${c.verdict || ""}`.toLowerCase().includes(needle));
+  const counts = {all: shown.length, tool: shown.filter(c => c.kind.startsWith("tool")).length,
+                  hook: shown.filter(c => c.kind.startsWith("hook")).length, write: shown.filter(writes).length};
+  const names = {all: "All", tool: "MCP tools", hook: "Hooks", write: "Wrote to graph"};
+  document.querySelectorAll("#cfilter button").forEach(b => { b.textContent = `${names[b.dataset.f]} (${counts[b.dataset.f]})`; });
   $("calls").innerHTML = rows.slice(0, 120).map(c => `<tr data-id="${c.id}" class="${c.id === selCall ? "sel" : ""}${newIds.has(c.id) ? " new" : ""}">
       <td class="mono muted" title="${esc(new Date(c.t * 1000).toLocaleString())}">${esc(clock(c.t))}</td>
       <td><span style="color:${color(c.agent)}">●</span> ${esc(nameOf(c.agent) || "—")}</td>
@@ -133,44 +160,72 @@ function showLatency() {  // the gate's own p50 since the server started, else t
   $("k-lat").innerHTML = `${v ?? "–"}<small>ms</small>`; }
 const refreshCalls = () => { clearTimeout(callsTimer); callsTimer = setTimeout(async () => {
   const before = new Set(calls.map(c => c.id));
-  calls = await (await fetch(`/api/calls?ws=${q(ws)}`)).json(); showLatency();
+  calls = await (await fetch(`/api/calls?ws=${q(ws)}`)).json(); showLatency(); renderSpark();
   renderCalls(before.size ? new Set(calls.filter(c => !before.has(c.id)).map(c => c.id)) : new Set()); }, 300); };
 
 // ---------------------------------------------------------------- graph (FalkorDB canvas)
+// The repo is the map (dim, tinted by kind); the code agents hold glows in their colour; leases stream particles;
+// every gate decision sends a burst along the path it walked and a ripple through the nodes it touched.
+const KIND = {file: "#7f95b5", function: "#4cc9a6", class: "#e9b44c", region: "#7b8390", planned: "#c4c8ce"};
 const canvas = $("canvas");
+let hover = null, ripples = {}, degree = {};
 canvas.setConfig({
-  backgroundColor: "#111113", foregroundColor: "#d6d6da", captionsKeys: ["name"], layoutMode: "force",
-  nodeStyle: {fontFamily: "Inter, Segoe UI, system-ui, sans-serif", glowColor: [236, 236, 238], glowMaxOpacity: .35},
+  backgroundColor: "rgba(0,0,0,0)", foregroundColor: "#d6d6da", captionsKeys: ["name"], layoutMode: "force",
+  nodeStyle: {fontFamily: "Inter, Segoe UI, system-ui, sans-serif"},
   linkStyle: {fontFamily: "Inter, Segoe UI, system-ui, sans-serif"},
-  layoutOptions: {tree: {direction: "lr", levelDistance: 170, nodeSpacing: 60}},
+  layoutOptions: {tree: {direction: "lr", levelDistance: 170, nodeSpacing: 46}},
+  simulation: {chargeStrength: -520, centerStrength: .04},
   isNodeSelected: n => lit.has(n.id),
   node: {nodeCanvasObject: drawNode, nodePointerAreaPaint: (n, c, ctx) => { ctx.fillStyle = c; ctx.beginPath();
-    ctx.arc(n.x, n.y, (n.size || 8) + 2, 0, 2 * Math.PI); ctx.fill(); }},
+    ctx.arc(n.x, n.y, (n.size || 8) + 3, 0, 2 * Math.PI); ctx.fill(); }},
   linkLineDash: l => l.data?.by === "name-match" ? [3, 3] : null,
-  eventHandlers: {onNodeClick: n => showNode(n), onBackgroundClick: () => renderGside()},
+  eventHandlers: {onNodeClick: n => showNode(n), onBackgroundClick: () => renderGside(),
+                  onNodeHover: n => { hover = n?.id || null; document.querySelector(".gstage").style.cursor = n ? "pointer" : ""; }},
 });
 new ResizeObserver(([e]) => { const r = e.contentRect; if (r.width) { canvas.setWidth(r.width); canvas.setHeight(r.height); } }).observe(document.querySelector(".gstage"));
+setInterval(() => canvas.getGraph?.()?.autoPauseRedraw(!$("v-graph").classList.contains("on")), 500);  // keep it moving
 
-function drawNode(n, ctx) {  // FalkorDB's engine and layouts; our node face: shape, lease colour, label underneath
-  const k = ctx.getTransform().a || 1, r = n.size || 8, on = lit.has(n.id);
-  if (on) { ctx.beginPath(); ctx.arc(n.x, n.y, r + 7 / k, 0, 2 * Math.PI); ctx.fillStyle = "rgba(236,236,238,.16)"; ctx.fill(); }
+function drawNode(n, ctx) {  // FalkorDB's engine and layouts; our node face: kind colour, ownership ring, label
+  const k = ctx.getTransform().a || 1, r = n.size || 6, agent = String(n.id).startsWith("agent:");
+  const ring = n.data?.ring, on = lit.has(n.id), now = performance.now();
+  const rip = ripples[n.id];  // a decision just walked through it: one ring that widens and fades
+  if (rip) {
+    const t = (now - rip.t) / 1200;
+    if (t > 1) delete ripples[n.id];
+    else { ctx.beginPath(); ctx.arc(n.x, n.y, r + (3 + 18 * t) / k, 0, 2 * Math.PI);
+      ctx.strokeStyle = rip.c + Math.round((1 - t) * 230).toString(16).padStart(2, "0"); ctx.lineWidth = 1.5 / k; ctx.stroke(); }
+  }
   ctx.beginPath();
-  if (n.shape === "square") ctx.rect(n.x - r * .8, n.y - r * .8, r * 1.6, r * 1.6); else ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
+  if (n.shape === "square") ctx.rect(n.x - r * .85, n.y - r * .85, r * 1.7, r * 1.7);
+  else ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
   ctx.fillStyle = n.color; ctx.fill();
-  ctx.lineWidth = (on ? 2 : 1) / k; ctx.strokeStyle = on ? "#ececee" : "rgba(255,255,255,.14)"; ctx.stroke();
-  const label = n.data?.name || "", agent = String(n.id).startsWith("agent:");
-  if (!label || (k < .45 && !agent && !on)) return;  // far out: only agents keep their names
-  ctx.font = `${agent ? 600 : 400} ${(agent ? 12.5 : 11) / k}px Inter, Segoe UI, system-ui, sans-serif`;
+  ctx.lineWidth = 1 / k; ctx.strokeStyle = on || hover === n.id ? "#f1f1f3" : "rgba(0,0,0,.35)"; ctx.stroke();
+  if (ring) {  // who holds it
+    ctx.beginPath(); ctx.arc(n.x, n.y, r + 3.5 / k, 0, 2 * Math.PI);
+    ctx.setLineDash(n.data.done ? [3 / k, 2.5 / k] : []); ctx.lineWidth = 2.2 / k; ctx.strokeStyle = ring; ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (agent) {
+    ctx.fillStyle = "#121214"; ctx.font = `700 ${r * .95}px Inter, Segoe UI, sans-serif`; ctx.textAlign = "center";
+    ctx.textBaseline = "middle"; ctx.fillText((n.data?.name || "?")[0].toUpperCase(), n.x, n.y + .5);
+  }
+  const label = n.data?.name || "", big = (degree[n.id] || 0) >= 4;
+  const show = agent || ring || on || hover === n.id || (big && k > .9) || k > 1.6;  // labels arrive as you zoom in
+  if (!label || !show) return;
+  ctx.font = `${agent || ring ? 600 : 400} ${(agent ? 12.5 : 11) / k}px Inter, Segoe UI, system-ui, sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "top";
-  ctx.fillStyle = agent || on ? "#ececee" : n.data?.context ? "#6c6c75" : "#a3a3ab";
-  ctx.fillText(label.length > 28 ? label.slice(0, 27) + "…" : label, n.x, n.y + r + 4 / k);
+  ctx.fillStyle = agent || ring || on || hover === n.id ? "#f1f1f3" : "#9a9aa3";
+  ctx.fillText(label.length > 28 ? label.slice(0, 27) + "…" : label, n.x, n.y + r + (ring ? 7 : 5) / k);
 }
 
-let owners = {};  // canonical unit id -> agent, for the current frame
+let owners = {}, worked = {};  // canonical unit id -> agent holding it now / who last worked on it
 function nodeColor(id, n) {
   if (id.startsWith("agent:")) return color(id.slice(6));
-  const o = owners[id] || ownerOf(id); if (o) return color(o);  // the event timeline is the only source: replays stay true
-  return n.kind === "file" ? "#34343b" : n.context ? "#2b2b31" : "#4a4a52";
+  return KIND[n.planned ? "planned" : n.kind] || KIND.region;  // ownership is the ring, not the fill
+}
+function animateLinks() {  // particles stream from each agent into the code it holds
+  const g = canvas.getGraph?.(); if (!g) return;
+  g.linkDirectionalParticles(l => l.relationship === "HOLDS" ? 2 : 0).linkDirectionalParticleSpeed(.005)
+   .linkDirectionalParticleWidth(l => l.relationship === "HOLDS" ? 2.2 : 2).linkDirectionalParticleColor(l => l.data?.burst || l.color);
 }
 let shape = "";
 function renderGraph() {
@@ -180,26 +235,50 @@ function renderGraph() {
   const planPath = id => (id.match(/^(?:file:)?planned:([^#]+)/) || [])[1];
   const canon = id => real[planPath(id)] || id;
   owners = {}; for (const a in state.holds) for (const u of state.holds[a]) owners[canon(u)] = a;
+  worked = {}; for (const u in state.touched || {}) worked[canon(u)] = state.touched[u];
   const seen = new Set(), ids = new Set();
   const gnodes = graph.nodes.filter(n => { const c = canon(n.id); if (seen.has(c)) return false; seen.add(c); ids.add(c); return true; })
     .map(n => ({...n, id: canon(n.id), planned: canon(n.id) === n.id && !!planPath(n.id)}));
+  const edges = graph.edges.filter(e => layout === "force" || e.rel !== "CALLS")
+    .filter(e => canon(e.a) !== canon(e.b) && ids.has(canon(e.a)) && ids.has(canon(e.b)));
+  degree = {}; for (const e of edges) { degree[canon(e.a)] = (degree[canon(e.a)] || 0) + 1; degree[canon(e.b)] = (degree[canon(e.b)] || 0) + 1; }
   const nodes = gnodes.map(n => ({id: n.id, labels: [n.kind], visible: true, color: nodeColor(n.id, n),
-    size: n.kind === "file" ? 7 : n.context ? 6 : 9, shape: n.kind === "file" ? "square" : "circle", data: {name: n.planned ? `${short(planPath(n.id))} (planned)` : short(n.id), kind: n.kind, context: !!n.context}}))
-    .concat(agents.map(a => ({id: `agent:${a}`, labels: ["Session"], visible: true, color: color(a), size: 12, data: {name: nameOf(a)}})));
-  const links = graph.edges.filter(e => layout === "force" || e.rel !== "CALLS").filter(e => canon(e.a) !== canon(e.b))
-    .map((e, i) => ({id: `e${i}`, relationship: e.rel, source: canon(e.a), target: canon(e.b), visible: true, color: e.rel === "CALLS" ? "#3e3e46" : "#2c2c33", data: {by: e.by}}))
-    .concat(agents.flatMap(a => [...new Set([...state.holds[a]].map(canon))].filter(u => ids.has(u)).map(u => ({id: `h:${a}:${u}`, relationship: "HOLDS",
-      source: `agent:${a}`, target: u, visible: true, color: color(a), data: {}}))));
+      size: owners[n.id] || worked[n.id] ? 11 : n.kind === "file" ? 8 : n.kind === "region" ? 6 : 7 + Math.min(4, Math.sqrt(degree[n.id] || 0) * 1.5),
+      shape: n.kind === "file" ? "square" : "circle",
+      data: {name: n.planned ? `${short(planPath(n.id))} (planned)` : short(n.id), kind: n.kind,
+        ring: owners[n.id] || worked[n.id] ? color(owners[n.id] || worked[n.id]) : null, done: !owners[n.id] && !!worked[n.id]}}))
+    .concat(agents.map(a => ({id: `agent:${a}`, labels: ["Session"], visible: true, color: color(a), size: 16, data: {name: nameOf(a)}})));
+  const links = edges.map((e, i) => ({id: `e${i}`, relationship: "", source: canon(e.a), target: canon(e.b), visible: true,
+      color: e.rel === "CALLS" ? "#4a5b66" : "#33333a", data: {by: e.by, rel: e.rel}}))  // structure: lines, no captions
+    .concat(agents.flatMap(a => [...new Set([...state.holds[a]].map(canon))].filter(u => ids.has(u)).map(u => ({id: `h:${a}:${u}`,
+      relationship: "HOLDS", source: `agent:${a}`, target: u, visible: true, color: color(a), width: 1.6, data: {}}))));
   const sig = nodes.map(n => n.id).join("|") + "#" + links.map(l => l.id).join("|") + layout;
-  if (sig !== shape) { shape = sig; canvas.setData({nodes, links}); }
-  else { const cur = Object.fromEntries(nodes.map(n => [n.id, n.color])); (canvas.getGraphData()?.nodes || []).forEach(n => { if (cur[n.id]) n.color = cur[n.id]; }); canvas.refresh(); }
+  if (sig !== shape) { shape = sig; canvas.setData({nodes, links}); setTimeout(animateLinks, 50); }
+  else {
+    const cur = Object.fromEntries(nodes.map(n => [n.id, n]));
+    (canvas.getGraphData()?.nodes || []).forEach(n => { const c = cur[n.id]; if (c) { n.color = c.color; n.size = c.size; n.data = c.data; } });
+    canvas.refresh();
+  }
   $("gempty").hidden = nodes.length > 0;
-  $("gempty").innerHTML = `<div class="empty" style="max-width:380px"><b>No code is in play</b>The graph shows only units an agent has leased, declared or been gated on, plus their direct neighbours. It fills in as agents work.</div>`;
-  $("legend").innerHTML = agents.map(a => `<span><i style="background:${color(a)}"></i>${esc(nameOf(a))}</span>`).join("")
-    + `<span><i style="background:#4a4a52"></i>free</span><span><i style="background:#2b2b31"></i>neighbour</span>`;
+  $("gempty").innerHTML = `<div class="empty" style="max-width:380px"><b>No code indexed yet</b>Run <code>nodes init</code> in a repository. Its files and functions appear here as a map, and the code agents hold lights up in their colour.</div>`;
+  const people = [...new Set([...agents, ...Object.values(worked)])];
+  $("legend").innerHTML = people.map(a => `<span><i style="background:transparent;border:2px ${agents.includes(a) ? "solid" : "dashed"} ${color(a)};width:11px;height:11px"></i>${esc(nameOf(a))}${agents.includes(a) ? "" : ' <span class="muted">(done)</span>'}</span>`).join("")
+    + `<span><i style="background:${KIND.function}"></i>function</span><span><i style="background:${KIND.class}"></i>class</span>`
+    + `<span><i style="background:${KIND.file};border-radius:2px"></i>file</span><span><i style="background:${KIND.region}"></i>block</span>`
+    + (graph.scope === "active" ? `<span class="muted">active area of ${graph.total} units</span>` : "");
 }
-function light(ids, ms = 2600) {  // a traversal: the path a decision walked, lit up on the canvas for a moment
-  lit = new Set(ids); canvas.refresh(); clearTimeout(litTimer); litTimer = setTimeout(() => { lit = new Set(); canvas.refresh(); }, ms);
+function light(ids, ms = 2600, c = "#ececee") {  // a traversal: ripple the nodes it touched, burst along their links
+  lit = new Set(ids); const now = performance.now(); ids.forEach(id => { ripples[id] = {t: now, c}; });
+  const g = canvas.getGraph?.(), set = new Set(ids);
+  if (g) for (const l of canvas.getGraphData()?.links || []) {
+    const s = l.source?.id ?? l.source, t = l.target?.id ?? l.target;
+    if (set.has(t) && (set.has(s) || l.data?.rel !== "CALLS")) {
+      l.data = {...l.data, burst: c};
+      for (let i = 0; i < 4; i++) setTimeout(() => g.emitParticle(l), i * 120);
+    }
+  }
+  canvas.refresh(); clearTimeout(litTimer);
+  litTimer = setTimeout(() => { lit = new Set(); (canvas.getGraphData()?.links || []).forEach(l => { if (l.data?.burst) delete l.data.burst; }); canvas.refresh(); }, ms);
 }
 const pathIds = e => [`agent:${e.agent}`, ...((e.path || "").match(UNIT_RE) || [])];
 
@@ -276,13 +355,13 @@ async function refreshState() {
 }
 function render(fresh = false) {
   state = rebuild(live ? events.length : cursor);
-  renderOverview(fresh); renderGraph(); if (!document.querySelector("#gside .kv")) renderGside();
+  renderOverview(fresh); renderSpark(); renderGraph(); if (!document.querySelector("#gside .kv")) renderGside();
   $("mode").textContent = live ? "live" : `${cursor} / ${events.length}`;
   $("dot").classList.toggle("on", live && !!es);
 }
 async function connect() {
   if (es) es.close();
-  $("crumb-ws").textContent = ws || "–"; shape = ""; selCall = null;
+  $("crumb-ws").textContent = ws || "–"; $("ws-avatar").textContent = (ws[0] || "N").toUpperCase(); shape = ""; selCall = null;
   events = await (await fetch(`/api/events?ws=${q(ws)}`)).json();
   $("slider").max = events.length; $("slider").value = cursor = events.length; live = true;
   await refreshState(); render(); refreshServer(); refreshCalls();
@@ -292,33 +371,34 @@ async function connect() {
   es.onmessage = async m => { const e = JSON.parse(m.data); events.push(e); $("slider").max = events.length; refreshCalls();
     if (!live) return;
     $("slider").value = cursor = events.length; await refreshState(); render(true); renderCalls();
-    if (e.kind === "decision") light(pathIds(e)); };
+    if (e.kind === "decision") light(pathIds(e), 2600, VCOL[e.verdict]); };
 }
 
 // ---------------------------------------------------------------- controls
 $("nav").onclick = ev => { const b = ev.target.closest("button"); if (!b) return;
   document.querySelectorAll("#nav button").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === `v-${b.dataset.view}`));
-  $("crumb-view").textContent = b.textContent.trim(); if (b.dataset.view === "graph") setTimeout(() => canvas.zoomToFit?.(1.2), 60); };
+  $("crumb-view").textContent = b.textContent.trim(); if (b.dataset.view === "graph") setTimeout(() => canvas.zoomToFit?.(.85), 60); };
 $("ws").onchange = e => { ws = e.target.value; history.replaceState(null, "", `?ws=${q(ws)}`); connect(); };
 $("more").onclick = () => { showAll = !showAll; renderOverview(); };
 $("cfilter").onclick = e => { const b = e.target.closest("button"); if (!b) return; callFilter = b.dataset.f;
   document.querySelectorAll("#cfilter button").forEach(x => x.classList.toggle("on", x === b)); renderCalls(); };
+$("csearch").oninput = () => renderCalls();
 $("calls").onclick = e => { const tr = e.target.closest("tr"); if (tr) showCall(tr.dataset.id); };
 $("feed").onclick = e => { const el = e.target.closest(".story"); if (!el?.dataset.trace) return;
   document.querySelector('#nav [data-view="activity"]').click(); showCall(el.dataset.trace); };
-$("gside").onclick = e => { const el = e.target.closest("[data-i]"); if (el) light(pathIds(events[+el.dataset.i])); };
+$("gside").onclick = e => { const el = e.target.closest("[data-i]"); if (el) { const ev = events[+el.dataset.i]; light(pathIds(ev), 2600, VCOL[ev.verdict]); } };
 $("layout").onclick = e => { const b = e.target.closest("button"); if (!b) return; layout = b.dataset.l;
   document.querySelectorAll("#layout button").forEach(x => x.classList.toggle("on", x === b));
   canvas.setLayout(layout); shape = ""; renderGraph(); };
-$("fit").onclick = () => canvas.zoomToFit(1.2);
+$("fit").onclick = () => canvas.zoomToFit(.85);
 $("slider").oninput = e => { cursor = +e.target.value; live = cursor >= events.length; stopPlay(); render(); renderCalls(); };
 $("livepill").onclick = () => { live = true; cursor = events.length; $("slider").value = cursor; stopPlay(); render(); };
 const stopPlay = () => { if (playing) clearInterval(playing); playing = null; $("play").textContent = "Replay"; };
 $("play").onclick = () => { if (playing) return stopPlay();
   live = false; cursor = 0; $("play").textContent = "Pause";
   playing = setInterval(() => { if (cursor >= events.length) { stopPlay(); live = true; render(); return; }
-    cursor++; $("slider").value = cursor; render(true); const e = events[cursor - 1]; if (e.kind === "decision") light(pathIds(e), 800); }, 900); };
+    cursor++; $("slider").value = cursor; render(true); const e = events[cursor - 1]; if (e.kind === "decision") light(pathIds(e), 850, VCOL[e.verdict]); }, 900); };
 setInterval(refreshServer, 10000);
 setInterval(() => live && renderOverview(), 30000);  // keep "2m ago" honest
 (async () => { if (!ws) { const st = await (await fetch("/api/state")).json(); ws = st.workspace || ""; } connect(); })();
