@@ -7,7 +7,7 @@
 [![FalkorDB 4.22.1](https://img.shields.io/badge/FalkorDB-4.22.1-e04a3a)](https://www.falkordb.com/)
 [![MCP](https://img.shields.io/badge/MCP-server-2f7fd1)](https://modelcontextprotocol.io/)
 
-[Demo video](DEMO_VIDEO_URL) · [Blog post](BLOG_POST_URL) · [Setup](SETUP.md)
+[Demo video](DEMO_VIDEO_URL) · [Blog post](https://dev.to/scorp2006/from-12-to-38-how-a-graph-turned-claude-subagents-into-a-team-1h3n) · [Setup](SETUP.md)
 
 ![The Nodes dashboard: three agents, two hand-offs, six conflicts prevented, and a plain-English feed of what happened](docs/img/dashboard.png)
 
