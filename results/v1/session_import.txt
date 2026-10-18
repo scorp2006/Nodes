@@ -1,0 +1,15 @@
+Real session import (nodes import-sessions logic, sprint item 2). Repo: one of the owner's private projects
+(label M). Fact text is not committed: it is private conversation content. Numbers only.
+
+transcripts matched by git common dir (main checkout + 1 worktree):  6
+rationale sentences found (cap 200 per transcript):                 3 / 275 / 35 / 11 / 0 / 0
+facts stored (trust 'extracted', Source = transcript:<file>#L<line>):  249   (one transcript hit the 200 cap)
+secret-shaped strings in the transcripts (keys, tokens, Bearer, AKIA): 0, so redaction had nothing to do on real data
+
+End-to-end redaction check: a copy of one real transcript (in a temp home dir) with one planted assistant
+sentence holding an Anthropic key, a GitHub token, a Nodes token, a Bearer header and an AWS key id:
+  the sentence was stored as a fact with all 5 replaced by [REDACTED]; no planted value survived anywhere.
+
+Quality (8 random facts read by hand): 5 state a decision and its reason ("reverted rather than commit an
+artifact that flips straight back"), 3 are consequences or review notes that match the 'why' regex without being
+a decision. Precision is moderate by design: no LLM, trust level 'extracted', never 'source-checked'.
