@@ -1,0 +1,26 @@
+stdlib: C:\Users\Sri Vihas\AppData\Roaming\uv\python\cpython-3.12.11-windows-x86_64-none\Lib  (Python 3.12.11)
+files parsed 690, skipped (not UTF-8 Python) 0
+parser stats: {'files': 628, 'functions': 15128, 'call_edges': 9532, 'call_sites_resolved': 11426, 'call_sites_unresolved': 26926}
+graph: 15713 nodes, 24617 edges
+parse 8.0 s, load into FalkorDB 1.1 s
+GRAPH.MEMORY USAGE: ['total_graph_sz_mb', 5, 'label_matrices_sz_mb', 0, 'relation_matrices_sz_mb', 0, 'amortized_node_block_sz_mb', 0, 'amortized_node_attributes_by_label_sz_mb', ['Function', 1, 'File', 0, 'Agent', 0], 'amortized_unlabeled_nodes_attributes_sz_mb', 0, 'amortized_edge_block_sz_mb', 0, 'amortized_edge_attributes_by_type_sz_mb', ['CONTAINS', 0, 'CALLS', 0], 'indices_sz_mb', 2]
+
+check_conflicts (2 agents x 5 random functions, 100 trials per depth):
+  depth 1: p50     2.4 ms   p99     9.0 ms   (n=100)   trials with an overlap: 0/100
+  depth 2: p50     2.3 ms   p99     5.5 ms   (n=100)   trials with an overlap: 1/100
+  depth 3: p50     2.6 ms   p99    12.4 ms   (n=100)   trials with an overlap: 1/100
+  depth 4: p50     3.7 ms   p99    31.8 ms   (n=100)   trials with an overlap: 2/100
+
+concurrency (real tool server, one MCP session per agent, 10 rounds of claim + coordination_status):
+  N= 10: 200 calls in 8.1 s = 25 calls/s
+         claim                p50   250.8 ms   p99  2362.0 ms   (n=100)
+         coordination_status  p50   227.4 ms   p99   495.0 ms   (n=100)
+         pool functions claimed 249/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0
+  N= 50: 1000 calls in 25.0 s = 40 calls/s
+         claim                p50  1064.4 ms   p99  3733.2 ms   (n=500)
+         coordination_status  p50  1064.8 ms   p99  2353.9 ms   (n=500)
+         pool functions claimed 300/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0
+  N=100: 2000 calls in 45.1 s = 44 calls/s
+         claim                p50  2094.3 ms   p99  3689.3 ms   (n=1000)
+         coordination_status  p50  1986.2 ms   p99  3594.1 ms   (n=1000)
+         pool functions claimed 300/300; reported won by 2 agents: 0; DB owner != reported winner: 0; version > 1: 0

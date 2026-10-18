@@ -1,0 +1,12 @@
+Pairs planned: 45 | analyzed (valid in all 3 conditions): 45
+
+condition    pairs passed   coordinated   turns  out tokens  agent s
+coop           16/45   36%     19/45      9.6        4221      117
+graph          23/45   51%     35/45     19.3        5171      185
+protocol       16/45   36%     22/45     11.6        4611      313
+
+Exact two-sided paired sign test; Holm-Bonferroni within each family; threshold p < 0.05
+  [PRIMARY  ] graph vs protocol on coordinated: better on 14, worse on 1, raw p = 0.001, Holm p = 0.002 (significant)
+  [PRIMARY  ] graph vs protocol on pass: better on 10, worse on 3, raw p = 0.092, Holm p = 0.092 (not significant)
+  [secondary] graph vs coop on coordinated: better on 17, worse on 1, raw p = 0.000, Holm p = 0.000 (significant)
+  [secondary] graph vs coop on pass: better on 11, worse on 4, raw p = 0.118, Holm p = 0.118 (not significant)

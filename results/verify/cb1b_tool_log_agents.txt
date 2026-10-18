@@ -1,0 +1,2 @@
+cb1b tool logs: 45 files, 246 tool calls; agent names seen: {'agent1': 115, 'agent2': 131}
+unexpected names: none

@@ -1,0 +1,17 @@
+tasks: 40
+
+individual average (HiddenBench metric):
+  full profile, before discussion (ceiling): 93.8%
+  hidden profile, after discussion, baseline: 23.5%
+  hidden profile, after discussion, placebo : 22.3%
+  hidden profile, after discussion, graph   : 44.4%
+  placebo closes -2% of the gap
+  graph closes 30% of the gap
+
+group strict majority:
+  full profile, before discussion (ceiling): 92.5%
+  hidden profile, after discussion, baseline: 15.0%
+  hidden profile, after discussion, placebo : 12.5%
+  hidden profile, after discussion, graph   : 37.5%
+  placebo closes -3% of the gap
+  graph closes 29% of the gap

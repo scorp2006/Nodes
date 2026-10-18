@@ -1,0 +1,12 @@
+ground truth rows: 199; skipped (missing patch): 0; eligible: 84; eligible with an evaluator error (dropped): 0
+pairs with an edited function missing from the graph: 0
+
+PRIMARY: eligible held-out pairs, disjoint edited functions: n = 34, interaction failures = 4
+  same file                    AUC 0.500 [95% CI 0.500-0.500]   flag precision 0.12 (4/34)   recall 1.00 (4/4)
+  CALLS distance               AUC 0.417 [95% CI 0.345-0.482]   flag precision 0.00 (0/5)   recall 0.00 (0/4)
+  CALLS|SHARES_STATE distance  AUC 0.400 [95% CI 0.152-0.667]   flag precision 0.10 (2/21)   recall 0.50 (2/4)
+
+SECONDARY: all eligible held-out pairs: n = 84, interaction failures = 45
+  same file                    AUC 0.500 [95% CI 0.500-0.500]   flag precision 0.54 (45/84)   recall 1.00 (45/45)
+  CALLS distance               AUC 0.834 [95% CI 0.752-0.911]   flag precision 0.75 (41/55)   recall 0.91 (41/45)
+  CALLS|SHARES_STATE distance  AUC 0.833 [95% CI 0.746-0.913]   flag precision 0.61 (43/71)   recall 0.96 (43/45)
