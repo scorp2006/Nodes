@@ -168,3 +168,24 @@ def test_dashboard_names_the_patterns_a_query_walks():
     assert patterns("MATCH (x:Session)-[w:WAITS_FOR]->(:Session {uid: $o}) RETURN x") == ["Session-[:WAITS_FOR]->Session"]
     assert patterns("MATCH (u:Unit)<-[:CONTAINS]-(f:Unit) RETURN f") == ["Unit-[:CONTAINS]->Unit"]
     assert patterns("MATCH (u:Unit {uid: $u}) RETURN u") == []
+
+
+def test_nested_code_leases_block_each_other(ws):  # noqa: F811  (CooperBench native run: file vs function leases)
+    st, _ = ws
+    a, b = ({"session": ops.join(st, n)[1], "name": n} for n in ("alice", "bob"))
+    file_uid = "file:t:pkg/m.py"
+    assert ops.before_acting(st, a, "edit", ["pkg.m.edit"])["decision"] == "proceed"       # alice: one function
+    r = ops.before_acting(st, b, "edit", [file_uid])                                        # bob: the whole file
+    assert r["decision"] == "defer" and r["data"]["path"][-1] == "alice"
+    assert ops.before_acting(st, b, "edit", ["pkg.m.helper"])["decision"] == "proceed"     # a different function: fine
+    ops.coordinate(st, a, "release")
+    ops.coordinate(st, b, "release")
+    assert ops.before_acting(st, a, "edit", [file_uid])["decision"] == "proceed"            # alice: the whole file
+    assert ops.before_acting(st, b, "edit", ["pkg.m.edit"])["decision"] == "defer"         # bob: a function in it
+    ops.coordinate(st, a, "release")
+    cls = st.q("t", "MATCH (u:Unit {kind: 'class'}) RETURN u.uid", ro=True)[0][0]
+    method = st.q("t", "MATCH (u:Unit {kind: 'function'}) WHERE u.symbol CONTAINS 'edit_file' RETURN u.uid", ro=True)[0][0]
+    assert ops.before_acting(st, a, "edit", [cls])["decision"] == "proceed"                 # alice: the class
+    assert ops.before_acting(st, b, "edit", [method])["decision"] == "defer"               # bob: its method
+    ops.coordinate(st, a, "done", text="abc")                                                # alice finishes
+    assert ops.before_acting(st, b, "edit", [method])["decision"] in ("proceed", "handoff")  # done owners don't block

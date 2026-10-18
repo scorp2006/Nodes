@@ -143,11 +143,21 @@ LEASE = """
 UNWIND $uids AS id
 MATCH (u:Unit {uid: id})
 OPTIONAL MATCH (o:Session {uid: u.lease_owner})
-WITH u, (u.lease_owner IS NULL OR u.lease_owner = $me OR u.lease_expires < $now OR o.status = 'done') AS avail
-WITH collect(u) AS us, collect(avail) AS av
-WITH us, all(x IN av WHERE x) AS ok
-UNWIND us AS u
-WITH u, ok, u.lease_owner AS prev
+// nested code: a file (or a planned unit, no lines) spans the whole file, a class spans its methods. Overlapping
+// units in the same file are the same code, so a live lease on any of them by someone else blocks this one.
+OPTIONAL MATCH (v:Unit {path: u.path})
+WHERE v <> u AND v.lease_owner IS NOT NULL AND v.lease_owner <> $me AND v.lease_expires >= $now
+  AND (u.start IS NULL OR v.start IS NULL OR (v.start <= u.end AND u.start <= v.end))
+WITH u, o, collect(v.lease_owner) AS vowners
+OPTIONAL MATCH (vo:Session {status: 'done'}) WHERE vo.uid IN vowners
+WITH u, o, vowners, collect(vo.uid) AS finished
+WITH u, o, [x IN vowners WHERE NOT x IN finished] AS nested
+WITH u, nested, (u.lease_owner IS NULL OR u.lease_owner = $me OR u.lease_expires < $now OR o.status = 'done')
+     AND size(nested) = 0 AS avail
+WITH collect(u) AS us, collect(avail) AS av, collect(nested) AS ns
+WITH us, ns, all(x IN av WHERE x) AS ok
+UNWIND range(0, size(us) - 1) AS i
+WITH us[i] AS u, ok, CASE WHEN size(ns[i]) > 0 THEN ns[i][0] ELSE us[i].lease_owner END AS prev
 SET u.lease_epoch = CASE WHEN ok AND (prev IS NULL OR prev <> $me) THEN coalesce(u.lease_epoch, 0) + 1 ELSE u.lease_epoch END,
     u.lease_owner = CASE WHEN ok THEN $me ELSE u.lease_owner END,
     u.lease_expires = CASE WHEN ok THEN $until ELSE u.lease_expires END
