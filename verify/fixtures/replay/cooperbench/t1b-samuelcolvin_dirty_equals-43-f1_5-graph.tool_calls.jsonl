@@ -1,0 +1,2 @@
+{"t": 1792279275.344037, "agent": "agent1", "tool": "declare_plan", "functions": ["dirty_equals._other.IsIP"], "resolved": [], "conflict": false}
+{"t": 1792279276.3157606, "agent": "agent2", "tool": "declare_plan", "functions": ["dirty_equals._other.IsPhoneNumber"], "resolved": [], "conflict": false}

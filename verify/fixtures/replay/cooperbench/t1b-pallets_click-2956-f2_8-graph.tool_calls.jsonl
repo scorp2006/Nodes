@@ -1,0 +1,7 @@
+{"t": 1792275661.2471128, "agent": "agent1", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "conflict": true}
+{"t": 1792275661.9407923, "agent": "agent2", "tool": "declare_plan", "functions": ["click.core.Context.__init__", "click.core.Context.get_option_history", "click.core.Command.__init__", "click.core.Group.__init__", "click.core.Parameter.handle_parse_result"], "resolved": ["click.core.Context.__init__", "click.core.Command.__init__", "click.core.Group.__init__", "click.core.Parameter.handle_parse_result"], "conflict": true}
+{"t": 1792275664.8343387, "agent": "agent2", "tool": "claim", "functions": ["click.core.Parameter.handle_parse_result", "click.core.Context.__init__", "click.core.Command.__init__"], "won": ["click.core.Parameter.handle_parse_result", "click.core.Context.__init__", "click.core.Command.__init__"], "lost": {}}
+{"t": 1792275670.9618795, "agent": "agent2", "tool": "mark_committed", "commit": "19b6500", "functions": 3}
+{"t": 1792275761.8593745, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-wait", "waited": 90}
+{"t": 1792275874.8552866, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-wait", "waited": 110}
+{"t": 1792275990.0496745, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-wait", "waited": 110}

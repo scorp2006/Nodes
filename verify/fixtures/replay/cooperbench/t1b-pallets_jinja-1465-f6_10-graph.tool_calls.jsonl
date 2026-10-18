@@ -1,0 +1,8 @@
+{"t": 1792277208.2536786, "agent": "agent1", "tool": "declare_plan", "functions": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "resolved": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "conflict": true}
+{"t": 1792277208.3726325, "agent": "agent2", "tool": "declare_plan", "functions": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "resolved": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "conflict": true}
+{"t": 1792277210.4116278, "agent": "agent2", "tool": "claim", "functions": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "won": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "lost": {}}
+{"t": 1792277210.5618997, "agent": "agent1", "tool": "claim", "functions": ["jinja2.filters.sync_do_groupby", "jinja2.filters.do_groupby"], "won": [], "lost": {"jinja2.filters.sync_do_groupby": "agent2", "jinja2.filters.do_groupby": "agent2"}}
+{"t": 1792277219.9633586, "agent": "agent2", "tool": "mark_committed", "commit": "12cda5cc7cbb98522f844a73dd83eda513197d5f", "functions": 2}
+{"t": 1792277220.746158, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "builder-work", "waited": 110}
+{"t": 1792277230.807948, "agent": "agent1", "tool": "mark_committed", "commit": "a1d31be216693cecee2a93b6b3da69da117458d6", "functions": 0}
+{"t": 1792277232.2329335, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}

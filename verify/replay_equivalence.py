@@ -12,6 +12,8 @@ when the caller is alone and the partner's declare_plan is logged within 60 s, t
 (in both systems). Nothing else is reordered.
 Only the harness runs whose code matches the frozen harness are replayed: HiddenBench board runs (dev1, test1,
 hb_sonnet) and CooperBench cb1b graph runs (45). Older dev CooperBench logs used earlier tool versions.
+Inputs: verify/fixtures/replay/ (the recorded tool calls, exported from runs/), plus HiddenBench_ICML and
+CooperBench cloned into external/ at the pinned commits in .github/workflows/ci.yml.
 
   python verify/replay_equivalence.py > results/repro/replay_equivalence.txt
 """
@@ -24,8 +26,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
-MAIN = ROOT.parents[1]  # the main checkout holds runs/ and external/
-sys.path[:0] = [str(ROOT), str(ROOT / "coop"), str(MAIN / "pilot")]
+FIX = ROOT / "verify" / "fixtures" / "replay"
+sys.path[:0] = [str(ROOT), str(ROOT / "coop"), str(ROOT / "pilot")]
 import coop_tools as ct  # noqa: E402  frozen CooperBench harness
 import graph_tools as gt  # noqa: E402  frozen HiddenBench harness (board mode)
 from world_graph import load as wg_load, parse_repo  # noqa: E402
@@ -34,7 +36,7 @@ from nodes import harness, indexer, ops  # noqa: E402
 from nodes.db import Store  # noqa: E402
 from prepare_repo import PACKAGE, prepare  # noqa: E402
 
-TASKS = {t["id"]: t for t in json.loads((MAIN / "external" / "HiddenBench_ICML" / "data" / "benchmark.json")
+TASKS = {t["id"]: t for t in json.loads((ROOT / "external" / "HiddenBench_ICML" / "data" / "benchmark.json")
                                         .read_text(encoding="utf-8"))}
 mismatches, counts = [], {"calls": 0, "text_equal": 0, "recorded_checks": 0, "recorded_equal": 0, "leaks": 0}
 
@@ -47,20 +49,20 @@ def check(kind, run, i, a, b, what):
         mismatches.append({"kind": kind, "run": run, "call": i, "what": what, "harness": a, "product": b})
 
 
-def hiddenbench(path: Path):
-    r = json.loads(path.read_text(encoding="utf-8"))
-    run = f"{path.parent.parent.name}/{path.stem}"
+def hiddenbench(r: dict):
+    run = r["run"]
+    batch, stem = run.split("/")
     task = SimpleNamespace(**TASKS[r["task_id"]])
-    hg = f"replay_h_{path.parent.parent.name}_{path.stem}"
+    hg = f"replay_h_{batch}_{stem}"
     gt.seed(hg, task, r["fact_assignments"])
     g = gt.connect(hg)
-    store = Store(f"replay-{path.parent.parent.name}-{path.stem}")
+    store = Store(f"replay-{batch}-{stem}")
     store.reset()
     store.setup()
     sess = harness.seed_board(store, r["fact_assignments"])
     briefing = {t for a in r["fact_assignments"] for t in a["visible_facts"]}
     posted = set()
-    for i, c in enumerate(r["board"]["tool_calls"]):
+    for i, c in enumerate(r["tool_calls"]):
         agent, tool = c["agent"], c["tool"]
         if tool == "share_fact":
             a, b = gt.share_fact(g, agent, c["fact_number"]), harness.share_fact(store, sess[agent], c["fact_number"])
@@ -73,7 +75,7 @@ def hiddenbench(path: Path):
             continue
         check("text", run, i, a, b, tool)
         counts["leaks"] += sum(t in b for t in briefing - posted)
-    rec = [list(p) for p in r["board"]["posts"]]
+    rec = [list(p) for p in r["posts"]]
     harness_posts = [[n, fid] for n, fid in g.ro_query("MATCH (a:Agent)-[s:SHARED]->(f:Fact) RETURN a.name, f.id "
                                                        "ORDER BY s.seq").result_set]
     ids = {text: fid for text, fid in g.ro_query("MATCH (f:Fact) RETURN f.text, f.id").result_set}
@@ -160,7 +162,7 @@ def cooperbench(log: Path, plan: dict):
 
 def main():
     t0 = time.time()
-    hb = sorted(Path(p) for b in ("dev1", "test1", "hb_sonnet") for p in glob.glob(str(MAIN / "runs" / b / "graph" / "t*_d0.json")))
+    hb = [json.loads(line) for line in (FIX / "hiddenbench.jsonl").read_text(encoding="utf-8").splitlines()]
     import faulthandler
     faulthandler.dump_traceback_later(180, repeat=True)  # a stall prints its stack to stderr
     for k, p in enumerate(hb, 1):
@@ -168,7 +170,7 @@ def main():
         print(f"  hiddenbench {k}/{len(hb)}", file=sys.stderr, flush=True)
     hb_calls = counts["calls"]
     plan = {r["Name"]: r for r in csv.DictReader(open(ROOT / "coop" / "plans" / "test1b.csv", encoding="utf-8"))}
-    logs = sorted(Path(p) for p in glob.glob(str(ROOT / "runs" / "cooperbench" / "t1b-*-graph.tool_calls.jsonl")))
+    logs = sorted(Path(p) for p in glob.glob(str(FIX / "cooperbench" / "t1b-*-graph.tool_calls.jsonl")))
     for k, log in enumerate(logs, 1):
         cooperbench(log, plan)
         print(f"  cooperbench {k}/{len(logs)}", file=sys.stderr, flush=True)
@@ -181,6 +183,9 @@ def main():
     print(f"mismatches: {len(mismatches)}   ({time.time() - t0:.0f} s)")
     for m in mismatches[:40]:
         print(json.dumps(m)[:1200])
+    # CI gate: every reply identical, every recorded field matched, no leak, and something was actually replayed
+    ok = counts["calls"] > 0 and not mismatches and not counts["leaks"] and len(hb) == 83 and len(logs) == 45
+    sys.exit(0 if ok else 1)
 
 
 if __name__ == "__main__":

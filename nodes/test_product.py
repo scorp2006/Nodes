@@ -42,6 +42,14 @@ class Editor:
 '''
 
 
+def stop(proc):
+    if sys.platform == "win32":  # the venv launcher starts a child python: kill the tree
+        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+    else:
+        proc.kill()
+    proc.wait()
+
+
 def free_port():
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
@@ -193,7 +201,7 @@ def test_mcp_requires_a_bearer_token_and_hooks_deny_on_defer(ws, tmp_path):
         ctx = hook(tb, edit)["hookSpecificOutput"]["additionalContext"]
         assert "HANDOFF" in ctx and "c0ffee" in ctx
     finally:
-        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+        stop(proc)
 
 
 def test_lan_mode_requires_the_token_on_every_endpoint(tmp_path):
@@ -221,4 +229,4 @@ def test_lan_mode_requires_the_token_on_every_endpoint(tmp_path):
         assert get("/api/state", hdr={"Authorization": f"Bearer {token}"}) == 200            # header works
         assert get(f"/?token={token}") == 200                                                # browser link works
     finally:
-        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+        stop(proc)

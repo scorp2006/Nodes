@@ -1,0 +1,2 @@
+{"t": 1792279941.6619353, "agent": "agent1", "tool": "declare_plan", "functions": ["dirty_equals._other.IsCreditCard"], "resolved": [], "conflict": false}
+{"t": 1792279942.6761613, "agent": "agent2", "tool": "declare_plan", "functions": ["dirty_equals._other.IsRegex"], "resolved": [], "conflict": false}

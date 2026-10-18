@@ -1,0 +1,2 @@
+{"t": 1792277602.200897, "agent": "agent2", "tool": "declare_plan", "functions": ["jinja2.ext.ConditionalI18nExtension"], "resolved": [], "conflict": false}
+{"t": 1792277603.0478246, "agent": "agent1", "tool": "declare_plan", "functions": ["jinja2.ext.InternationalizationExtension.parse", "jinja2.ext.InternationalizationExtension._make_node"], "resolved": ["jinja2.ext.InternationalizationExtension.parse", "jinja2.ext.InternationalizationExtension._make_node"], "conflict": false}

@@ -1,0 +1,2 @@
+{"t": 1792279612.8167233, "agent": "agent1", "tool": "declare_plan", "functions": ["dirty_equals._other.IsMac"], "resolved": [], "conflict": false}
+{"t": 1792279613.7688265, "agent": "agent2", "tool": "declare_plan", "functions": ["dirty_equals._other.IsColor"], "resolved": [], "conflict": false}

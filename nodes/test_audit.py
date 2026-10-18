@@ -13,7 +13,7 @@ import pytest
 from nodes import ops
 from nodes.__main__ import config_files
 from nodes.shellwrites import write_targets
-from nodes.test_product import PORT, free_port, ws  # noqa: F401  (fixture)
+from nodes.test_product import PORT, free_port, stop, ws  # noqa: F401  (fixture)
 
 
 @pytest.mark.parametrize("cmd, expected", [
@@ -70,7 +70,7 @@ def server(ws, tmp_path):  # noqa: F811
                                                              "Content-Type": "application/json"})
         return json.loads(urllib.request.urlopen(req).read()).get("hookSpecificOutput", {})
     yield st, root, hook
-    subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+    stop(proc)
 
 
 def test_bash_writes_are_gated_like_edits(server):

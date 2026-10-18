@@ -1,0 +1,9 @@
+{"t": 1792275413.9354386, "agent": "agent1", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Option._smart_complete", "click.core.Option.shell_complete"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "conflict": true}
+{"t": 1792275414.7790248, "agent": "agent2", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "conflict": true}
+{"t": 1792275416.088904, "agent": "agent1", "tool": "claim", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "won": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "lost": {}}
+{"t": 1792275416.7872472, "agent": "agent2", "tool": "claim", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "won": ["click.core.Parameter.process_value"], "lost": {"click.core.Option.__init__": "agent1", "click.core.Option.to_info_dict": "agent1"}}
+{"t": 1792275423.796768, "agent": "agent2", "tool": "mark_committed", "commit": "eb7c3492019a30ea6138634c71ca46a0f9d46797", "functions": 1}
+{"t": 1792275424.402209, "agent": "agent1", "tool": "mark_committed", "commit": "4dd4508103be1367175fb292bbf264257e184967", "functions": 2}
+{"t": 1792275425.9803276, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "builder-final", "waited": 110}
+{"t": 1792275435.4181516, "agent": "agent2", "tool": "mark_committed", "commit": "befbc55d790bc3f0ad315cfd389ba9e5a4acd416", "functions": 1}
+{"t": 1792275535.5688832, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}

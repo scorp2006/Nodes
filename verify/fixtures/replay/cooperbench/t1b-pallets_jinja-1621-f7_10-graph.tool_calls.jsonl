@@ -1,0 +1,2 @@
+{"t": 1792278933.1262515, "agent": "agent2", "tool": "declare_plan", "functions": ["jinja2.loaders.BaseLoader"], "resolved": [], "conflict": false}
+{"t": 1792278933.8161888, "agent": "agent1", "tool": "declare_plan", "functions": ["jinja2.loaders.FileSystemLoader.__init__"], "resolved": ["jinja2.loaders.FileSystemLoader.__init__"], "conflict": false}

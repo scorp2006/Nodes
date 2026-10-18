@@ -1,0 +1,11 @@
+{"t": 1792275405.6916819, "agent": "agent1", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "conflict": true}
+{"t": 1792275406.2464092, "agent": "agent2", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "conflict": true}
+{"t": 1792275409.2025068, "agent": "agent2", "tool": "claim", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "won": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "lost": {}}
+{"t": 1792275410.122698, "agent": "agent1", "tool": "claim", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Parameter.process_value"], "won": ["click.core.Parameter.process_value"], "lost": {"click.core.Option.__init__": "agent2", "click.core.Option.to_info_dict": "agent2"}}
+{"t": 1792275416.2807434, "agent": "agent1", "tool": "mark_committed", "commit": "8b27d146935c96659d9036101ca6440c8aa54a1b", "functions": 1}
+{"t": 1792275422.6673148, "agent": "agent2", "tool": "mark_committed", "commit": "eb2a690", "functions": 2}
+{"t": 1792275423.5251093, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}
+{"t": 1792275483.355662, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 60}
+{"t": 1792275518.9149384, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 90}
+{"t": 1792275601.1127405, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}
+{"t": 1792275632.417857, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}
