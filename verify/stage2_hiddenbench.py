@@ -56,7 +56,7 @@ def main():
     # the live verdicts as the product actually returned them, from the traces
     got, agree, leaks, shown = Counter(), 0, 0, 0
     for t in tasks:
-        ws = f"repro-repro_dev1-{t}"
+        ws = f"repro-repro_dev1-{t.replace('_', '-')}"  # run file t12_d0 -> workspace t12-d0
         recs = [json.loads(x) for x in (TRACES / f"{ws}.trace.jsonl").read_text(encoding="utf-8").splitlines()]
         r = l[t]
         held = {a["agent"]: a["visible_facts"] for a in r["fact_assignments"]}

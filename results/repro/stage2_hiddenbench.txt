@@ -1,0 +1,27 @@
+1. settings (original dev1 vs live product run):
+   model         claude-haiku-5-5   claude-haiku-5-5   same
+   rounds        15                 15                 same
+   seed          2026               2026               same
+   profile       hidden             hidden             same
+   split         dev                dev                same
+   duplications  1                  1                  same
+   condition     graph              graph              same
+   effort        None               None               (None = CLI default)
+   server        stdio (per call)   product            (pre-registered caveat)
+
+2. accuracy: tasks complete in both: 20 (live missing: none)
+   original dev1 graph: 13/20   live product: 13/20   pre-registered bar 9-16 of 20: PASS
+
+3. source-check verdicts on share_fact (harness rule: source-checked iff the agent holds that fact):
+   original  share_fact calls 205, source-checked 205, unverified (nothing posted) 0, board posts 128
+   live      share_fact calls 306, source-checked 306, unverified (nothing posted) 0, board posts 171
+   live, as returned by the product (traces): yes 306, no 0; agrees with the harness rule on 306/306
+
+4. leakage on live traces: 549 board/who replies checked; unposted briefing facts shown: 0
+
+5. tool use per run (mean; bar: live within 0.5x-1.5x of the original mean):
+   share_fact          original  10.2  live  15.3  ratio 1.49  PASS
+   shared_facts        original  21.6  live  18.4  ratio 0.85  PASS
+   who_has_not_shared  original  12.3  live   9.1  ratio 0.74  PASS
+   all                 original  44.1  live  42.8  ratio 0.97  PASS
+   per task (original/live): t12 34/25, t22 53/49, t29 64/70, t31 22/59, t32 73/84, t33 61/22, t34 24/22, t36 114/38, t38 52/38, t43 60/34, t49 12/64, t4 0/10, t51 41/13, t52 10/20, t55 55/66, t56 17/52, t58 68/66, t62 81/77, t65 20/25, t8 22/21
