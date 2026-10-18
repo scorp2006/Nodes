@@ -109,5 +109,47 @@ def gt(workers: int = 2):
     print(f"stopped: {len(done)}/{total} done, cut-off {'reached' if datetime.now(timezone.utc) >= CUTOFF else 'not reached'}")
 
 
+def score():
+    """Run ONCE. Pooled primary (v2 light disjoint rows + heavy rows finished by the cut-off), then the secondaries."""
+    import world_graph_v2 as v2
+    from falkordb import FalkorDB
+    from score_detector2 import NO_PATH, report
+
+    db = FalkorDB(port=6390)
+    v2.FalkorDB = lambda **kw: db  # v2.load hard-codes 6379; use the separate container
+    static_rows = {(r["repo"], r["task"], tuple(r["pair"])): r
+                   for r in map(json.loads, STATIC.read_text(encoding="utf-8").splitlines())}
+    gt_rows = [json.loads(line) for line in GT.read_text(encoding="utf-8").splitlines()] if GT.exists() else []
+    in_time = [r for r in gt_rows if datetime.fromisoformat(r["done_at"]) <= CUTOFF]
+    infra = [r for r in in_time if "infra_error" in r or r.get("error") or "skip" in r]
+    elig = [r for r in in_time if r.get("eligible") and r not in infra]
+    disjoint = [k for k, r in static_rows.items() if r.get("disjoint")]
+    print(f"heavy disjoint pairs: {len(disjoint)}; tested by the cut-off: {len(in_time)}; "
+          f"not tested: {len(disjoint) - len(in_time)}; infra errors (dropped): {len(infra)}; eligible: {len(elig)}")
+    heavy = []
+    for repo, task in sorted({(r["repo"], r["task"]) for r in elig}):
+        rd, pkg = prepare(repo, task)
+        funcs, calls, state, _ = v2.parse_repo(rd / pkg)
+        g = v2.load(f"det3_{repo}_{task}", funcs, calls, state)
+        known = {f["qualname"] for f in funcs}
+        for r in [x for x in elig if (x["repo"], x["task"]) == (repo, task)]:
+            st = static_rows[(repo, task, tuple(r["pair"]))]
+            f1, f2 = (set(f) & known for f in st["funcs"])
+            row = r | {"funcs": st["funcs"], "same_file": st["same_file"], "disjoint": True, "heavy": True}
+            for key, rel in (("d_calls", "CALLS"), ("d_calls_state", "CALLS|SHARES_STATE")):
+                d = v2.distance(g, sorted(f1), sorted(f2), rel) if f1 and f2 else None
+                row[key] = NO_PATH if d is None else d
+            heavy.append(row)
+        g.delete()
+    light = [r | {"heavy": False} for r in json.loads((RES / "detector2_rows.json").read_text(encoding="utf-8"))
+             if r["disjoint"]]
+    (RES / "detector3_rows.json").write_text(json.dumps(heavy, indent=1), encoding="utf-8")
+    pooled = light + heavy
+    report(pooled, "PRIMARY: eligible disjoint pairs, pooled (v2 light + v3 heavy)")
+    report(heavy, "SECONDARY: eligible disjoint pairs, heavy repos only")
+    report([r for r in pooled if all(r["funcs"])],
+           "SECONDARY (amendment 1): pooled, both patches edit >= 1 mapped function")
+
+
 if __name__ == "__main__":
-    {"static": static, "gt": gt}[sys.argv[1]]()
+    {"static": static, "gt": gt, "score": score}[sys.argv[1]]()
