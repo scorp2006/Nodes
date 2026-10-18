@@ -19,6 +19,7 @@ claude (Get-Content '$promptFile' -Raw)
 "@ | Set-Content -Path $script -Encoding utf8
     Start-Process powershell -ArgumentList "-NoExit", "-ExecutionPolicy", "Bypass", "-File", $script
 }
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$nodesRepo'; python -m nodes watch --workspace shop"
+$py = $agents._nodes_python
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$nodesRepo'; & '$py' -m nodes watch --workspace shop"
 Start-Process "http://127.0.0.1:$Port/?ws=shop"
 "Started alice and bob. Approve the Nodes MCP server and the edits when Claude Code asks."

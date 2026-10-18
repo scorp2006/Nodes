@@ -29,7 +29,8 @@ def main():
     ap.add_argument("--timeout", type=int, default=1500)
     a = ap.parse_args()
     base = Path(a.dir)
-    agents = json.loads((base / "agents.json").read_text(encoding="utf-8"))
+    agents = {k: v for k, v in json.loads((base / "agents.json").read_text(encoding="utf-8")).items()
+              if not k.startswith("_")}
     procs = {}
     t0 = time.time()
     for name, info in agents.items():

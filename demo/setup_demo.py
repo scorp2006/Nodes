@@ -67,6 +67,7 @@ def main():
             run("git", "config", f, agent if f == "user.name" else f"{agent}@example.com", cwd=base / agent)
         prompt = PROMPT.format(agent=agent, task=task, python=py.as_posix())
         launch[agent] = {"token": token, "worktree": str(base / agent), "prompt": prompt}
+    launch["_nodes_python"] = sys.executable  # the interpreter that has the Nodes dependencies (for `nodes watch`)
     (base / "agents.json").write_text(json.dumps(launch, indent=1), encoding="utf-8")
     print(f"demo ready in {base}\n  agents: {', '.join(AGENTS)} (worktrees {base / 'alice'}, {base / 'bob'})\n"
           f"  dashboard: http://127.0.0.1:{a.port}/?ws=shop\n  next: powershell -File {HERE / 'start_agents.ps1'}")
