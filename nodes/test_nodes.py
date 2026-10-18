@@ -134,15 +134,21 @@ def test_fact_source_check(team):
 
 
 def test_web_state_and_no_path_traversal(team):
-    g, _ = team
+    g, ws = team
     core.set_plan(g, "alice", ["pkg.m.helper"])
     core.set_plan(g, "bob", ["pkg.m.edit"])
     port = free_port()
-    httpd = server.serve_web(g, port)
+    httpd = server.serve_web(g, port, ws)
     try:
         st = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{port}/api/state").read())
         assert {a["id"] for a in st["agents"]} == {"alice", "bob"}
         assert st["conflicts"][0]["hops"] == 1
+        post = lambda body: urllib.request.urlopen(urllib.request.Request(  # noqa: E731
+            f"http://127.0.0.1:{port}/api/before_acting", data=json.dumps(body).encode(), method="POST"))
+        assert json.loads(post({"agent": "carol", "functions": ["pkg.m.other_edit"]}).read())["decision"] == "proceed"
+        for bad_body in ({"agent": "../x", "functions": ["a"]}, {"agent": "carol", "functions": "notalist"}):
+            with pytest.raises(urllib.error.HTTPError):
+                post(bad_body)
         for bad in ("/replays/../server.py", "/replays/..%2Fserver.py", "/etc/passwd"):
             with pytest.raises(urllib.error.HTTPError):
                 urllib.request.urlopen(f"http://127.0.0.1:{port}{bad}")
@@ -181,3 +187,33 @@ def test_mcp_over_http_end_to_end(team, tmp_path):
         assert (tmp_path / "tools.jsonl").exists()
     finally:
         subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"], capture_output=True)
+
+
+def test_action_gate_decisions(team):
+    from nodes import gate
+
+    g, ws = team
+    good = [{"text": "The cache is flushed every 30 seconds.", "source": "NOTES.md"}]
+    r = gate.before_acting(g, ws, "alice", ["pkg.m.edit"], good, "speed up edit")
+    assert r["decision"] == "proceed" and r["provenance"]["status"] == "verified"
+    assert gate.before_acting(g, ws, "bob", ["pkg.m.helper"])["decision"] == "proceed"
+    # bob needs alice's function while she works: defer, and he holds nothing extra (all-or-nothing)
+    r = gate.before_acting(g, ws, "bob", ["pkg.m.edit", "pkg.m.other_edit"])
+    assert r["decision"] == "defer" and r["claim"]["blocked_by"] == {"pkg.m.edit": "alice"}
+    assert g.ro_query("MATCH (f:Function {qualname: 'pkg.m.other_edit'}) RETURN f.claimed_by").result_set[0][0] is None
+    # alice now needs bob's function: waiting would close a cycle -> escalate with the cycle as the path
+    r = gate.before_acting(g, ws, "alice", ["pkg.m.helper"])
+    assert r["decision"] == "escalate" and "deadlock" in r["reason"]
+    assert r["explanation"] == ["alice", "-WAITS_FOR->", "bob", "-WAITS_FOR->", "alice"]
+    # evidence that isn't in its source -> escalate, nothing claimed
+    r = gate.before_acting(g, ws, "carol", ["pkg.m.other_edit"], [{"text": "flushed every 5 seconds", "source": "NOTES.md"}])
+    assert r["decision"] == "escalate" and r["provenance"]["status"] == "unverified" and r["claim"]["won"] == []
+    # alice finishes: bob's retry gets ownership handed over, with her commit
+    core.mark_done(g, "alice", "abc123")
+    r = gate.before_acting(g, ws, "bob", ["pkg.m.edit"])
+    assert r["decision"] == "hand_off" and r["claim"]["handed_from"] == {"pkg.m.edit": "alice"} and "abc123" in r["reason"]
+    assert g.ro_query("MATCH (:Agent {id: 'bob'})-[w:WAITS_FOR]->() RETURN count(w)").result_set[0][0] == 0
+    # every decision is stored and traceable to its sources
+    log = gate.recent(g)
+    assert [x["decision"] for x in log][::-1] == ["proceed", "proceed", "defer", "escalate", "escalate", "hand_off"]
+    assert log[-1]["cites"] == ["NOTES.md"]

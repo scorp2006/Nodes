@@ -30,6 +30,14 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break
 .no{background:color-mix(in srgb,var(--bad) 15%,transparent);color:var(--bad)}
 .empty{color:var(--mute);font-style:italic}
 a{color:var(--accent)}
+.wide{grid-column:1/-1}
+.dec{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
+.proceed{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.hand_off{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.defer{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.escalate{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.why{margin-top:4px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-word}
+.edge{color:var(--mute)}
 </style>
 </head>
 <body>
@@ -38,6 +46,7 @@ a{color:var(--accent)}
   <span class="mute" id="meta">connecting…</span>
 </header>
 <main>
+  <section class="wide"><h2>Action gate: every action passes through the graph first</h2><div id="actions"></div></section>
   <section><h2>Agents, plans and claims</h2><div id="agents"></div></section>
   <section><h2>Conflict paths</h2><div id="conflicts"></div></section>
   <section><h2>Board: source-checked facts</h2><div id="facts"></div></section>
@@ -48,6 +57,12 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const chips = (xs, cls = "") => xs.length ? `<div class="chips">${xs.map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join("")}</div>` : "";
 function render(s) {
   $("meta").textContent = `${s.agents.length} agents · ${s.functions} functions · updated ${new Date().toLocaleTimeString()}`;
+  $("actions").innerHTML = (s.actions || []).map(x => `<div class="agent">
+      <span class="dec ${esc(x.decision)}">${esc(x.decision.replace("_", " "))}</span>
+      <span class="name">${esc(x.agent)}</span> <span class="mute">${esc(x.description)}</span>
+      <div class="why">${esc(x.explanation).replace(/(-[A-Z_]+->)/g, '<span class="edge">$1</span>')}</div>
+      ${x.cites.length ? `<div class="mute">cites ${x.cites.map(esc).join(", ")}</div>` : ""}</div>`).join("")
+    || '<div class="empty">No action has asked the gate yet.</div>';
   $("agents").innerHTML = s.agents.map(a => `<div class="agent">
       <span class="name">${esc(a.id)}</span>${a.commit ? ` <span class="tag yes">done ${esc(a.commit.slice(0, 10))}</span>` : ""}
       <div class="mute">plans</div>${chips(a.plan) || '<div class="empty">no plan yet</div>'}

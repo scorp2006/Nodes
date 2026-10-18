@@ -16,7 +16,7 @@ from pathlib import Path
 from falkordb import FalkorDB
 from mcp.server.mcpserver import Context, MCPServer
 
-from . import core
+from . import core, gate
 
 WEB = Path(__file__).with_name("web")
 
@@ -94,6 +94,15 @@ def build(g, workspace: Path, log_dir: Path | None = None) -> MCPServer:
         return logged(agent, "share_fact", f"Posted. Source-checked: {'yes' if ok else 'no (the quote is not in ' + source + ')'}.",
                       checked=ok)
 
+    @server.tool(name="before_acting")
+    def _gate(functions: list[str], ctx: Context, evidence: list[dict] | None = None, description: str = "") -> str:
+        """Call before every change. functions: what you will change; evidence: [{"text": quote, "source": "path"}]
+        that justifies it. Returns the decision (proceed / defer / hand_off / escalate), the reason, and the graph
+        path that explains it. Only act on "proceed" or "hand_off"."""
+        agent = who(ctx)
+        r = gate.before_acting(g, workspace, agent, functions, evidence, description)
+        return logged(agent, "before_acting", json.dumps(r, indent=1), decision=r["decision"])
+
     @server.tool(name="board")
     def _board(ctx: Context) -> str:
         """The team board, newest first, with each fact's source and whether it was source-checked."""
@@ -104,12 +113,12 @@ def build(g, workspace: Path, log_dir: Path | None = None) -> MCPServer:
     return server
 
 
-def serve_web(g, port: int) -> ThreadingHTTPServer:
+def serve_web(g, port: int, workspace: Path | None = None) -> ThreadingHTTPServer:
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):  # noqa: N802
             path = self.path.split("?")[0]
             if path == "/api/state":
-                body, kind = json.dumps(core.state(g)).encode(), "application/json"
+                body, kind = json.dumps(core.state(g) | {"actions": gate.recent(g)}).encode(), "application/json"
             elif path in ("/", "/replay") or path.startswith("/replays/"):
                 f = (WEB / ("index.html" if path == "/" else "replay.html" if path == "/replay" else path[1:])).resolve()
                 if not (f.is_file() and f.is_relative_to(WEB.resolve())):
@@ -120,6 +129,25 @@ def serve_web(g, port: int) -> ThreadingHTTPServer:
                 return self.send_error(404)
             self.send_response(200)
             self.send_header("Content-Type", kind)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_POST(self):  # noqa: N802
+            if self.path != "/api/before_acting" or workspace is None:
+                return self.send_error(404)
+            try:
+                req = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length", 0)), 100_000)))
+                fns, ev = req["functions"], req.get("evidence") or []
+                if not (isinstance(fns, list) and all(isinstance(f, str) for f in fns) and isinstance(ev, list)
+                        and all(isinstance(e, dict) for e in ev)):
+                    raise ValueError("functions: list of strings; evidence: list of {text, source}")
+                body = json.dumps(gate.before_acting(g, workspace, req["agent"], fns, ev,
+                                                     str(req.get("description", "")))).encode()
+            except (ValueError, KeyError, TypeError) as e:
+                return self.send_error(400, str(e)[:200])
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
@@ -139,7 +167,7 @@ def run(team: str, workspace: Path, db_host="localhost", db_port=6379, port=8780
     g = FalkorDB(host=db_host, port=db_port).select_graph(team)
     if transport == "stdio":
         return build(g, workspace, log_dir).run("stdio")
-    serve_web(g, web_port)
+    serve_web(g, web_port, workspace)
     hosts = [f"{h}:{port}" for h in ("127.0.0.1", "localhost", "host.docker.internal")]
     security = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts, allowed_origins=[])
     build(g, workspace, log_dir).run("streamable-http", host="127.0.0.1", port=port, transport_security=security)

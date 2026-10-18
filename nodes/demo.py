@@ -11,13 +11,14 @@ from mcp import ClientSession
 from mcp.client.streamable_http import create_mcp_http_client, streamable_http_client
 
 
-async def call(port, agent, tool, args):
+async def call(port, agent, tool, args, quiet=False):
     async with create_mcp_http_client(headers={"X-Agent": agent}) as http:
         async with streamable_http_client(f"http://127.0.0.1:{port}/mcp", http_client=http) as (r, w, *_):
             async with ClientSession(r, w) as s:
                 await s.initialize()
                 text = (await s.call_tool(tool, args)).content[0].text
-    print(f"\n[{agent}] {tool}({args})\n{text}")
+    if not quiet:
+        print(f"\n[{agent}] {tool}({args})\n{text}")
     return text
 
 

@@ -126,7 +126,8 @@ def release(g, agent: str, found: list[str]) -> list[str]:
 
 
 def mark_done(g, agent: str, commit: str) -> int:
-    g.query("MATCH (a:Agent {id: $a}) SET a.commit = $c, a.done_at = timestamp()", {"a": check_name(agent), "c": commit})
+    g.query("MATCH (a:Agent {id: $a}) SET a.commit = $c, a.done_at = timestamp() "
+            "WITH a OPTIONAL MATCH (a)-[w:WAITS_FOR]->() DELETE w", {"a": check_name(agent), "c": commit})
     return g.ro_query("MATCH (f:Function {claimed_by: $a}) RETURN count(f)", {"a": agent}).result_set[0][0]
 
 
@@ -202,7 +203,7 @@ def check_source(workspace: Path, text: str, source: str) -> bool:
     return _norm_text(text) in _norm_text("\n".join(lines))
 
 
-def share_fact(g, workspace: Path, agent: str, text: str, source: str) -> bool:
+def share_fact(g, workspace: Path, agent: str, text: str, source: str, fact_id: str | None = None) -> bool:
     """Post a fact quoting a workspace file. It is marked source-checked only if the quote is in that file."""
     checked = check_source(workspace, text, source)
     g.query("""
@@ -210,8 +211,8 @@ def share_fact(g, workspace: Path, agent: str, text: str, source: str) -> bool:
         WITH a
         OPTIONAL MATCH ()-[prev:POSTED]->()
         WITH a, count(prev) AS seq
-        CREATE (a)-[:POSTED {seq: seq}]->(:Fact {text: $t, source: $s, checked: $c})
-        """, {"a": check_name(agent), "t": text[:2000], "s": source[:300], "c": checked})
+        CREATE (a)-[:POSTED {seq: seq}]->(:Fact {id: $id, text: $t, source: $s, checked: $c})
+        """, {"a": check_name(agent), "t": text[:2000], "s": source[:300], "c": checked, "id": fact_id})
     return checked
 
 
