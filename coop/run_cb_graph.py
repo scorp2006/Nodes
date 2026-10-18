@@ -60,6 +60,23 @@ You have five tools backed by a graph of this repository's functions and calls, 
   (up to 110) it waits for your partner's announcement instead of you polling.
 - impact_of(function): what calls, or is called by, a function within 2 calls.
 Call declare_plan before editing anything.""",
+    # sprint step 7 (exploratory): the same procedure through the product's six native tools (`--profile nodes`)
+    "native": """
+
+## How you claim, announce and wait: shared coordination tools
+You have six tools from the Nodes server, backed by a graph of this repository's functions and calls, shared with
+your partner:
+- declare_intent(task, summary, touches): record the functions you intend to change, e.g. touches=
+  [{"path": "src/package/module.py", "symbol": "Class.method", "mode": "modify"}]. It reports overlaps with your
+  partner's intent and who should own the shared functions.
+- before_acting(action="edit", targets): call before editing, with targets as full dotted names
+  (e.g. "package.module.Class.method") or "path:10-20". proceed: those functions are now yours (step 1: the first to
+  get proceed owns them). defer: your partner owns them. handoff: the owner finished; build on their commit.
+- coordinate(op="done", text=<commit hash>): announce your commit hash (steps 2 and 3).
+- status(wait_seconds=0): your leases, waits and recent changes. With wait_seconds (up to 60) it waits for your
+  partner's announcement instead of you polling.
+- context_for(task_or_query): the functions matching a query and who owns them.
+Call declare_intent before editing anything.""",
     "protocol": """
 
 ## How you claim, announce and wait: messages
@@ -161,7 +178,7 @@ def patch_adapter(mode: str, world_graph: str, log_path: str) -> None:
     adapter._build_claude_command = build_claude_command
 
 
-def patch_adapter_product(mode: str, port: int, tokens: dict) -> None:
+def patch_adapter_product(mode: str, port: int, tokens: dict, server: str = "code_graph") -> None:
     """Reproduction stage 2: the same `code_graph` tools, served by the Nodes product (harness-coop profile).
     Identity is each agent's bearer token instead of the harness's X-Agent header."""
     from cooperbench.agents.claude_code import adapter
@@ -174,7 +191,7 @@ def patch_adapter_product(mode: str, port: int, tokens: dict) -> None:
 
     def build_claude_command(*args, extra_flags: str = "", coop_env=None, **kwargs):
         agent_id = (coop_env or {}).get("COOP_AGENT_ID", "agent")
-        mcp = {"mcpServers": {"code_graph": {
+        mcp = {"mcpServers": {server: {
             "type": "http", "url": f"http://host.docker.internal:{port}/mcp",
             "headers": {"Authorization": f"Bearer {tokens[agent_id]}"}}}}
         extra_flags += f"--mcp-config {shlex.quote(json.dumps(mcp))} "
@@ -186,7 +203,7 @@ def patch_adapter_product(mode: str, port: int, tokens: dict) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--condition", choices=["coop", "protocol", "graph"], required=True)
+    ap.add_argument("--condition", choices=["coop", "protocol", "graph", "native"], required=True)
     ap.add_argument("--world-graph", help="graph key for this pair (tool conditions)")
     ap.add_argument("--repo-dir")
     ap.add_argument("--src", help="package dir inside the repo, e.g. src/click")
@@ -198,7 +215,7 @@ def main() -> None:
 
     patch_container_cleanup()
     patch_effort(args.effort)  # applied first, so every condition gets exactly the same flag
-    if args.condition == "graph" and args.product_port:
+    if args.condition in ("graph", "native") and args.product_port:
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from nodes import indexer, ops
         from nodes.db import Store
@@ -206,12 +223,13 @@ def main() -> None:
         st = Store(args.world_graph)
         st.reset()
         st.setup()
-        print(f"product workspace {args.world_graph}: {indexer.index(st, Path(args.repo_dir), args.src, args.world_graph)}",
-              flush=True)
+        stats = indexer.index(st, Path(args.repo_dir), args.src, args.world_graph, all_languages=False)  # Python, as in Stage 2
+        print(f"product workspace {args.world_graph}: { {k: v for k, v in stats.items() if k != '_units'} }", flush=True)
         st.r.hset("nodes:workspaces", args.world_graph, json.dumps(
             {"root": args.repo_dir, "repo": args.world_graph, "package": args.src, "team_size": 2}))
         tokens = {a: ops.join(st, a, task="cooperbench", client="harness")[0] for a in ("agent1", "agent2")}
-        patch_adapter_product(args.condition, args.product_port, tokens)
+        patch_adapter_product(args.condition, args.product_port, tokens,
+                              "nodes" if args.condition == "native" else "code_graph")
     elif args.condition != "coop":
         t0 = time.perf_counter()
         funcs, calls, stats = parse_repo(Path(args.repo_dir) / args.src)

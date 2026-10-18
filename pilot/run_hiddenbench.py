@@ -43,6 +43,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nodes import harness as nodes_harness  # noqa: E402  (reproduction stage 2)
 from nodes.db import Store  # noqa: E402
 PRODUCT_PORT = 8791  # `python -m nodes up --profile harness-board --port 8791`
+NATIVE_PORT = 8792  # sprint step 7: `python -m nodes up --profile nodes --port 8792`
+NATIVE_TOOLS = ["context_for", "declare_intent", "before_acting", "post_fact", "coordinate", "status"]
 
 SPLITS = json.loads((Path(__file__).with_name("splits.json")).read_text(encoding="utf-8"))
 TOOLS = {"graph": ["share_fact", "shared_facts", "who_has_not_shared"],
@@ -62,6 +64,11 @@ CLAIMS = (" You also have a shared evidence board. post_claim(text) posts a clai
           "anything.")
 NOTEPAD = (" You also have a private notepad. write_note(text) saves a note only you can see. "
            "read_notes() shows your notes. review_my_facts() lists your own numbered facts.")
+# --server native: the same board text, with the product's own tool names and usage
+NATIVE_BOARD = (" You also have a shared evidence board. post_fact(text, source_ref={\"kind\": \"briefing\", "
+                "\"ref\": \"<fact number>\"}) posts one of your numbered facts; the server checks it against your "
+                "briefing and marks it source-checked (it is really in your briefing) or unverified. status() and "
+                "context_for() list every fact posted so far, who posted it and whether it was source-checked.")
 EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD,
          "graph_unverified": NUDGE + CLAIMS, "placebo": NUDGE + NOTEPAD}
 
@@ -119,23 +126,28 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
     seed = _scenario_seed(args.seed, task_index, dup)
     extra = EXTRA[args.condition]
     tools = TOOLS.get(args.condition, [])
-    client = ClaudeCLIClient(args.model, effort=args.effort, allowed_tools=" ".join(f"mcp__board__{t}" for t in tools))
+    native = bool(tools) and args.server == "native"
+    if native:
+        extra, tools = NUDGE + NATIVE_BOARD, NATIVE_TOOLS
+    mcp_name = "nodes" if native else "board"
+    client = ClaudeCLIClient(args.model, effort=args.effort,
+                             allowed_tools=" ".join(f"mcp__{mcp_name}__{t}" for t in tools))
     work = out_dir / "work" / args.condition / f"t{task.id}_d{dup}"
     graph = None
     try:
-        if tools and args.server == "product":  # reproduction stage 2: the Nodes product, harness-board profile
+        if tools and args.server in ("product", "native"):  # stage 2 (harness-board) / step 7 (nodes profile)
             work.mkdir(parents=True, exist_ok=True)
             agents, assignments = instantiate_agents(task, client, args.profile, prompts, random.Random(seed),
                                                      extra_prompt=extra, special_agent_ratio=1.0)
-            store = Store(f"repro-{out_dir.name}-t{task.id}-d{dup}")
+            store = Store(f"{'native' if native else 'repro'}-{out_dir.name}-t{task.id}-d{dup}")
             store.reset()
             store.setup()
             sessions = nodes_harness.seed_board(store, assignments)
             graph = store
             for agent in agents:
                 cfg = work / f"{agent.name.replace(' ', '_')}.mcp.json"
-                cfg.write_text(json.dumps({"mcpServers": {"board": {
-                    "type": "http", "url": f"http://127.0.0.1:{PRODUCT_PORT}/mcp",
+                cfg.write_text(json.dumps({"mcpServers": {mcp_name: {
+                    "type": "http", "url": f"http://127.0.0.1:{NATIVE_PORT if native else PRODUCT_PORT}/mcp",
                     "headers": {"Authorization": f"Bearer {sessions[agent.name]['token']}"}}}}), encoding="utf-8")
                 client.mcp_for_system[agent.history[0]["content"]] = str(cfg)
         elif tools:
@@ -165,14 +177,14 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
 
     run.update(condition=args.condition, model=args.model,
                usage=usage_summary(client.calls) | {"wall_seconds": round(time.time() - started, 1)})
-    if graph and args.server == "product":
+    if graph and args.server in ("product", "native"):
         ids = {t: f"s{i}" for i, t in enumerate(task.shared_information)} |               {t: f"h{i}" for i, t in enumerate(task.hidden_information)}
         trace = Path(".nodes/traces") / f"{graph.ws}.trace.jsonl"
         recs = [json.loads(line) for line in trace.read_text(encoding="utf-8").splitlines()] if trace.exists() else []
         run["board"] = {
             "graph": f"ws:{graph.ws}",
-            "posts": [[n, ids.get(t, t)] for n, t in graph.q("x", "MATCH (s:Session)-[a:ASSERTED]->(f:Fact) "
-                                                             "RETURN s.name, f.text ORDER BY a.seq", ro=True)],
+            "posts": [[n, ids.get(t, t)] + ([st] if native else []) for n, t, st in graph.q(
+                "x", "MATCH (s:Session)-[a:ASSERTED]->(f:Fact) RETURN s.name, f.text, f.status ORDER BY a.seq", ro=True)],
             "claims": [],
             "tool_calls": [{"t": r["t"], "agent": r["agent"], "tool": r["name"], **r["request"]}
                            for r in recs if r["kind"].startswith("tool")],
@@ -211,12 +223,17 @@ def main():
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--no-peek", action="store_true", help="print progress counts only, never results")
-    ap.add_argument("--server", choices=["stdio", "http", "product"], default="stdio",
-                    help="stdio: new tool process per call (dev1/test1); http: one long-lived server")
+    ap.add_argument("--server", choices=["stdio", "http", "product", "native"], default="stdio",
+                    help="stdio: new tool process per call (dev1/test1); http: one long-lived server; "
+                         "product: harness-board profile on 8791; native: nodes profile (six tools) on 8792")
     ap.add_argument("--digest", action="store_true", help="push the board into every turn")
     args = ap.parse_args()
     if args.server == "http" and args.condition in MODE:
         start_http_server(MODE[args.condition])  # left running for later batches; it holds no run state
+    if args.server == "native":
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", NATIVE_PORT)) != 0:
+                sys.exit(f"start the server first: python -m nodes up --profile nodes --port {NATIVE_PORT}")
 
     path = DATA / ("benchmark_short.json" if args.split == "short" else "benchmark.json")
     tasks = load_benchmark(path=str(path))
