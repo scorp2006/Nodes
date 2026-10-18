@@ -381,12 +381,15 @@ def register(server, reg) -> None:
         last = request.query_params.get("from", "$")
 
         async def gen():
-            r = aioredis.Redis(host=reg.host, port=reg.port)
+            r = aioredis.Redis(host=reg.host, port=reg.port, socket_timeout=30)  # longer than the 5 s block below
             nonlocal last
             try:
                 yield ": connected\n\n"
                 while not await request.is_disconnected():
-                    got = await r.xread({f"ws:{ws}:events": last}, block=15000, count=100)
+                    try:
+                        got = await r.xread({f"ws:{ws}:events": last}, block=5000, count=100)
+                    except (TimeoutError, aioredis.TimeoutError):  # a quiet moment, not an error
+                        got = None
                     if not got:
                         yield ": keepalive\n\n"
                         continue
