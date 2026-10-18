@@ -159,3 +159,12 @@ def test_plugin_gate_fails_closed_only_in_initialized_repos(tmp_path):
     assert out["permissionDecision"] == "deny" and "unreachable" in out["permissionDecisionReason"]
     (repo / ".git" / "nodes.json").write_text('{"fail_mode": "open"}')
     assert run(repo) == ""
+
+
+def test_dashboard_names_the_patterns_a_query_walks():
+    from nodes.hooks import patterns
+    assert patterns("MATCH (s:Session)-[:MADE]->(d:Decision)-[:CITES]->(u:Unit) RETURN u") == \
+        ["Session-[:MADE]->Decision", "Decision-[:CITES]->Unit"]
+    assert patterns("MATCH (x:Session)-[w:WAITS_FOR]->(:Session {uid: $o}) RETURN x") == ["Session-[:WAITS_FOR]->Session"]
+    assert patterns("MATCH (u:Unit)<-[:CONTAINS]-(f:Unit) RETURN f") == ["Unit-[:CONTAINS]->Unit"]
+    assert patterns("MATCH (u:Unit {uid: $u}) RETURN u") == []

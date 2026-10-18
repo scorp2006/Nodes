@@ -22,10 +22,11 @@ from mcp.server.auth.settings import AuthSettings
 from mcp.server.mcpserver import Context, MCPServer
 
 from . import harness, identity, ops, redact
-from .db import Store
+from .db import LAST_RESULT, Store
 
 WEB = Path(__file__).with_name("web")
 CALLS = contextvars.ContextVar("calls", default=None)
+EFFECTS = ("nodes_created", "relationships_created", "properties_set", "nodes_deleted", "relationships_deleted")
 
 
 class Registry:
@@ -42,14 +43,20 @@ class Registry:
             st = Store(ws, self.host, self.port)
             orig = st.q
 
-            def q(name, cypher, params=None, ro=False, _orig=orig):  # per-query latency into the current trace
+            def q(name, cypher, params=None, ro=False, _orig=orig):  # per-query latency + effects into the trace
                 t0 = time.perf_counter()
+                LAST_RESULT.set(None)
                 try:
                     return _orig(name, cypher, params, ro)
                 finally:
                     calls = CALLS.get()
                     if calls is not None:
-                        calls.append([name, round((time.perf_counter() - t0) * 1000, 2), " ".join(cypher.split())[:700]])
+                        res = LAST_RESULT.get()
+                        fx = {k: int(getattr(res, k)) for k in EFFECTS if res is not None and getattr(res, k)}
+                        if res is not None:
+                            fx["rows"] = len(res.result_set)
+                        calls.append([name, round((time.perf_counter() - t0) * 1000, 2), " ".join(cypher.split())[:700],
+                                      fx])
             st.q = q
             self.stores[ws] = st
         return self.stores[ws]

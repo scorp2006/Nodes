@@ -20,6 +20,7 @@ from falkordb import FalkorDB
 from redis.exceptions import ResponseError
 
 TRACE = contextvars.ContextVar("trace_id", default="")  # set by the server around each traced call
+LAST_RESULT = contextvars.ContextVar("last_result", default=None)  # FalkorDB result of this context's last query
 
 LABELS = ["Principal", "Session", "Unit", "Intent", "Decision", "Fact", "Source", "Request", "Commitment"]
 MANDATORY = [("Fact", "source_uid"), ("Decision", "reason"), ("Decision", "verdict"), ("Session", "principal")]
@@ -79,6 +80,7 @@ class Store:
         t0 = time.perf_counter()
         res = (self.g.ro_query if ro else self.g.query)(cypher, params or {})
         self.lat[name].append((time.perf_counter() - t0) * 1000)
+        LAST_RESULT.set(res)  # the server's trace reads the real write counts from it
         return res.result_set
 
     def latency_report(self) -> dict:

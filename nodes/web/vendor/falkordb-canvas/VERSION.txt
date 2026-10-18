@@ -1,0 +1,5 @@
+@falkordb/canvas 0.3.3 (MIT, see LICENSE), bundled locally so the dashboard loads nothing from a CDN.
+Built with esbuild 0.24.2: bundle --format=esm --splitting --minify, entry `export * from '@falkordb/canvas'`.
+Bundled dependencies: d3 7.9.0 (ISC), force-graph 1.52.0 (MIT); notices in falkordb-canvas.js.LEGAL.txt.
+The 3D renderer chunk (three.js, 3d-force-graph) is not shipped: Nodes uses 2D only. setDimension('3d') would
+fail to load it and the canvas stays in 2D, as the package documents.

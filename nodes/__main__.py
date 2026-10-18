@@ -44,7 +44,8 @@ def ensure_db(host: str, port: int) -> None:
         raise SystemExit(f"FalkorDB at {host}:{port} is not reachable")
     name = f"nodes-falkordb-{port}" if port != 6380 else "nodes-falkordb"
     if subprocess.run(["docker", "start", name], capture_output=True).returncode != 0:
-        subprocess.run(["docker", "run", "-d", "--name", name, "-p", f"127.0.0.1:{port}:6379", IMAGE], check=True)
+        browser = ["-p", "127.0.0.1:3001:3000"] if port == 6380 else []  # FalkorDB Browser, for the raw graph
+        subprocess.run(["docker", "run", "-d", "--name", name, "-p", f"127.0.0.1:{port}:6379", *browser, IMAGE], check=True)
     for _ in range(30):
         if up():
             return

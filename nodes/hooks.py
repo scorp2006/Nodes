@@ -15,7 +15,11 @@ Hook mapping (checked against code.claude.com/docs/en/hooks):
 from __future__ import annotations
 
 import json
+import os
+import re
+import socket
 import time
+from collections import Counter, deque
 from pathlib import Path
 
 from starlette.requests import Request
@@ -377,15 +381,155 @@ def register(server, reg) -> None:
         uids = [a[0] for a in active]
         nbr = st.q("dash.neighbors", """
             UNWIND $u AS id MATCH (a:Unit {uid: id})-[d:DEPENDS_ON]-(b:Unit)
-            RETURN DISTINCT a.uid, b.uid, b.kind, b.symbol, b.path, d.resolved_by LIMIT 120""", {"u": uids}, ro=True)
+            RETURN DISTINCT startNode(d).uid, endNode(d).uid, b.uid, b.kind, b.symbol, b.path, d.resolved_by
+            LIMIT 120""", {"u": uids}, ro=True)
+        files = st.q("dash.files", """
+            UNWIND $u AS id MATCH (f:Unit {kind: 'file'})-[:CONTAINS]->(x:Unit {uid: id})
+            RETURN DISTINCT f.uid, f.path, x.uid""", {"u": uids}, ro=True)
         nodes = {u: {"id": u, "kind": k, "label": s or p, "owner": o} for u, k, s, p, o in active}
-        for a, b, k, s, p, by in nbr:
+        for _, _, b, k, s, p, _ in nbr:
             nodes.setdefault(b, {"id": b, "kind": k, "label": s or p, "owner": None, "context": True})
-        edges = [{"a": a, "b": b, "by": by} for a, b, *_, by in nbr]
+        edges = [{"a": a, "b": b, "rel": "CALLS", "by": by} for a, b, _, _, _, _, by in nbr]
+        for f, p, x in files:  # files as parents: the tree layout reads repo -> file -> unit
+            nodes.setdefault(f, {"id": f, "kind": "file", "label": p, "owner": None, "context": True})
+            edges.append({"a": f, "b": x, "rel": "CONTAINS"})
         return JSONResponse({"nodes": list(nodes.values()), "edges": edges})
+
+    async def node(request: Request) -> Response:
+        """Everything about one unit: where it is, who leases it, who wrote it and why, facts and decisions on it."""
+        ws, uid = _ws(request), request.query_params.get("uid", "")
+        st = reg.store(ws)
+        rows = st.q("dash.node", """
+            MATCH (u:Unit {uid: $u}) OPTIONAL MATCH (o:Session {uid: u.lease_owner})
+            RETURN u.kind, u.path, u.symbol, u.start, u.end, u.lang, u.status, o.name, u.lease_epoch, u.lease_expires,
+                   u.last_rev, u.rationale""", {"u": uid}, ro=True)
+        if not rows:
+            return JSONResponse({"error": "not found"}, 404)
+        k, path, sym, s, e, lang, status, owner, epoch, exp, rev, why = rows[0]
+        authors = st.q("dash.node.authors", "MATCH (p:Principal)-[o:OWNS_CODE]->(:Unit {uid: $u}) RETURN p.name, p.uid, "
+                       "o.lines ORDER BY o.lines DESC LIMIT 5", {"u": uid}, ro=True)
+        decisions = st.q("dash.node.decisions", "MATCH (s:Session)-[:MADE]->(d:Decision)-[:CITES]->(:Unit {uid: $u}) "
+                         "RETURN s.name, d.verdict, d.reason, d.at ORDER BY d.at DESC LIMIT 6", {"u": uid}, ro=True)
+        held = st.q("dash.node.held", "MATCH (s:Session)-[h:HELD]->(:Unit {uid: $u}) RETURN s.name, h.epoch, h.from "
+                    "ORDER BY h.epoch DESC LIMIT 6", {"u": uid}, ro=True)
+        calls = st.q("dash.node.calls", "MATCH (:Unit {uid: $u})-[:DEPENDS_ON]->(b:Unit) RETURN b.symbol LIMIT 12",
+                     {"u": uid}, ro=True)
+        callers = st.q("dash.node.callers", "MATCH (a:Unit)-[:DEPENDS_ON]->(:Unit {uid: $u}) RETURN a.symbol LIMIT 12",
+                       {"u": uid}, ro=True)
+        facts = st.q("dash.node.facts", "MATCH (f:Fact)-[:SOURCED_FROM]->(src:Source) WHERE src.ref STARTS WITH $p "
+                     "RETURN f.text, f.status, src.ref LIMIT 6", {"p": path or "\x00"}, ro=True) if path else []
+        return JSONResponse({
+            "uid": uid, "kind": k, "path": path, "symbol": sym, "lines": [s, e], "lang": lang, "status": status,
+            "lease": {"owner": owner, "epoch": epoch, "expires": exp} if owner else None,
+            "last_change": {"commit": rev, "why": why} if rev else None,
+            "authors": [{"name": n, "id": i, "lines": ln} for n, i, ln in authors],
+            "lease_history": [{"agent": a, "epoch": ep, "at": t} for a, ep, t in held],
+            "decisions": [{"agent": a, "verdict": v, "reason": r, "at": t} for a, v, r, t in decisions],
+            "calls": [c for (c,) in calls], "called_by": [c for (c,) in callers],
+            "facts": [{"text": t, "status": s_, "source": r} for t, s_, r in facts]})
+
+    started = time.time()
+
+    async def server_info(request: Request) -> Response:
+        """The local MCP server and its database, for the dashboard's status panel."""
+        ws = _ws(request)
+        t0 = time.perf_counter()
+        reg.r.ping()
+        ping = round((time.perf_counter() - t0) * 1000, 2)
+        ver = ""
+        for m in reg.r.execute_command("MODULE", "LIST"):
+            m = m.items() if isinstance(m, dict) else zip(m[::2], m[1::2])  # RESP3 dict or RESP2 list
+            m = {(k.decode() if isinstance(k, bytes) else k): v for k, v in m}
+            if m.get("name") in (b"graph", "graph"):
+                v = int(m["ver"])
+                ver = f"{v // 10000}.{v // 100 % 100}.{v % 100}"
+        counts = {}
+        if ws and f"ws:{ws}" in set(reg.r.execute_command("GRAPH.LIST")):
+            st = reg.store(ws)
+            counts = {lbl: n for lbl, n in st.q("dash.labels", "MATCH (n) RETURN labels(n)[0], count(n)", ro=True)}
+            counts["_edges"] = st.q("dash.edges", "MATCH ()-[e]->() RETURN count(e)", ro=True)[0][0]
+        trace = reg.trace_dir / f"{ws}.trace.jsonl"
+        info = reg.workspace(ws)
+        return JSONResponse({
+            "server": {"profile": "nodes", "mcp": f"{request.url.scheme}://{request.url.netloc}/mcp",
+                       "started_at": started, "uptime_s": round(time.time() - started),
+                       "tools": ["context_for", "declare_intent", "before_acting", "post_fact", "coordinate", "status"],
+                       "hooks": ["SessionStart", "PreToolUse", "PostToolUse", "SubagentStart", "SubagentStop", "Stop",
+                                 "SessionEnd"]},
+            "falkordb": {"host": reg.host, "port": reg.port, "module_version": ver, "ping_ms": ping,
+                         "graph": f"ws:{ws}" if ws else "",
+                         **browser(reg.port)},
+            "workspace": {"name": ws, "root": info.get("root", ""), "replay_of": info.get("replay_of"),
+                          "counts": counts, "traced_calls": sum(1 for _ in trace.open(encoding="utf-8"))
+                          if trace.exists() else 0}})
+
+    async def calls(request: Request) -> Response:
+        """Recent traced calls (MCP tools and hooks), newest first, each with what it did to the graph."""
+        ws = _ws(request)
+        ws = json.loads(reg.r.hget("nodes:workspaces", ws) or "{}").get("replay_of", ws)
+        p = reg.trace_dir / f"{ws}.trace.jsonl"
+        if not p.exists():
+            return JSONResponse([])
+        with p.open(encoding="utf-8") as fh:
+            tail = deque(fh, maxlen=int(request.query_params.get("limit", "200")))
+        out = []
+        for line in reversed(tail):
+            r = json.loads(line)
+            qs = r.get("queries") or []
+            fx = Counter()
+            for q in qs:
+                fx.update(q[3] if len(q) > 3 else {})
+            measured = any(len(q) > 3 for q in qs)  # traces written before effects were recorded have none
+            resp = json.dumps(r.get("response"))
+            m = re.search(r"Nodes gate: (\w+)", resp) or re.search(r'"decision": "(\w+)"', resp)
+            out.append({"id": r["id"], "t": r["t"], "kind": r["kind"], "name": r["name"], "agent": r.get("agent"),
+                        "ms": r.get("ms"), "queries": len(qs), "effects": dict(fx) if measured else None,
+                        "verdict": m.group(1).lower() if m else None, "error": '"code":' in resp.replace(" ", ""),
+                        "patterns": sorted({pt for q in qs for pt in patterns(q[2])})[:8]})
+        return JSONResponse(out)
+
+    async def static(request: Request) -> Response:  # the dashboard's own files (app.js, vendored canvas)
+        base = Path(__file__).with_name("web").resolve()
+        f = (base / request.path_params["path"]).resolve()
+        if not f.is_file() or not f.is_relative_to(base):
+            return JSONResponse({"error": "not found"}, 404)
+        return FileResponse(f, media_type="text/javascript" if f.suffix == ".js" else None)
 
     async def replay_page(request: Request) -> Response:
         return FileResponse(Path(__file__).with_name("web") / "index.html")
 
-    for path, fn in (("/api/stream", stream), ("/api/events", all_events), ("/api/trace", trace), ("/api/graph", graph)):
+    for path, fn in (("/api/stream", stream), ("/api/events", all_events), ("/api/trace", trace), ("/api/graph", graph),
+                     ("/api/node", node), ("/api/server", server_info), ("/api/calls", calls),
+                     ("/static/{path:path}", static)):
         server.custom_route(path, methods=["GET"])(fn)
+
+
+def _listening(port: int) -> bool:
+    with socket.socket() as s:
+        s.settimeout(0.2)
+        return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def browser(db_port: int) -> dict:
+    """Where FalkorDB Browser is, and what to type in its login form (it can't be deep-linked to a graph)."""
+    own = os.environ.get("NODES_BROWSER_URL") or ("http://127.0.0.1:3001" if _listening(3001) else "")
+    if own:  # the browser inside our own FalkorDB container (`nodes up` publishes it on :3001)
+        return {"browser": own, "browser_login": "localhost : 6379"}
+    if _listening(3000):  # another FalkorDB container's browser: point it at ours through Docker's host alias
+        return {"browser": "http://127.0.0.1:3000", "browser_login": f"host.docker.internal : {db_port}"}
+    return {"browser": "", "browser_login": ""}
+
+
+REL = re.compile(r"\((\w*)(?::(\w+))?[^()]*\)\s*(<?)-\[\w*(?::(\w+))?[^\]]*\]-(>?)\s*(?=\((\w*)(?::(\w+))?)")
+
+
+def patterns(cypher: str) -> list[str]:
+    """The relationship patterns a query walks or writes, e.g. 'Session-[:HELD]->Unit' (variables resolved to labels)."""
+    labels = dict(re.findall(r"\((\w+):(\w+)", cypher))
+    out = []
+    for a, la, left, rel, right, b, lb in REL.findall(cypher):
+        if not rel:
+            continue
+        la, lb = la or labels.get(a, "?"), lb or labels.get(b, "?")
+        out.append(f"{lb}-[:{rel}]->{la}" if left and not right else f"{la}-[:{rel}]->{lb}")
+    return out
