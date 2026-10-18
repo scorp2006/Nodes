@@ -1,0 +1,18 @@
+--- C
+Q1 commits that changed a file                       30/30
+Q2 last commit touching a unit + its message         30/30
+Q3 who wrote a unit (blame lines per author)         30/30
+Q4 files that change together (support)              30/30
+Q5 call edges visible in the caller's source         30/30   {'name-match': 21, 'ast-static': 9}
+--- F
+Q1 commits that changed a file                       17/17
+Q2 last commit touching a unit + its message         30/30
+Q3 who wrote a unit (blame lines per author)         30/30
+Q4 files that change together (support)              26/26
+Q5 call edges visible in the caller's source         30/30   {'ast-static': 29, 'name-match': 1}
+--- agent context
+Q6 decisions with a session + cited units (shop)     13/13
+Q6 decision nodes == decision events (shop)          13/13
+   e.g. Session-MADE->Decision-CITES->Unit paths exist: True
+Q7 facts whose cited transcript line holds them (import-medusa) 249/249
+ALL ANSWERS MATCH

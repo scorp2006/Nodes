@@ -169,7 +169,8 @@ class _span:
 
 def link_calls(units: list[dict], calls: list[tuple]) -> list[dict]:
     """Name-based call edges: a callee name matches function units by their last name segment.
-    Same-file matches win; a name shared by more than 3 functions repo-wide is too ambiguous and dropped."""
+    Same-file matches win; a name shared by more than 3 functions (in the file, else repo-wide) is too ambiguous
+    and dropped, and dunders (super().__init__) are never matched."""
     by_name = {}
     for u in units:
         if u["kind"] == "function":
@@ -178,9 +179,11 @@ def link_calls(units: list[dict], calls: list[tuple]) -> list[dict]:
     lang_of = {u["uid"]: u["lang"] for u in units}
     edges = []
     for src, name in calls:
+        if name.startswith("__") and name.endswith("__"):  # super().__init__(...) names no particular class
+            continue
         cands = [u for u in by_name.get(name, []) if u["lang"] == lang_of[src]]  # never across languages
         same = [u for u in cands if u["path"] == path_of[src]]
-        pick = same or (cands if len(cands) <= 3 else [])
+        pick = (same if len(same) <= 3 else []) if same else (cands if len(cands) <= 3 else [])
         edges += [{"src": src, "dst": u["uid"], "confidence": 0.5 if same else 0.3} for u in pick if u["uid"] != src]
     return edges
 
