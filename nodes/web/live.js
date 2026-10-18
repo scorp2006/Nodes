@@ -21,8 +21,8 @@ export class Live {
   }
 
   fit() {
-    const s = Math.min(this.root.clientWidth / W, this.root.clientHeight / H) || 1;
-    this.stage.style.transform = `scale(${s})`;
+    const cw = this.root.clientWidth, ch = this.root.clientHeight, s = Math.min(cw / W, ch / H) || 1;
+    this.stage.style.transform = `translate(${Math.max(0, (cw - W * s) / 2)}px, ${Math.max(0, (ch - H * s) / 2)}px) scale(${s})`;  // centred
     this.root.style.setProperty("--lv-h", `${H * s}px`);
   }
 
@@ -75,7 +75,7 @@ export class Live {
     el.innerHTML = `<div class="lv-bubble"></div><div class="lv-avatar">${this.animalSVG(name, 46)}</div>
       <div class="lv-name">${this.esc(this.nameOf(name))}</div><div class="lv-task"></div>`;
     this.root.querySelector(".lv-agents").appendChild(el);
-    const a = {el, name, home: {x: 52 + Math.floor(slot / 6) * 92, y: TOP + 62 + (slot % 6) * 104}, at: null, done: false};
+    const a = {el, name, home: {x: 92 + Math.floor(slot / 6) * 92, y: TOP + 62 + (slot % 6) * 104}, at: null, done: false};
     this.agents[name] = a;
     this.move(a, a.home, false);
     return a;

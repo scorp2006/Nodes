@@ -29,6 +29,8 @@ from . import identity, indexer, ops, redact
 from .lang import EXT
 from .shellwrites import write_targets
 
+FRESH = {"Cache-Control": "no-cache"}  # the dashboard files: browsers revalidate (etag), so an update shows up on reload
+
 PROTOCOL = """You are {name} on a team of coding agents coordinated by Nodes (a shared FalkorDB graph).
 - Before you start, call declare_intent with the functions/files you plan to change.
 - Every Edit/Write is gated automatically. If the gate says DEFER, a teammate owns that code: work on something
@@ -323,7 +325,7 @@ def register(server, reg) -> None:
 
     # ------------------------------------------------------------------ dashboard -------
     async def index(request: Request) -> Response:
-        return FileResponse(Path(__file__).with_name("web") / "index.html")
+        return FileResponse(Path(__file__).with_name("web") / "index.html", headers=FRESH)
 
     async def state(request: Request) -> Response:
         graphs = set(reg.r.execute_command("GRAPH.LIST"))
@@ -591,10 +593,10 @@ def register(server, reg) -> None:
         f = (base / request.path_params["path"]).resolve()
         if not f.is_file() or not f.is_relative_to(base):
             return JSONResponse({"error": "not found"}, 404)
-        return FileResponse(f, media_type="text/javascript" if f.suffix == ".js" else None)
+        return FileResponse(f, media_type="text/javascript" if f.suffix == ".js" else None, headers=FRESH)
 
     async def replay_page(request: Request) -> Response:
-        return FileResponse(Path(__file__).with_name("web") / "index.html")
+        return FileResponse(Path(__file__).with_name("web") / "index.html", headers=FRESH)
 
     for path, fn in (("/api/stream", stream), ("/api/events", all_events), ("/api/trace", trace), ("/api/graph", graph),
                      ("/api/node", node), ("/api/server", server_info), ("/api/calls", calls),
