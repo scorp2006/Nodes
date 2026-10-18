@@ -1,0 +1,2 @@
+{"t": 1792279786.881533, "agent": "agent1", "tool": "declare_plan", "functions": ["dirty_equals._other.IsURL"], "resolved": [], "conflict": false}
+{"t": 1792279787.7809937, "agent": "agent2", "tool": "declare_plan", "functions": ["dirty_equals._other.IsHash"], "resolved": [], "conflict": false}

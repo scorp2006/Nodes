@@ -1,0 +1,8 @@
+{"t": 1792276008.9148939, "agent": "agent2", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict", "click.core.Option.handle_parse_result"], "resolved": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "conflict": true}
+{"t": 1792276009.916866, "agent": "agent1", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.handle_parse_result"], "resolved": ["click.core.Option.__init__"], "conflict": true}
+{"t": 1792276011.5139515, "agent": "agent2", "tool": "claim", "functions": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "won": ["click.core.Option.__init__", "click.core.Option.to_info_dict"], "lost": {}}
+{"t": 1792276013.0833192, "agent": "agent1", "tool": "claim", "functions": ["click.core.Option.__init__"], "won": [], "lost": {"click.core.Option.__init__": "agent2"}}
+{"t": 1792276022.0785553, "agent": "agent2", "tool": "mark_committed", "commit": "4a1f7b0c837eda52d43f6c01fd1a3504ce97b93c", "functions": 2}
+{"t": 1792276023.200087, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "builder-work", "waited": 110}
+{"t": 1792276054.23733, "agent": "agent1", "tool": "mark_committed", "commit": "ba656b9e4d69400a8661ea2611df138b677f76d8", "functions": 0}
+{"t": 1792276054.6335766, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 100}

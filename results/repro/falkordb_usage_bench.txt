@@ -1,0 +1,10 @@
+workspace graph ws:bench-usage = click 2068: {'units': 563, 'functions': 451, 'regions': 96, 'calls': 324} indexed in 0.25 s
+UNIQUE uid: 2/2 duplicate creates rejected by FalkorDB
+indexed uid lookup: p50 0.82 ms, p99 8.12 ms (n=500)
+MANDATORY provenance: 2/2 writes without provenance rejected by FalkorDB
+before_acting (resolve + lease CAS + impact + Decision write), 2 targets: p50 9.22 ms, p99 28.24 ms (n=300)
+  of which the lease CAS query alone: p50 1.19 ms, p99 5.41 ms (n=300)
+50 concurrent agents claim one unit: winners = 1, lease epoch = 1
+pub/sub publish -> subscriber receives: p50 0.52 ms, p99 5.83 ms (n=200)  (harness polled every 2000 ms: mean wait ~1000 ms)
+GRAPH.COPY of the workspace (1015 nodes): p50 98.48 ms, p99 104.61 ms (n=10)
+graph per workspace: a second workspace sees 0 of the first workspace's units

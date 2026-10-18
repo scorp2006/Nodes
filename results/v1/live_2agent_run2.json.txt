@@ -1,0 +1,122 @@
+{
+ "wall_seconds": 178,
+ "model": "claude-sonnet-5-5",
+ "effort": "low",
+ "decisions": [
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> file:shop:src/shop/models.py, region:shop:src/shop/models.py#User.__body__"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> region:shop:src/shop/models.py#module@2"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> fn:shop:src/shop/api.py#user_summary"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> fn:shop:src/shop/models.py#order_total"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> file:planned:tests/test_verify.py"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> file:planned:tests/test_points.py"
+  ],
+  [
+   "alice",
+   "proceed",
+   "alice -HOLDS-> fn:shop:tests/test_base.py#test_base"
+  ],
+  [
+   "bob",
+   "handoff",
+   "alice -DONE_AT-> 0fe00a84fad315d63a46083a9dd8d95e4417dc64 -HANDS-> file:shop:src/shop/models.py -TO-> bob"
+  ],
+  [
+   "bob",
+   "proceed",
+   "bob -HOLDS-> file:shop:src/shop/models.py, region:shop:src/shop/models.py#User.__body__"
+  ],
+  [
+   "bob",
+   "handoff",
+   "alice -DONE_AT-> 0fe00a84fad315d63a46083a9dd8d95e4417dc64 -HANDS-> region:shop:src/shop/models.py#module@2 -TO-> bob"
+  ],
+  [
+   "bob",
+   "handoff",
+   "alice -DONE_AT-> 0fe00a84fad315d63a46083a9dd8d95e4417dc64 -HANDS-> fn:shop:src/shop/models.py#order_total -TO-> bob"
+  ],
+  [
+   "bob",
+   "handoff",
+   "alice -DONE_AT-> 0fe00a84fad315d63a46083a9dd8d95e4417dc64 -HANDS-> fn:shop:src/shop/api.py#user_summary -TO-> bob"
+  ],
+  [
+   "bob",
+   "handoff",
+   "alice -DONE_AT-> 0fe00a84fad315d63a46083a9dd8d95e4417dc64 -HANDS-> fn:shop:tests/test_base.py#test_base -TO-> bob"
+  ]
+ ],
+ "verdict_counts": {
+  "proceed": 8,
+  "defer": 0,
+  "handoff": 5,
+  "escalate": 0
+ },
+ "sessions": [
+  [
+   "agent1",
+   "active",
+   null
+  ],
+  [
+   "agent2",
+   "active",
+   null
+  ],
+  [
+   "alice",
+   "done",
+   "0fe00a84fad315d63a46083a9dd8d95e4417dc64"
+  ],
+  [
+   "bob",
+   "done",
+   "7bb28e9e2b86d65e8dac07125b450d725965795b"
+  ]
+ ],
+ "branch_commits": {
+  "alice": [
+   "0fe00a8 add email verification"
+  ],
+  "bob": [
+   "7bb28e9 fix base test for points",
+   "0d956df add loyalty points",
+   "0fe00a8 add email verification"
+  ]
+ },
+ "merged_cleanly": {
+  "alice": true,
+  "bob": true
+ },
+ "both_features_present": true,
+ "merged_tests": [
+  "3 passed in 0.02s"
+ ],
+ "agents_exit": {
+  "alice": 0,
+  "bob": 0
+ }
+}

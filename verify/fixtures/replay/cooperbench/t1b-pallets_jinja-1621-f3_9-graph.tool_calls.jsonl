@@ -1,0 +1,11 @@
+{"t": 1792278881.7714849, "agent": "agent1", "tool": "declare_plan", "functions": ["jinja2.loaders.split_template_path", "jinja2.loaders.validate_template_path"], "resolved": ["jinja2.loaders.split_template_path"], "conflict": true}
+{"t": 1792278882.5463407, "agent": "agent2", "tool": "declare_plan", "functions": ["jinja2.loaders.FileSystemLoader.__init__", "jinja2.loaders.FileSystemLoader.get_source", "jinja2.loaders.FileSystemLoader._on_template_changed"], "resolved": ["jinja2.loaders.FileSystemLoader.__init__", "jinja2.loaders.FileSystemLoader.get_source"], "conflict": true}
+{"t": 1792278884.2365515, "agent": "agent2", "tool": "claim", "functions": ["jinja2.loaders.FileSystemLoader.__init__", "jinja2.loaders.FileSystemLoader.get_source"], "won": ["jinja2.loaders.FileSystemLoader.__init__", "jinja2.loaders.FileSystemLoader.get_source"], "lost": {}}
+{"t": 1792278885.0973852, "agent": "agent1", "tool": "claim", "functions": ["jinja2.loaders.split_template_path"], "won": ["jinja2.loaders.split_template_path"], "lost": {}}
+{"t": 1792278893.4135697, "agent": "agent1", "tool": "mark_committed", "commit": "c4301b3868dc7ad30867ae7232b580e9b3bc505c", "functions": 1}
+{"t": 1792278893.4852276, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-wait", "waited": 0}
+{"t": 1792278909.3288367, "agent": "agent2", "tool": "mark_committed", "commit": "2f7d6377f68d4f5ec01cd6b849ed286b46d69e32", "functions": 2}
+{"t": 1792278911.352159, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}
+{"t": 1792278915.5704439, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 0}
+{"t": 1792279008.5797513, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 90}
+{"t": 1792279029.6354218, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}

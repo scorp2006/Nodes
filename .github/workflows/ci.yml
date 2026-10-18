@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+# FalkorDB v4.22.1 everywhere, pinned by digest (the same image `nodes up` starts)
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      falkordb:
+        image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a
+        ports: ["6380:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest -q nodes/test_v1.py nodes/test_product.py nodes/test_audit.py
+
+  replay:
+    # Every recorded harness tool call (4916) replayed into the frozen harness (FalkorDB :6379) and the product's
+    # harness profile (:6380); must be byte-identical with no leaks. No LLM calls.
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      harness-db:
+        image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a
+        ports: ["6379:6379"]
+      product-db:
+        image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a
+        ports: ["6380:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Yassellee/HiddenBench_ICML
+          ref: 3be6ca16973e4fb751ffc0dfb7eb11f2d28335d1
+          path: external/HiddenBench_ICML
+          sparse-checkout: data
+      - uses: actions/checkout@v4
+        with:
+          repository: cooperbench/CooperBench
+          ref: 63b9d44d9f39a02fccf5bf0052db48a917a011fd
+          path: external/CooperBench
+          sparse-checkout: dataset
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python verify/replay_equivalence.py

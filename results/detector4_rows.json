@@ -1,0 +1,1688 @@
+[
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   1,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   1,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   1,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   1,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   1,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   2,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._install",
+    "jinja2.ext.InternationalizationExtension._install_callables",
+    "jinja2.ext.InternationalizationExtension._install_null",
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension._uninstall",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.22727272727272727,
+  "cc": 0.0,
+  "risk": 0.11363636363636363,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   2,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._install_callables",
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.22727272727272727,
+  "cc": 0.0,
+  "risk": 0.11363636363636363,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   2,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._install",
+    "jinja2.ext.InternationalizationExtension._install_callables",
+    "jinja2.ext.InternationalizationExtension._install_null",
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.22727272727272727,
+  "cc": 0.0,
+  "risk": 0.11363636363636363,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   4,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   4,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   4,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension._make_node",
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   5,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   5,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.18181818181818182,
+  "cc": 0.0,
+  "risk": 0.09090909090909091,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   5,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   5,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.parse"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   6,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   6,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   7,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   7,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   8,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "funcs": [
+   [],
+   []
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   8,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1559",
+  "pair": [
+   9,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [],
+   [
+    "jinja2.ext.InternationalizationExtension.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   1,
+   3
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.FileSystemLoader.list_templates"
+   ],
+   [
+    "jinja2.loaders.split_template_path"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 1,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.6956521739130435,
+  "cc": 0.0,
+  "risk": 0.34782608695652173,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   1,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.FileSystemLoader.list_templates"
+   ],
+   [
+    "jinja2.loaders.BaseLoader.load"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 3,
+  "d_calls_state": 3,
+  "same_fn": 0.0,
+  "cov": 0.56,
+  "cc": 0.0,
+  "risk": 0.28,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   2,
+   3
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.PackageLoader.get_source"
+   ],
+   [
+    "jinja2.loaders.split_template_path"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 1,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.9565217391304348,
+  "cc": 0.0,
+  "risk": 0.4782608695652174,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   2,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.PackageLoader.get_source"
+   ],
+   [
+    "jinja2.loaders.FileSystemLoader.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.22727272727272727,
+  "cc": 0.0,
+  "risk": 0.11363636363636363,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   2,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.PackageLoader.get_source"
+   ],
+   [
+    "jinja2.loaders.ChoiceLoader.__init__",
+    "jinja2.loaders.ChoiceLoader.list_templates",
+    "jinja2.loaders.DictLoader.__init__",
+    "jinja2.loaders.DictLoader.list_templates",
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.list_templates",
+    "jinja2.loaders.FunctionLoader.__init__",
+    "jinja2.loaders.ModuleLoader.__init__",
+    "jinja2.loaders.PackageLoader.__init__",
+    "jinja2.loaders.PackageLoader.list_templates",
+    "jinja2.loaders.PrefixLoader.__init__",
+    "jinja2.loaders.PrefixLoader.list_templates"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.5,
+  "cc": 0.0,
+  "risk": 0.25,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   2,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.PackageLoader.get_source"
+   ],
+   [
+    "jinja2.loaders.BaseLoader.load"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 3,
+  "d_calls_state": 3,
+  "same_fn": 0.0,
+  "cov": 0.5517241379310345,
+  "cc": 0.0,
+  "risk": 0.27586206896551724,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   2,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.PackageLoader.get_source"
+   ],
+   [
+    "jinja2.loaders.FileSystemLoader.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.22727272727272727,
+  "cc": 0.0,
+  "risk": 0.11363636363636363,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   3,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.split_template_path"
+   ],
+   [
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.get_source"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 1,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.6956521739130435,
+  "cc": 0.0,
+  "risk": 0.34782608695652173,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   3,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.split_template_path"
+   ],
+   [
+    "jinja2.loaders.FileSystemLoader.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.21739130434782608,
+  "cc": 0.0,
+  "risk": 0.10869565217391304,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   3,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "funcs": [
+   [],
+   [
+    "jinja2.loaders.ChoiceLoader.__init__",
+    "jinja2.loaders.ChoiceLoader.get_source",
+    "jinja2.loaders.ChoiceLoader.load",
+    "jinja2.loaders.DictLoader.__init__",
+    "jinja2.loaders.DictLoader.get_source",
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.get_source",
+    "jinja2.loaders.FunctionLoader.__init__",
+    "jinja2.loaders.FunctionLoader.get_source",
+    "jinja2.loaders.PackageLoader.__init__",
+    "jinja2.loaders.PackageLoader.get_source",
+    "jinja2.loaders.PrefixLoader.__init__",
+    "jinja2.loaders.PrefixLoader.get_source",
+    "jinja2.loaders.PrefixLoader.load"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   3,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.split_template_path"
+   ],
+   [
+    "jinja2.loaders.ChoiceLoader.__init__",
+    "jinja2.loaders.ChoiceLoader.list_templates",
+    "jinja2.loaders.DictLoader.__init__",
+    "jinja2.loaders.DictLoader.list_templates",
+    "jinja2.loaders.FileSystemLoader.__init__",
+    "jinja2.loaders.FileSystemLoader.list_templates",
+    "jinja2.loaders.FunctionLoader.__init__",
+    "jinja2.loaders.ModuleLoader.__init__",
+    "jinja2.loaders.PackageLoader.__init__",
+    "jinja2.loaders.PackageLoader.list_templates",
+    "jinja2.loaders.PrefixLoader.__init__",
+    "jinja2.loaders.PrefixLoader.list_templates"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.4838709677419355,
+  "cc": 0.0,
+  "risk": 0.24193548387096775,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "pallets_jinja_task",
+  "task": "1621",
+  "pair": [
+   3,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "funcs": [
+   [
+    "jinja2.loaders.split_template_path"
+   ],
+   [
+    "jinja2.loaders.FileSystemLoader.__init__"
+   ]
+  ],
+  "unknown_funcs": [],
+  "disjoint": true,
+  "same_file": true,
+  "d_calls": 7,
+  "d_calls_state": 2,
+  "same_fn": 0.0,
+  "cov": 0.21739130434782608,
+  "cc": 0.0,
+  "risk": 0.10869565217391304,
+  "coverage_status": "ok"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   3,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T03:12:27.800541+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   7,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:26:43.585081+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:47:48.805747+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:48:40.490702+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T04:07:04.270213+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   6,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T04:24:08.576261+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   1,
+   3
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T05:25:52.604789+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T05:26:55.532094+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T05:50:15.194383+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T05:54:27.415169+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:17:40.549660+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   1,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T06:28:31.134017+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:50:28.762252+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   7,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:54:35.956611+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1706",
+  "pair": [
+   2,
+   4
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T04:04:02.669825+00:00",
+  "funcs": [
+   [
+    "outlines.backends.xgrammar.XGrammarBackend.__init__",
+    "outlines.backends.xgrammar.XGrammarBackend.get_cfg_logits_processor",
+    "outlines.backends.xgrammar.XGrammarBackend.get_json_schema_logits_processor",
+    "outlines.backends.xgrammar.XGrammarBackend.get_regex_logits_processor"
+   ],
+   [
+    "outlines.backends.xgrammar.XGrammarLogitsProcessor.__init__",
+    "outlines.backends.xgrammar.XGrammarLogitsProcessor.process_logits"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 1,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "dspy_task",
+  "task": "8635",
+  "pair": [
+   2,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T04:33:02.824381+00:00",
+  "funcs": [
+   [
+    "dspy.propose.grounded_proposer.GroundedProposer.__init__",
+    "dspy.propose.grounded_proposer.GroundedProposer.propose_instruction_for_predictor"
+   ],
+   [
+    "dspy.propose.grounded_proposer.GroundedProposer.propose_instructions_for_program"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 1,
+  "d_calls_state": 1,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.875,
+  "risk": 0.4375,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ },
+ {
+  "repo": "huggingface_datasets_task",
+  "task": "3997",
+  "pair": [
+   1,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T02:33:11.741035+00:00",
+  "funcs": [
+   [
+    "datasets.features.features.Features.__delitem__",
+    "datasets.features.features.Features.__setitem__"
+   ],
+   [
+    "datasets.features.features.Features.update"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7,
+  "same_fn": 0.0,
+  "cov": 0.0,
+  "cc": 0.0,
+  "risk": 0.0,
+  "coverage_status": "coverage unavailable (no test mapped)"
+ }
+]

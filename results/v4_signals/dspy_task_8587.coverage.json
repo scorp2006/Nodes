@@ -1,0 +1,1 @@
+{"repo": "dspy_task", "task": "8587", "base": "80412ce96d70fdb64dcf2c63940f511d6f89ca44", "test_files": ["tests/streaming/test_streaming.py"], "at_base": ["tests/streaming/test_streaming.py"], "status": "coverage unavailable", "exercises": {}}

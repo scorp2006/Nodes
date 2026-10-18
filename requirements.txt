@@ -1,2 +1,3 @@
 falkordb==1.8.0
 mcp==2.3.0
+tree-sitter-language-pack==1.22.1

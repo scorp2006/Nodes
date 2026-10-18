@@ -1,0 +1,8 @@
+# Optional: `python -m nodes up` starts this same container itself. Use compose only if you prefer to manage it.
+# The Nodes server runs on the host (it reads your repo and Claude Code's hooks call it on 127.0.0.1).
+services:
+  falkordb:
+    image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a  # v4.22.1
+    container_name: nodes-falkordb
+    ports:
+      - "127.0.0.1:6380:6379"   # Redis protocol; Nodes uses 6380 so it never collides with another Redis on 6379

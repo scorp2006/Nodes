@@ -1,0 +1,9 @@
+{"t": 1792278652.2092083, "agent": "agent2", "tool": "declare_plan", "functions": ["jinja2.loaders.split_template_path", "jinja2.loaders.validate_template_path"], "resolved": ["jinja2.loaders.split_template_path"], "conflict": true}
+{"t": 1792278652.8101096, "agent": "agent1", "tool": "declare_plan", "functions": ["jinja2.loaders.FileSystemLoader.get_source", "jinja2.loaders.PackageLoader.get_source"], "resolved": ["jinja2.loaders.FileSystemLoader.get_source", "jinja2.loaders.PackageLoader.get_source"], "conflict": true}
+{"t": 1792278653.8603337, "agent": "agent2", "tool": "claim", "functions": ["jinja2.loaders.split_template_path"], "won": ["jinja2.loaders.split_template_path"], "lost": {}}
+{"t": 1792278654.7517335, "agent": "agent1", "tool": "claim", "functions": ["jinja2.loaders.FileSystemLoader.get_source", "jinja2.loaders.PackageLoader.get_source"], "won": ["jinja2.loaders.FileSystemLoader.get_source", "jinja2.loaders.PackageLoader.get_source"], "lost": {}}
+{"t": 1792278660.2794228, "agent": "agent1", "tool": "mark_committed", "commit": "5ef407c72701bfaa95e0cdf84f43545082aa7aea", "functions": 2}
+{"t": 1792278664.2764666, "agent": "agent2", "tool": "mark_committed", "commit": "30683fb89d8958eac8012149a693a17015220635", "functions": 1}
+{"t": 1792278664.4923313, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 60}
+{"t": 1792278775.7076688, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 100}
+{"t": 1792278782.2250292, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 110}

@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 
 from falkordb import FalkorDB
+from mcp.server.mcpserver import Context, MCPServer
 from redis.exceptions import ResponseError
 
 
@@ -171,16 +172,31 @@ def my_facts(g, agent: str) -> str:
     return "Your facts:\n" + "\n".join(f"Fact {n}: {t}" for n, t in rows)
 
 
-def serve(graph: str, agent: str, log: str | None = None, mode: str = "board") -> None:
+DIGEST = {
+    "board": lambda g, agent: shared_facts(g) + "\n" + who_has_not_shared(g),
+    "claims": lambda g, agent: shared_claims(g) + "\n" + who_has_not_posted(g),
+    "notepad": lambda g, agent: read_notes(g, agent),
+}
+
+
+def digest(graph: str, agent: str, mode: str) -> str:
+    """What gets pushed into each turn: exactly what the mode's read tools would return."""
+    return DIGEST[mode](connect(graph), agent)
+
+
+def build_server(mode: str, resolve):
+    """One MCP server exposing only `mode`'s three tools.
+
+    resolve(ctx) -> (graph handle, agent name, log path or None) for the calling agent.
+    """
     import json
     import time
 
-    from mcp.server.mcpserver import MCPServer
 
-    g = connect(graph)
+
     server = MCPServer("board")
 
-    def logged(tool: str, result: str, **kw) -> str:
+    def logged(agent, log, tool: str, result: str, **kw) -> str:
         if log:
             with open(log, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"t": time.time(), "agent": agent, "tool": tool, **kw}) + "\n")
@@ -188,58 +204,94 @@ def serve(graph: str, agent: str, log: str | None = None, mode: str = "board") -
 
     if mode == "notepad":
         @server.tool(name="write_note")
-        def _write(text: str) -> str:
+        def _write(text: str, ctx: Context) -> str:
             """Save a private note. Only you can ever see your notes."""
-            return logged("write_note", write_note(g, agent, text))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "write_note", write_note(g, agent, text))
 
         @server.tool(name="read_notes")
-        def _read() -> str:
+        def _read(ctx: Context) -> str:
             """Show all of your private notes, oldest first."""
-            return logged("read_notes", read_notes(g, agent))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "read_notes", read_notes(g, agent))
 
         @server.tool(name="review_my_facts")
-        def _mine() -> str:
+        def _mine(ctx: Context) -> str:
             """List your own numbered facts from your briefing."""
-            return logged("review_my_facts", my_facts(g, agent))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "review_my_facts", my_facts(g, agent))
     elif mode == "claims":
         @server.tool(name="post_claim")
-        def _claim(text: str) -> str:
+        def _claim(text: str, ctx: Context) -> str:
             """Post a claim to the shared board, in your own words. Claims are not checked."""
-            return logged("post_claim", post_claim(g, agent, text))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "post_claim", post_claim(g, agent, text))
 
         @server.tool(name="shared_claims")
-        def _claims() -> str:
+        def _claims(ctx: Context) -> str:
             """List every claim posted to the board so far, with who posted it."""
-            return logged("shared_claims", shared_claims(g))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "shared_claims", shared_claims(g))
 
         @server.tool(name="who_has_not_posted")
-        def _who_claims() -> str:
+        def _who_claims(ctx: Context) -> str:
             """Name the participants who hold facts nobody else has and have not posted anything."""
-            return logged("who_has_not_posted", who_has_not_posted(g))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "who_has_not_posted", who_has_not_posted(g))
     else:
         @server.tool(name="share_fact")
-        def _share(fact_number: int) -> str:
+        def _share(fact_number: int, ctx: Context) -> str:
             """Post one of your own numbered facts to the shared board. It is marked source-checked."""
-            return logged("share_fact", share_fact(g, agent, fact_number), fact_number=fact_number)
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "share_fact", share_fact(g, agent, fact_number), fact_number=fact_number)
 
         @server.tool(name="shared_facts")
-        def _shared() -> str:
+        def _shared(ctx: Context) -> str:
             """List every fact posted to the board so far, with who posted it."""
-            return logged("shared_facts", shared_facts(g))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "shared_facts", shared_facts(g))
 
         @server.tool(name="who_has_not_shared")
-        def _who() -> str:
+        def _who(ctx: Context) -> str:
             """Name the participants who hold facts nobody else has and have not posted them."""
-            return logged("who_has_not_shared", who_has_not_shared(g))
+            g, agent, log = resolve(ctx)
+            return logged(agent, log, "who_has_not_shared", who_has_not_shared(g))
+    return server
 
-    server.run()
+
+def serve(graph: str, agent: str, log: str | None = None, mode: str = "board") -> None:
+    """stdio: one process per agent call, identity fixed by the command line (dev/test1 setup)."""
+    g = connect(graph)
+    build_server(mode, lambda ctx: (g, agent, log)).run()
+
+
+HTTP_PORTS = {"board": 8771, "claims": 8772, "notepad": 8773}
+
+
+def serve_http(mode: str) -> None:
+    """One long-lived HTTP server per mode for a whole batch; one DB connection.
+
+    Each agent's MCP config sends X-Board-Graph / X-Board-Agent / X-Board-Log headers.
+    The harness writes those configs; agents never see or control them.
+    """
+    db = FalkorDB(host="localhost", port=6379)
+
+    def resolve(ctx):
+        h = ctx.headers or {}
+        return db.select_graph(h["x-board-graph"]), h["x-board-agent"], h.get("x-board-log")
+
+    build_server(mode, resolve).run("streamable-http", host="127.0.0.1", port=HTTP_PORTS[mode])
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--graph", required=True)
-    ap.add_argument("--agent", required=True)
     ap.add_argument("--mode", choices=["board", "claims", "notepad"], default="board")
+    ap.add_argument("--http", action="store_true", help="long-lived HTTP server for this mode")
+    ap.add_argument("--graph")
+    ap.add_argument("--agent")
     ap.add_argument("--log", help="append one JSON line per tool call")
     args = ap.parse_args()
-    serve(args.graph, args.agent, args.log, args.mode)
+    if args.http:
+        serve_http(args.mode)
+    else:
+        serve(args.graph, args.agent, args.log, args.mode)

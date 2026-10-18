@@ -1,0 +1,1 @@
+{"repo": "dottxt_ai_outlines_task", "task": "1706", "base": "947c904608821ef6e33493181f87653e25b08862", "test_files": ["tests/backends/test_xgrammar.py"], "at_base": ["tests/backends/test_xgrammar.py"], "status": "ok", "tests": 0, "exercises": {}, "edge_props": {"resolved_by": "coverage", "confidence": 1.0}}

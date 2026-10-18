@@ -1,0 +1,7 @@
+.git
+.venv*
+external
+runs
+results
+**/__pycache__
+**/*.pyc

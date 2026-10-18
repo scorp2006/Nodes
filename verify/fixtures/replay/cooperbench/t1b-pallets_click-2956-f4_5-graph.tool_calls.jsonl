@@ -1,0 +1,8 @@
+{"t": 1792275914.764097, "agent": "agent1", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.process_value"], "resolved": ["click.core.Option.__init__"], "conflict": true}
+{"t": 1792275915.716781, "agent": "agent2", "tool": "declare_plan", "functions": ["click.core.Option.__init__", "click.core.Option.type_cast_value", "click.core._clear_cache"], "resolved": ["click.core.Option.__init__"], "conflict": true}
+{"t": 1792275917.9802394, "agent": "agent2", "tool": "claim", "functions": ["click.core.Option.__init__"], "won": ["click.core.Option.__init__"], "lost": {}}
+{"t": 1792275918.3784769, "agent": "agent1", "tool": "claim", "functions": ["click.core.Option.__init__"], "won": [], "lost": {"click.core.Option.__init__": "agent2"}}
+{"t": 1792275928.759327, "agent": "agent2", "tool": "mark_committed", "commit": "3e3994a7528e9405c8889fe246af016588e5ae57", "functions": 1}
+{"t": 1792275930.2218955, "agent": "agent1", "tool": "coordination_status", "conflict": true, "step": "builder-work", "waited": 60}
+{"t": 1792275945.833346, "agent": "agent1", "tool": "mark_committed", "commit": "c59dc8c61437715fe131d2c5b0608280a58c3f65", "functions": 0}
+{"t": 1792275947.1097224, "agent": "agent2", "tool": "coordination_status", "conflict": true, "step": "owner-final", "waited": 100}

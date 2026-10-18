@@ -1,0 +1,1 @@
+{"repo": "dspy_task", "task": "8563", "base": "80412ce96d70fdb64dcf2c63940f511d6f89ca44", "test_files": ["tests/adapters/test_chat_adapter.py", "tests/adapters/test_tool.py"], "at_base": ["tests/adapters/test_chat_adapter.py", "tests/adapters/test_tool.py"], "status": "coverage unavailable", "exercises": {}}

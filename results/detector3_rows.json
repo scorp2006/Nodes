@@ -1,0 +1,445 @@
+[
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   3,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T03:12:27.800541+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   7,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:26:43.585081+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:47:48.805747+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T03:48:40.490702+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   10
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T04:07:04.270213+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   6,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T04:24:08.576261+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   1,
+   3
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T05:25:52.604789+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   7
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T05:26:55.532094+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T05:50:15.194383+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   2,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T05:54:27.415169+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:17:40.549660+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   1,
+   8
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T06:28:31.134017+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   5,
+   6
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:50:28.762252+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1655",
+  "pair": [
+   7,
+   9
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "conflicts",
+  "merged_both_pass": false,
+  "interaction_failure": true,
+  "error": null,
+  "done_at": "2026-10-18T06:54:35.956611+00:00",
+  "funcs": [
+   [],
+   []
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ },
+ {
+  "repo": "dottxt_ai_outlines_task",
+  "task": "1706",
+  "pair": [
+   2,
+   4
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T04:04:02.669825+00:00",
+  "funcs": [
+   [
+    "outlines.backends.xgrammar.XGrammarBackend.__init__",
+    "outlines.backends.xgrammar.XGrammarBackend.get_cfg_logits_processor",
+    "outlines.backends.xgrammar.XGrammarBackend.get_json_schema_logits_processor",
+    "outlines.backends.xgrammar.XGrammarBackend.get_regex_logits_processor"
+   ],
+   [
+    "outlines.backends.xgrammar.XGrammarLogitsProcessor.__init__",
+    "outlines.backends.xgrammar.XGrammarLogitsProcessor.process_logits"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 1,
+  "d_calls_state": 1
+ },
+ {
+  "repo": "dspy_task",
+  "task": "8635",
+  "pair": [
+   2,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T04:33:02.824381+00:00",
+  "funcs": [
+   [
+    "dspy.propose.grounded_proposer.GroundedProposer.__init__",
+    "dspy.propose.grounded_proposer.GroundedProposer.propose_instruction_for_predictor"
+   ],
+   [
+    "dspy.propose.grounded_proposer.GroundedProposer.propose_instructions_for_program"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 1,
+  "d_calls_state": 1
+ },
+ {
+  "repo": "huggingface_datasets_task",
+  "task": "3997",
+  "pair": [
+   1,
+   5
+  ],
+  "alone1": true,
+  "alone2": true,
+  "eligible": true,
+  "merge_status": "clean",
+  "merged_both_pass": true,
+  "interaction_failure": false,
+  "error": null,
+  "done_at": "2026-10-18T02:33:11.741035+00:00",
+  "funcs": [
+   [
+    "datasets.features.features.Features.__delitem__",
+    "datasets.features.features.Features.__setitem__"
+   ],
+   [
+    "datasets.features.features.Features.update"
+   ]
+  ],
+  "same_file": true,
+  "disjoint": true,
+  "heavy": true,
+  "d_calls": 7,
+  "d_calls_state": 7
+ }
+]

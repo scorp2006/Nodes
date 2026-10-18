@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Board vs chat replay</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6e6e73;--line:#e3e3e0;--ok:#1f8a4c;--bad:#c62828;--accent:#3b5bdb}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--card:#1c1c1f;--ink:#f2f2f2;--mute:#9a9aa0;--line:#2c2c30;--ok:#4cc38a;--bad:#ff6b6b;--accent:#8ea2ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+header{padding:16px 16px 8px}
+h1{font-size:20px;margin:0 0 4px}
+.mute{color:var(--mute);font-size:13px}
+.controls{position:sticky;top:0;z-index:2;background:var(--bg);padding:8px 16px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line)}
+input[type=range]{flex:1}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 12px}
+main{display:grid;gap:12px;padding:12px 16px 24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+h2{font-size:15px;margin:0 0 2px}
+.votes{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.vote{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.right{border-color:var(--ok);color:var(--ok)}.wrong{border-color:var(--bad);color:var(--bad)}
+.msg{border-top:1px solid var(--line);padding:8px 0}
+.who{font-weight:600;font-size:13px}
+.board{background:var(--bg);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:13px}
+.verdict{font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Replay</h1>
+  <div class="mute">The same HiddenBench task, run twice with the same model and the same private facts.
+    Left: agents share facts through the source-checked board. Right: placebo, chat only. Recorded runs from the
+    pre-registered test (graph 15/40 vs placebo 5/40 right). This task is one of five case studies, three graph wins
+    and two graph losses: <span id="pick"></span>.</div>
+</header>
+<div class="controls">
+  <button id="play">Play</button>
+  <input type="range" id="round" min="1" value="1">
+  <span id="label" class="mute"></span>
+</div>
+<main>
+  <section id="graph"></section>
+  <section id="placebo"></section>
+</main>
+<script>
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const task = new URLSearchParams(location.search).get("task") || "t42_d0";
+let data, max = 1;
+function votes(v, ans) {
+  return `<div class="votes">${v.map(x => `<span class="vote ${x.vote === ans ? "right" : "wrong"}">${esc(x.agent)}: ${esc(x.vote)}</span>`).join("")}</div>`;
+}
+function panel(cond, r, title) {
+  const d = data[cond], ans = d.correct_answer, last = r === max;
+  const msgs = d.discussion_transcript.filter(m => m.round === r);
+  const right = 2 * d.final_votes.filter(v => v.vote === ans).length > d.final_votes.length;
+  let board = "";
+  if (d.posts) {
+    const n = Math.round(d.posts.length * r / max);  // posts are recorded in order, without round numbers
+    board = `<div class="board"><b>Board</b> (${n} of ${d.posts.length} posts; order is recorded, timing is approximate):<br>${d.posts.slice(0, n)
+      .map(([a, f]) => `${esc(a)} posted ${f.startsWith("h") ? "a private fact" : "a shared fact"}`).join("<br>") || "empty"}</div>`;
+  }
+  return `<h2>${title}</h2><div class="mute">initial votes</div>${votes(d.initial_votes, ans)}${board}
+    ${msgs.map(m => `<div class="msg"><div class="who">${esc(m.agent)}</div>${esc(m.response.replaceAll("**", ""))}</div>`).join("")}
+    ${last ? `<div class="mute">final votes</div>${votes(d.final_votes, ans)}<div class="verdict" style="color:var(--${right ? "ok" : "bad"})">
+      Group ${right ? "right" : "wrong"} (correct: ${esc(ans)})</div>` : ""}`;
+}
+function show(r) {
+  document.getElementById("round").value = r;
+  document.getElementById("label").textContent = `round ${r} of ${max}`;
+  document.getElementById("graph").innerHTML = panel("graph", r, "With the board");
+  document.getElementById("placebo").innerHTML = panel("placebo", r, "Chat only (placebo)");
+}
+let timer;
+document.getElementById("round").oninput = e => show(+e.target.value);
+document.getElementById("play").onclick = e => {
+  if (timer) { clearInterval(timer); timer = null; e.target.textContent = "Play"; return; }
+  e.target.textContent = "Pause";
+  timer = setInterval(() => { const r = +document.getElementById("round").value; if (r >= max) { clearInterval(timer); timer = null; e.target.textContent = "Play"; } else show(r + 1); }, 2500);
+};
+fetch(`/replays/${encodeURIComponent(task)}.json`).then(r => r.json()).then(d => {
+  data = d;
+  max = Math.max(...d.graph.discussion_transcript.map(m => m.round));
+  document.getElementById("round").max = max;
+  document.getElementById("title").textContent = `${d.graph.scenario.replaceAll("_", " ")} (${task})`;
+  document.getElementById("pick").textContent = d.note || "see results/verify/case_studies.md";
+  show(1);
+}).catch(() => { document.getElementById("title").textContent = `No replay for ${task}. Export it with python -m nodes replay-export.`; });
+</script>
+</body>
+</html>

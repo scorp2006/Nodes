@@ -1,0 +1,1 @@
+{"repo": "llama_index_task", "task": "17070", "base": "0417380ada935e277d686aef941b84032e67c57a", "test_files": ["llama-index-core/tests/evaluation/test_metrics.py"], "at_base": ["tests/evaluation/test_metrics.py"], "status": "ok", "tests": 0, "exercises": {}, "edge_props": {"resolved_by": "coverage", "confidence": 1.0}}

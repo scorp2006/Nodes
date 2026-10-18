@@ -1,0 +1,37 @@
+Ingestion test (verify/ingestion_test.py, run 3, commit 804d786+). Repos by label only; each cloned to a throwaway folder.
+No LLM. Checks: coverage vs git ls-files, functions/classes vs universal-ctags 6.1.0, 20 random spans,
+co-change and ownership recomputed from raw git log / git blame, re-init idempotence, one-commit incremental update.
+
+repo note                               index s  units  nodes  edges  MB   cover  spans  cochg  owner  re-init  1 commit
+------------------------------------------------------------------------------------------------------------------------
+A    Go + JS, ~1.4k files                 29.29  12109  12112  38451  10 881/881  20/20    n/a     ok     same    2 units
+B    Python, large library                25.23   5524  14762  34030   8 258/258  20/20     ok     ok     same    3 units
+C    Python, mid-size library              7.19   2560   7490  15845   3  91/91   20/20     ok     ok     same    3 units
+D    JavaScript, small                     1.59    448    454   1032   0  51/51   20/20    n/a     ok     same    2 units
+E    Python + JavaScript, small             1.9    672    677   1669   0  55/55   20/20    n/a     ok     same    2 units
+F    Python, the user's own small proje    0.68    277    304    715   0  17/17   20/20     ok     ok     same    3 units
+G    Python + HTML, this repo (main)       0.41     73     96    224   0   7/7    20/20     ok     ok     same    2 units
+
+Functions / classes per language: Nodes vs ctags
+  A: go fn 4529/7239 cls 606/602; javascript fn 962/1273 cls 1/1; python fn 673/692 cls 64/64; typescript fn 1626/1496 cls 120/108
+  B: python fn 4111/4441 cls 414/414
+  C: python fn 1781/1898 cls 179/181
+  D: javascript fn 73/97 cls 0/0; python fn 85/85 cls 0/0
+  E: javascript fn 166/174 cls 0/0; python fn 180/182 cls 11/11
+  F: python fn 113/124 cls 23/23
+  G: python fn 40/49 cls 2/2
+
+Reading the ctags gaps (approximate, by design):
+  - Go (A): ctags 'func' = 4529, identical to Nodes; the rest of its count is 2710 struct fields ('member') and 68 interface method specs.
+  - JavaScript (A, D, E): ctags also tags nested functions, object-literal methods and named callbacks; Nodes units are top-level
+    functions, class methods and functions assigned to names. Calls between them are name-match (confidence 0.3/0.5), never cross-language.
+  - TypeScript (A): Nodes is higher (1626 vs 1496): arrow functions assigned to consts are units; ctags tags them as constants.
+  - Python: the precise resolver skips functions nested in functions (ctags counts them): 0-7% gap; classes match except 2 of 181 in C.
+cochg n/a: no file pair reaches support 2 (single-commit repos). A has one commit (a cache snapshot).
+
+Bugs this test found and fixed before run 3 (run 2 output kept in runs/ingestion2.jsonl):
+  - re-init was not idempotent on A/B/C (35/2/8 units): two symbols with the same name in one file (property setters,
+    try/except fallbacks) shared a uid. Later duplicates are now Name@2, Name@3.
+  - co-change support was higher than raw git on B/C: the 30-file cap counted only indexed files of a commit; it now uses the full commit size.
+  - region ids based on line numbers renamed regions on unrelated edits (run 1): now ordinal (module@1, module@2...).
+

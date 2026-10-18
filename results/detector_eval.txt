@@ -1,0 +1,24 @@
+Offline check of the conflict detector on CooperBench's published coop trajectories
+(Claude, k1, light repos: click 2068/2800/2956, jinja 1465/1559/1621, dirty-equals 43). No model calls.
+Each agent's final patch -> functions it changed -> same overlap query as check_conflicts (CALLS*0..3).
+
+Pairs: 286.
+
+Ground truth A: textual merge conflict (published merge_analysis.status != clean): 4 / 286 (1%)
+  graph overlap (<=3 calls)  recall 50%  precision 1%   flagged 225/286
+  same function edited       recall 50%  precision 1%   flagged 214/286
+  same file edited           recall 75%  precision 1%   flagged 279/286
+
+Ground truth B: merged tree fails at least one feature's tests: 207 / 286 (72%)
+  (also counts each agent's own bugs, so it is noisy)
+  graph overlap (<=3 calls)  recall 87%  precision 80%  (base rate 72%)
+  same function edited       recall 85%  precision 82%
+  same file edited           recall 98%  precision 72%
+
+Reading: function-level overlap is common (about 3 in 4 pairs) but rarely becomes a textual conflict, so the
+detector cannot predict textual conflicts. Against "merged tree fails", it beats the base rate by about 8 points,
+but the call-graph extension adds nothing over "same function edited". 28 pairs had a patch that touched no
+function (module-level or non-Python changes), which this method can't see.
+
+RETRACTED (see results/preregistration_detector2.md): ground truth A came from the published Dec-2025 merge
+reports, which used an older union-merge policy. Under the current evaluator the same published patches conflict.

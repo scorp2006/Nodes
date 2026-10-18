@@ -22,6 +22,8 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import socket
+import subprocess
 import sys
 import time
 import traceback
@@ -37,6 +39,13 @@ from claude_client import ClaudeCLIClient
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "external" / "HiddenBench_ICML" / "data"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from nodes import harness as nodes_harness  # noqa: E402  (reproduction stage 2)
+from nodes.db import Store  # noqa: E402
+PRODUCT_PORT = 8791  # `python -m nodes up --profile harness-board --port 8791`
+NATIVE_PORT = 8792  # sprint step 7: `python -m nodes up --profile nodes --port 8792`
+NATIVE_TOOLS = ["context_for", "declare_intent", "before_acting", "post_fact", "coordinate", "status"]
+
 SPLITS = json.loads((Path(__file__).with_name("splits.json")).read_text(encoding="utf-8"))
 TOOLS = {"graph": ["share_fact", "shared_facts", "who_has_not_shared"],
          "graph_unverified": ["post_claim", "shared_claims", "who_has_not_posted"],
@@ -55,17 +64,44 @@ CLAIMS = (" You also have a shared evidence board. post_claim(text) posts a clai
           "anything.")
 NOTEPAD = (" You also have a private notepad. write_note(text) saves a note only you can see. "
            "read_notes() shows your notes. review_my_facts() lists your own numbered facts.")
+# --server native: the same board text, with the product's own tool names and usage
+NATIVE_BOARD = (" You also have a shared evidence board. post_fact(text, source_ref={\"kind\": \"briefing\", "
+                "\"ref\": \"<fact number>\"}) posts one of your numbered facts; the server checks it against your "
+                "briefing and marks it source-checked (it is really in your briefing) or unverified. status() and "
+                "context_for() list every fact posted so far, who posted it and whether it was source-checked.")
 EXTRA = {"baseline": "", "nudge": NUDGE, "graph": NUDGE + BOARD,
          "graph_unverified": NUDGE + CLAIMS, "placebo": NUDGE + NOTEPAD}
 
 
-def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str) -> str:
+def mcp_config_for(run_dir: Path, graph: str, agent: str, mode: str, http: bool = False) -> str:
     path = run_dir / f"{agent.replace(' ', '_')}.mcp.json"
-    args = ["-I", str(Path(__file__).with_name("graph_tools.py")), "--graph", graph, "--agent", agent,
-            "--mode", mode, "--log", str(run_dir / "tool_calls.jsonl")]
-    path.write_text(json.dumps({"mcpServers": {"board": {"command": sys.executable, "args": args}}}),
-                    encoding="utf-8")
+    log = str(run_dir / "tool_calls.jsonl")
+    if http:  # long-lived server for the whole batch; identity travels in headers we write
+        server = {"type": "http", "url": f"http://127.0.0.1:{graph_tools.HTTP_PORTS[mode]}/mcp",
+                  "headers": {"X-Board-Graph": graph, "X-Board-Agent": agent, "X-Board-Log": log}}
+    else:  # a fresh server process for every agent call
+        server = {"command": sys.executable,
+                  "args": ["-I", str(Path(__file__).with_name("graph_tools.py")), "--graph", graph,
+                           "--agent", agent, "--mode", mode, "--log", log]}
+    path.write_text(json.dumps({"mcpServers": {"board": server}}), encoding="utf-8")
     return str(path)
+
+
+def start_http_server(mode: str) -> subprocess.Popen | None:
+    """Start the long-lived tool server for `mode` unless one is already listening."""
+    port = graph_tools.HTTP_PORTS[mode]
+    with socket.socket() as s:
+        if s.connect_ex(("127.0.0.1", port)) == 0:
+            return None
+    proc = subprocess.Popen([sys.executable, "-I", str(Path(__file__).with_name("graph_tools.py")),
+                             "--http", "--mode", mode], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(100):
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                return proc
+        time.sleep(0.1)
+    proc.kill()
+    raise RuntimeError(f"tool server for {mode} did not start on port {port}")
 
 
 def usage_summary(calls: list[dict]) -> dict:
@@ -90,11 +126,31 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
     seed = _scenario_seed(args.seed, task_index, dup)
     extra = EXTRA[args.condition]
     tools = TOOLS.get(args.condition, [])
-    client = ClaudeCLIClient(args.model, allowed_tools=" ".join(f"mcp__board__{t}" for t in tools))
+    native = bool(tools) and args.server == "native"
+    if native:
+        extra, tools = NUDGE + NATIVE_BOARD, NATIVE_TOOLS
+    mcp_name = "nodes" if native else "board"
+    client = ClaudeCLIClient(args.model, effort=args.effort,
+                             allowed_tools=" ".join(f"mcp__{mcp_name}__{t}" for t in tools))
     work = out_dir / "work" / args.condition / f"t{task.id}_d{dup}"
     graph = None
     try:
-        if tools:
+        if tools and args.server in ("product", "native"):  # stage 2 (harness-board) / step 7 (nodes profile)
+            work.mkdir(parents=True, exist_ok=True)
+            agents, assignments = instantiate_agents(task, client, args.profile, prompts, random.Random(seed),
+                                                     extra_prompt=extra, special_agent_ratio=1.0)
+            store = Store(f"{'native' if native else 'repro'}-{out_dir.name}-t{task.id}-d{dup}")
+            store.reset()
+            store.setup()
+            sessions = nodes_harness.seed_board(store, assignments)
+            graph = store
+            for agent in agents:
+                cfg = work / f"{agent.name.replace(' ', '_')}.mcp.json"
+                cfg.write_text(json.dumps({"mcpServers": {mcp_name: {
+                    "type": "http", "url": f"http://127.0.0.1:{NATIVE_PORT if native else PRODUCT_PORT}/mcp",
+                    "headers": {"Authorization": f"Bearer {sessions[agent.name]['token']}"}}}}), encoding="utf-8")
+                client.mcp_for_system[agent.history[0]["content"]] = str(cfg)
+        elif tools:
             work.mkdir(parents=True, exist_ok=True)
             (work / "tool_calls.jsonl").unlink(missing_ok=True)
             # Same seed + same call order as run_scenario, so these are the exact agents it will build.
@@ -103,9 +159,13 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
             suffix = "" if args.condition == "graph" else f"_{args.condition}"  # keep dev1 graph names stable
             graph = f"board_{out_dir.name}{suffix}_t{task.id}_d{dup}"
             graph_tools.seed(graph, task, assignments)  # wipes any leftover board from a failed attempt
+            mode = MODE[args.condition]
             for agent in agents:
-                client.mcp_for_system[agent.history[0]["content"]] = mcp_config_for(
-                    work, graph, agent.name, MODE[args.condition])
+                system = agent.history[0]["content"]
+                client.mcp_for_system[system] = mcp_config_for(work, graph, agent.name, mode, args.server == "http")
+                if args.digest:
+                    client.digest_for_system[system] = (
+                        lambda name=agent.name: graph_tools.digest(graph, name, mode))
 
         run = run_scenario(task, client, args.profile, prompts, rounds=args.rounds, seed=seed,
                            extra_prompt=extra, special_agent_ratio=1.0)
@@ -117,7 +177,19 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
 
     run.update(condition=args.condition, model=args.model,
                usage=usage_summary(client.calls) | {"wall_seconds": round(time.time() - started, 1)})
-    if graph:
+    if graph and args.server in ("product", "native"):
+        ids = {t: f"s{i}" for i, t in enumerate(task.shared_information)} |               {t: f"h{i}" for i, t in enumerate(task.hidden_information)}
+        trace = Path(".nodes/traces") / f"{graph.ws}.trace.jsonl"
+        recs = [json.loads(line) for line in trace.read_text(encoding="utf-8").splitlines()] if trace.exists() else []
+        run["board"] = {
+            "graph": f"ws:{graph.ws}",
+            "posts": [[n, ids.get(t, t)] + ([st] if native else []) for n, t, st in graph.q(
+                "x", "MATCH (s:Session)-[a:ASSERTED]->(f:Fact) RETURN s.name, f.text, f.status ORDER BY a.seq", ro=True)],
+            "claims": [],
+            "tool_calls": [{"t": r["t"], "agent": r["agent"], "tool": r["name"], **r["request"]}
+                           for r in recs if r["kind"].startswith("tool")],
+        }
+    elif graph:
         g = graph_tools.connect(graph)
         log = work / "tool_calls.jsonl"
         run["board"] = {
@@ -145,12 +217,23 @@ def main():
     ap.add_argument("--out", required=True, help="batch folder, e.g. runs/dev1")
     ap.add_argument("--profile", default="hidden", choices=["hidden", "full"])
     ap.add_argument("--model", default="claude-haiku-5-5")
+    ap.add_argument("--effort", choices=["low", "medium", "high"], help="Claude Code --effort (default: CLI default)")
     ap.add_argument("--rounds", type=int, default=15)
     ap.add_argument("--duplications", type=int, default=1)
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--no-peek", action="store_true", help="print progress counts only, never results")
+    ap.add_argument("--server", choices=["stdio", "http", "product", "native"], default="stdio",
+                    help="stdio: new tool process per call (dev1/test1); http: one long-lived server; "
+                         "product: harness-board profile on 8791; native: nodes profile (six tools) on 8792")
+    ap.add_argument("--digest", action="store_true", help="push the board into every turn")
     args = ap.parse_args()
+    if args.server == "http" and args.condition in MODE:
+        start_http_server(MODE[args.condition])  # left running for later batches; it holds no run state
+    if args.server == "native":
+        with socket.socket() as s:
+            if s.connect_ex(("127.0.0.1", NATIVE_PORT)) != 0:
+                sys.exit(f"start the server first: python -m nodes up --profile nodes --port {NATIVE_PORT}")
 
     path = DATA / ("benchmark_short.json" if args.split == "short" else "benchmark.json")
     tasks = load_benchmark(path=str(path))
