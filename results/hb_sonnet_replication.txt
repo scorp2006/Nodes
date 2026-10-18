@@ -1,0 +1,15 @@
+Batch: ..\..\runs\hb_sonnet
+Tasks complete in all 2 conditions: 20
+
+condition         runs       group right         95% CI   agents right before->after   list $
+graph               20   16/20  =   80%    58%- 92%          28% -> 80%           42.24
+placebo             20   14/20  =   70%    48%- 85%          17% -> 70%           30.83
+
+Paired comparisons (exact two-sided sign test on group right/wrong, same tasks and seeds):
+  [PRIMARY  ] graph vs placebo: graph better on 3, worse on 1, p = 0.625
+
+Compute per run (mean):
+  graph                16620 output tokens    394 s model time   70.7 tool calls  144.8 turns    671 s wall
+  placebo               7966 output tokens    282 s model time    0.0 tool calls   74.1 turns    559 s wall
+
+Graph board: 91% of private facts posted on average
