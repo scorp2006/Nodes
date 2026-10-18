@@ -1,0 +1,67 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1000px;height:420px;background:#fff;overflow:hidden}
+body{position:relative;font-family:Fredoka,"Arial Rounded MT Bold","Segoe UI",sans-serif;color:#16161a}
+.dot{position:absolute;border-radius:50%}
+h1{position:absolute;left:62px;top:52px;font-size:150px;font-weight:700;letter-spacing:-3px;line-height:1}
+.tag{position:absolute;left:68px;top:232px;font-size:31px;font-weight:600;color:#2b2b31;letter-spacing:-.3px}
+.sub{position:absolute;left:68px;top:280px;font-size:18px;font-weight:400;color:#6c6c74;width:440px;line-height:1.35}
+.pills{position:absolute;left:66px;top:340px;display:flex;gap:10px}
+.pill{font-size:16px;font-weight:600;padding:7px 16px;border-radius:999px;background:var(--bg);color:var(--fg)}
+svg.edges{position:absolute;left:0;top:0;width:1000px;height:420px}
+.node{position:absolute;border-radius:50%;background:#fff;border:5px solid var(--c);display:grid;place-items:center;
+  box-shadow:0 10px 24px rgba(30,30,50,.12)}
+.hub{position:absolute;width:30px;height:30px;border-radius:50%;background:#16161a;box-shadow:0 0 0 7px #fff,0 0 0 9px #ececf0}
+.bubble{position:absolute;transform:translateX(-50%);font-size:17px;font-weight:600;padding:6px 14px;border-radius:14px;background:#fff;
+  border:2px solid #16161a;white-space:nowrap;box-shadow:0 4px 0 #16161a}
+.bubble:after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-7px;width:12px;height:12px;background:#fff;
+  border-right:2px solid #16161a;border-bottom:2px solid #16161a;transform:rotate(45deg)}
+.go{color:#2a9d6a}.wait{color:#d08a00}.hand{color:#2f7fd1}.ink{color:#16161a}
+</style></head><body>
+<!-- soft confetti -->
+<div class="dot" style="left:14px;top:18px;width:14px;height:14px;background:#ffd166"></div><div class="dot" style="left:948px;top:380px;width:18px;height:18px;background:#5ab4ff"></div><div class="dot" style="left:520px;top:32px;width:10px;height:10px;background:#ff8a7a"></div><div class="dot" style="left:470px;top:380px;width:12px;height:12px;background:#4cd4a0"></div><div class="dot" style="left:975px;top:40px;width:9px;height:9px;background:#ff8fab"></div><div class="dot" style="left:36px;top:372px;width:9px;height:9px;background:#5ab4ff"></div><div class="dot" style="left:560px;top:230px;width:8px;height:8px;background:#ffd166"></div><div class="dot" style="left:420px;top:132px;width:7px;height:7px;background:#ff8fab"></div>
+<svg class="edges" viewBox="0 0 1000 420">
+  <g fill="none" stroke-linecap="round" stroke-width="5">
+    <path d="M760 214 C 720 170, 690 150, 668 140" stroke="#e4e4ea"/>
+    <path d="M760 214 C 800 160, 830 130, 872 112" stroke="#e4e4ea"/>
+    <path d="M760 214 C 720 270, 680 300, 650 318" stroke="#e4e4ea"/>
+    <path d="M760 214 C 810 260, 840 290, 870 306" stroke="#e4e4ea"/>
+    <path d="M900 150 C 940 210, 930 250, 905 280" stroke="#f2b84b" stroke-dasharray="2 12"/>
+  </g>
+</svg>
+<h1>Nodes</h1>
+<div class="tag">Coding agents that don’t collide.</div>
+<div class="sub">One shared graph tells every AI agent who is working where, before it edits.</div>
+<div class="pills">
+  <span class="pill" style="--bg:#ffe6e2;--fg:#d65a4a">FalkorDB</span>
+  <span class="pill" style="--bg:#e3f1ff;--fg:#2f7fd1">MCP</span>
+  <span class="pill" style="--bg:#ddf6ec;--fg:#23885c">Claude Code</span>
+</div>
+<div class="hub" style="left:745px;top:199px"></div>
+
+  <div class="node" style="left:612px;top:92px;--c:#ff8a7a;width:104px;height:104px"><svg viewBox="0 0 44 44" width="90" height="90" role="img" aria-label="cat node"><title>cat node</title><path d="M9 10 L17 18 L10 22Z M35 10 L27 18 L34 22Z" fill="#ff8a7a"/><path d="M11 13 L15 17.5 L11.5 19.5Z M33 13 L29 17.5 L32.5 19.5Z" fill="#ff9eb0"/>
+    <circle cx="22" cy="26" r="14" fill="#ff8a7a"/><circle cx="15.5" cy="25" r="2.6" fill="#1d1d22"/><circle cx="28.5" cy="25" r="2.6" fill="#1d1d22"/>
+  <circle cx="16.4" cy="24.1" r=".9" fill="#fff"/><circle cx="29.4" cy="24.1" r=".9" fill="#fff"/><circle cx="12.5" cy="30" r="2.6" fill="#ff9eb0" opacity=".7"/><circle cx="31.5" cy="30" r="2.6" fill="#ff9eb0" opacity=".7"/><path d="M21 29.5 h2 l-1 1.3z" fill="#1d1d22"/><path d="M19.5 31.5 q2.5 2.4 5 0" stroke="#1d1d22" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M5 27 h7 M5 30.5 h7 M32 27 h7 M32 30.5 h7" stroke="#1d1d22" stroke-width=".8" opacity=".5"/></svg></div>
+  <div class="bubble go" style="left:664px;top:46px">go!</div>
+
+  <div class="node" style="left:836px;top:62px;--c:#5ab4ff;width:104px;height:104px"><svg viewBox="0 0 44 44" width="90" height="90" role="img" aria-label="rabbit node"><title>rabbit node</title><ellipse cx="15" cy="9" rx="4" ry="9.5" fill="#5ab4ff"/><ellipse cx="29" cy="9" rx="4" ry="9.5" fill="#5ab4ff"/><ellipse cx="15" cy="9.5" rx="1.8" ry="6.5" fill="#ff9eb0"/>
+    <ellipse cx="29" cy="9.5" rx="1.8" ry="6.5" fill="#ff9eb0"/><circle cx="22" cy="27" r="13.5" fill="#5ab4ff"/><circle cx="15.5" cy="26" r="2.6" fill="#1d1d22"/><circle cx="28.5" cy="26" r="2.6" fill="#1d1d22"/>
+  <circle cx="16.4" cy="25.1" r=".9" fill="#fff"/><circle cx="29.4" cy="25.1" r=".9" fill="#fff"/><circle cx="12.5" cy="31" r="2.6" fill="#ff9eb0" opacity=".7"/><circle cx="31.5" cy="31" r="2.6" fill="#ff9eb0" opacity=".7"/>
+    <path d="M21 30 h2 l-1 1.2z" fill="#1d1d22"/><path d="M22 31.2 v1.6 M22 32.8 q-1.6 1.4 -3 .4 M22 32.8 q1.6 1.4 3 .4" stroke="#1d1d22" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="bubble wait" style="left:888px;top:16px">wait…</div>
+
+  <div class="node" style="left:592px;top:270px;--c:#ffd166;width:98px;height:98px"><svg viewBox="0 0 44 44" width="84" height="84" role="img" aria-label="bear node"><title>bear node</title><circle cx="11" cy="13" r="5.5" fill="#ffd166"/><circle cx="33" cy="13" r="5.5" fill="#ffd166"/><circle cx="11" cy="13" r="2.6" fill="#ff9eb0" opacity=".8"/>
+    <circle cx="33" cy="13" r="2.6" fill="#ff9eb0" opacity=".8"/><circle cx="22" cy="25" r="15" fill="#ffd166"/><circle cx="15.5" cy="23.5" r="2.6" fill="#1d1d22"/><circle cx="28.5" cy="23.5" r="2.6" fill="#1d1d22"/>
+  <circle cx="16.4" cy="22.6" r=".9" fill="#fff"/><circle cx="29.4" cy="22.6" r=".9" fill="#fff"/>
+    <ellipse cx="22" cy="30" rx="6" ry="4.6" fill="#fff" opacity=".75"/><ellipse cx="22" cy="28.4" rx="2.2" ry="1.6" fill="#1d1d22"/><path d="M19.5 30.5 q2.5 2.4 5 0" stroke="#1d1d22" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="bubble hand" style="left:641px;top:224px">handoff</div>
+
+  <div class="node" style="left:836px;top:262px;--c:#4cd4a0;width:98px;height:98px"><svg viewBox="0 0 44 44" width="84" height="84" role="img" aria-label="frog node"><title>frog node</title><circle cx="13.5" cy="13.5" r="6.5" fill="#4cd4a0"/><circle cx="30.5" cy="13.5" r="6.5" fill="#4cd4a0"/><circle cx="13.5" cy="13.5" r="4" fill="#fff"/>
+    <circle cx="30.5" cy="13.5" r="4" fill="#fff"/><circle cx="13.5" cy="14" r="2.2" fill="#1d1d22"/><circle cx="30.5" cy="14" r="2.2" fill="#1d1d22"/>
+    <ellipse cx="22" cy="27" rx="16" ry="12.5" fill="#4cd4a0"/><circle cx="12.5" cy="29" r="2.6" fill="#ff9eb0" opacity=".7"/><circle cx="31.5" cy="29" r="2.6" fill="#ff9eb0" opacity=".7"/><path d="M14 29 Q22 36 30 29" stroke="#1d1d22" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></div>
+  <div class="bubble ink" style="left:885px;top:216px">on it</div>
+</body></html>
