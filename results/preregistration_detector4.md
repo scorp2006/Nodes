@@ -61,3 +61,15 @@ For a pair with edited-function sets A and B:
   - (b) the same, limited to pairs where both patches edit at least one function.
 - **Too few failures:** with fewer than 10 interaction failures in a subset, its numbers are descriptive only, and
   the report says so plainly.
+
+## Amendment 1 (committed before any v3 or v4 score was viewed)
+Signal runs for the test tasks (`runs/v4_signals.log`, raw outputs under `results/v4_signals/cov_raw/`, not
+committed) showed environment failures in heavy-repo coverage:
+- **dspy:** coverage was not installed in the run environment.
+- **datasets:** pytest collection failed (the installed pyarrow is newer than the repo supports).
+- **outlines 1655 and 1706:** pytest collection failed (a requests dependency).
+
+These runs produced a coverage file with **no test mapped**. They now count as "coverage unavailable", as the
+pre-registration intended for failed runs, so they are excluded from secondary (a). The fix is a one-line change
+in `coop/score_v4.py`. Nothing else changed, and the failed installs were not retried (that would be
+environment tuning on test tasks). Coverage is available for click, jinja, dirty-equals and outlines 1371.

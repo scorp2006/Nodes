@@ -40,7 +40,8 @@ def load_graph(db, repo, task):
     for i in range(0, len(rows), 1000):
         g.query("UNWIND $r AS r MERGE (t:Test {name: r.t}) MERGE (f:Function {qualname: r.f}) "
                 "MERGE (t)-[e:EXERCISES]->(f) SET e.resolved_by = 'coverage', e.confidence = 1.0", {"r": rows[i:i + 1000]})
-    return g, cv["status"]
+    # v4 amendment 1: a run that mapped no test (collection failed) counts as coverage unavailable
+    return g, cv["status"] if cv["exercises"] else "coverage unavailable (no test mapped)"
 
 
 def signals(g, a, b):
