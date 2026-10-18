@@ -33,22 +33,24 @@ def exact_sign_p(wins: int, losses: int) -> Fraction:
 
 def main(root: Path) -> None:
     data = {}
-    for c in CONDITIONS:
+    conditions = [c for c in CONDITIONS if (root / c).is_dir()]  # a replication batch may hold only some
+    for c in conditions:
         data[c] = {f.stem: json.loads(f.read_text(encoding="utf-8")) for f in (root / c).glob("t*_d0.json")}
     common = set.intersection(*(set(d) for d in data.values())) - EXCLUDED
-    print(f"tasks valid in all 5 conditions after excluding t1-t3: {len(common)}")
+    print(f"tasks valid in all {len(conditions)} conditions after excluding t1-t3: {len(common)}")
     missing = sorted(set.union(*(set(d) for d in data.values())) - set.intersection(*(set(d) for d in data.values())))
     print(f"tasks missing in some condition (dropped): {missing or 'none'}")
-    right = {c: {t: group_right(data[c][t]) for t in common} for c in CONDITIONS}
-    for c in CONDITIONS:
+    right = {c: {t: group_right(data[c][t]) for t in common} for c in conditions}
+    for c in conditions:
         print(f"  {c:17} {sum(right[c].values()):2}/{len(common)}")
     raw = {}
-    for a, b, kind in PAIRS:
+    pairs = [p for p in PAIRS if p[0] in data and p[1] in data]
+    for a, b, kind in pairs:
         w = sum(right[a][t] and not right[b][t] for t in common)
         l = sum(right[b][t] and not right[a][t] for t in common)
         raw[(a, b)] = exact_sign_p(w, l)
         print(f"  [{kind:9}] {a} vs {b}: better {w}, worse {l}, exact p = {float(raw[(a, b)]):.4f}")
-    sec = [(a, b) for a, b, k in PAIRS if k == "secondary"]
+    sec = [(a, b) for a, b, k in pairs if k == "secondary"]
     order = sorted(sec, key=lambda k: raw[k])
     running, adj = Fraction(0), {}
     for rank, k in enumerate(order):

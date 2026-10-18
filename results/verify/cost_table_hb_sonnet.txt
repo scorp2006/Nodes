@@ -1,0 +1,4 @@
+tasks: 20
+condition          right list $ total $ per right out tok/run calls/run wall s p50 wall s p90
+graph                 16        42.24       2.640       16620      66.3        679        744
+placebo               14        30.83       2.202        7966      66.3        563        590

@@ -1,0 +1,6 @@
+tasks valid in all 2 conditions after excluding t1-t3: 20
+tasks missing in some condition (dropped): none
+  placebo           14/20
+  graph             16/20
+  [primary  ] graph vs placebo: better 3, worse 1, exact p = 0.6250
+Holm-adjusted secondaries:
