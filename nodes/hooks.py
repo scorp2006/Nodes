@@ -119,8 +119,9 @@ def register(server, reg) -> None:
         rel, lines, exists = edit_targets(tool, ti, wt)
         if not rel or Path(rel).suffix.lower() not in EXT:  # any indexed language
             return {}
-        info = reg.workspace(sess["ws"])
-        if exists and rel.startswith(info.get("package", "") + "/"):
+        indexed = store.q("hook.indexed", "MATCH (u:Unit {path: $p}) WHERE u.start IS NOT NULL RETURN count(u)",
+                          {"p": rel}, ro=True)[0][0] if exists else 0
+        if exists and indexed:  # any indexed language: gate the exact units the edit touches
             targets = [f"{rel}:{min(lines)}-{max(lines)}"]
         else:  # a new file, or one outside the indexed package: a file-level unit others can see and wait on
             uid = f"file:planned:{rel}"
