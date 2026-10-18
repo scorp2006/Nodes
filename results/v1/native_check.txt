@@ -1,0 +1,42 @@
+1. settings (Stage 2 repro_dev1 vs native run):
+   model         claude-haiku-5-5   claude-haiku-5-5   same
+   rounds        15                 15                 same
+   seed          2026               2026               same
+   profile       hidden             hidden             same
+   split         dev                dev                same
+   duplications  1                  1                  same
+   condition     graph              graph              same
+   effort        None               None               same
+   workers       3                  3                  same
+   server        product            native             DIFFERENT
+
+2. accuracy: 20 tasks finished (missing vs Stage 2: none)
+   Stage 2 harness-board: 13/20   native: 12/20   9-16 bar: inside (exploratory, not pre-registered)
+
+3. per task: right (stage2/native), post_fact calls (checked/unverified), reads (status/context_for), other tools, posts on board, replies truncated by the budget
+   t4_d0   -/-  post_fact   8 (8/0)  reads   0 (0/0)  other 0  posts 4
+   t8_d0   Y/Y  post_fact   5 (5/0)  reads   0 (0/0)  other 0  posts 5
+   t12_d0  -/Y  post_fact  17 (17/0)  reads   6 (5/1)  other 0  posts 11
+   t22_d0  Y/-  post_fact  10 (10/0)  reads   0 (0/0)  other 0  posts 6
+   t29_d0  Y/Y  post_fact  17 (17/0)  reads   9 (9/0)  other 1  posts 8
+   t31_d0  Y/Y  post_fact  13 (13/0)  reads   3 (3/0)  other 0  posts 7
+   t32_d0  Y/Y  post_fact   9 (9/0)  reads   2 (2/0)  other 0  posts 7
+   t33_d0  -/Y  post_fact   5 (5/0)  reads   5 (5/0)  other 0  posts 3
+   t34_d0  Y/-  post_fact   5 (5/0)  reads   0 (0/0)  other 0  posts 5
+   t36_d0  -/-  post_fact  12 (12/0)  reads   0 (0/0)  other 0  posts 7
+   t38_d0  Y/Y  post_fact  21 (21/0)  reads  13 (9/4)  other 1  posts 8
+   t43_d0  Y/Y  post_fact   7 (7/0)  reads   3 (2/1)  other 0  posts 5
+   t49_d0  Y/Y  post_fact  14 (14/0)  reads  15 (13/2)  other 0  posts 10
+   t51_d0  -/-  post_fact   4 (4/0)  reads   0 (0/0)  other 0  posts 3
+   t52_d0  Y/-  post_fact   9 (9/0)  reads   1 (1/0)  other 0  posts 4
+   t55_d0  -/-  post_fact  19 (19/0)  reads   1 (1/0)  other 0  posts 9
+   t56_d0  Y/Y  post_fact  23 (23/0)  reads   0 (0/0)  other 0  posts 13
+   t58_d0  Y/Y  post_fact  12 (12/0)  reads   0 (0/0)  other 0  posts 8
+   t62_d0  Y/Y  post_fact  12 (12/0)  reads   7 (6/1)  other 0  posts 4
+   t65_d0  -/-  post_fact  20 (20/0)  reads   2 (2/0)  other 0  posts 11
+   means per task: post_fact 12.1 (Stage 2 share_fact 15.3); reads 3.4 (Stage 2 shared_facts+who_has_not_shared 27.4); declare_intent 0, before_acting 2, coordinate 0 in total
+   replies carrying a 'truncated' marker (budget cap): 0
+
+4. source-check verdicts on post_fact: {'source-checked': 242}; agree with the rule on 242/242
+
+5. leakage: 309 status/context_for/post_fact replies checked; unposted briefing facts shown: 0
