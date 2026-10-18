@@ -49,7 +49,7 @@ class Registry:
                 finally:
                     calls = CALLS.get()
                     if calls is not None:
-                        calls.append([name, round((time.perf_counter() - t0) * 1000, 2)])
+                        calls.append([name, round((time.perf_counter() - t0) * 1000, 2), " ".join(cypher.split())[:700]])
             st.q = q
             self.stores[ws] = st
         return self.stores[ws]
@@ -80,8 +80,10 @@ class Verifier:
 
 def traced_call(reg: Registry, ws: str, sess: dict, kind: str, name: str, request, fn):
     """Run fn() with per-query timing; write one trace record; return fn's result."""
-    calls = []
-    token = CALLS.set(calls)
+    from .db import TRACE
+    import uuid as _uuid
+    calls, tid = [], _uuid.uuid4().hex[:12]
+    token, ttoken = CALLS.set(calls), TRACE.set(tid)
     t0 = time.perf_counter()
     try:
         out = fn()
@@ -90,7 +92,8 @@ def traced_call(reg: Registry, ws: str, sess: dict, kind: str, name: str, reques
                         str(e)[:300], "Check the arguments and retry.")
     finally:
         CALLS.reset(token)
-    reg.trace(ws, {"t": time.time(), "kind": kind, "agent": sess.get("name"), "session": sess.get("session"),
+        TRACE.reset(ttoken)
+    reg.trace(ws, {"id": tid, "t": time.time(), "kind": kind, "agent": sess.get("name"), "session": sess.get("session"),
                    "name": name, "request": request, "response": out,
                    "ms": round((time.perf_counter() - t0) * 1000, 2), "queries": calls})
     return out

@@ -17,7 +17,7 @@ from mcp import ClientSession
 from mcp.client.streamable_http import create_mcp_http_client, streamable_http_client
 
 HERE = Path(__file__).resolve().parent
-USER, ALL, TOTAL = "region:gatedemo:src/shop/models.py#User.__body__", "region:gatedemo:src/shop/models.py#module@4", \
+USER, ALL, TOTAL = "region:gatedemo:src/shop/models.py#User.__body__", "region:gatedemo:src/shop/models.py#module@1", \
     "fn:gatedemo:src/shop/models.py#order_total"
 
 

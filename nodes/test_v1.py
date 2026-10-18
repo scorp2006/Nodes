@@ -53,7 +53,7 @@ def test_typescript_units_and_region_leases(repo):
     stats, _ = index(st, root)
     assert stats["files_by_lang"]["typescript"] == 2
     kinds = dict(st.q("t", "MATCH (u:Unit) RETURN u.uid, u.kind", ro=True))
-    assert kinds["region:r:web/app.ts#imports"] == "region" and kinds["region:r:web/app.ts#module@3"] == "region"
+    assert kinds["region:r:web/app.ts#imports"] == "region" and kinds["region:r:web/app.ts#module@1"] == "region"
     assert kinds["fn:r:web/app.ts#price"] == "function"
     a, b = (dict(zip(("session", "name"), (ops.join(st, n)[1], n))) for n in ("alice", "bob"))
     assert ops.before_acting(st, a, "edit", ["web/app.ts:1"])["decision"] == "proceed"   # the import block

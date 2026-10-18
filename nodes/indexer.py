@@ -5,7 +5,7 @@ Units (uid scheme `{kind}:{repo}:{path}#{symbol}`):
   fn:{repo}:{path}#{Class.func}                 a function or method (qualname kept for the harness profile)
   region:{repo}:{path}#imports                  the module's import statements: a leasable unit, because the
                                                 study's real breakages were textual collisions in such blocks
-  region:{repo}:{path}#module@{line}            each run of other module-level statements (aliases, constants)
+  region:{repo}:{path}#module@{n}               the n-th run of other module-level statements (aliases, constants)
   region:{repo}:{path}#{Class}.__body__         a class body's non-method statements (class attributes)
 Edges: (file)-[:CONTAINS]->(unit); (fn)-[:DEPENDS_ON {kind:'calls', resolved_by:'ast-static', confidence}]->(fn).
 Functions and calls come from the frozen study parser (coop/world_graph.py), so names resolve exactly as in the
@@ -17,6 +17,7 @@ import ast
 import hashlib
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "coop"))
@@ -28,14 +29,15 @@ def _regions(tree: ast.Module):
     imports = [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))]
     if imports:
         yield "imports", min(n.lineno for n in imports), max(n.end_lineno for n in imports)
-    run = []
+    run, k = [], 0
     for n in tree.body + [None]:
         plain = n is not None and not isinstance(n, (ast.Import, ast.ImportFrom, ast.FunctionDef,
                                                      ast.AsyncFunctionDef, ast.ClassDef))
         if plain:
             run.append(n)
         elif run:
-            yield f"module@{run[0].lineno}", run[0].lineno, run[-1].end_lineno
+            k += 1  # numbered by order, not line: an edit elsewhere never renames a block
+            yield f"module@{k}", run[0].lineno, run[-1].end_lineno
             run = []
     for cls in (n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)):
         body = [s for s in cls.body if not isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
@@ -120,6 +122,11 @@ def scan_all(repo_root: Path, package: str | None, repo: str) -> tuple[list[dict
 
 def index(store, repo_root: Path, package: str | None, repo: str, batch: int = 1000, all_languages: bool = True) -> dict:
     units, edges, langs = scan_all(repo_root, package, repo) if all_languages else (*scan(repo_root, package, repo), {})
+    seen = Counter()
+    for u in units:  # same symbol twice in one file (property setters, try/except fallbacks): later ones get @2, @3
+        seen[u["uid"]] += 1
+        if seen[u["uid"]] > 1:
+            u["uid"] += f"@{seen[u['uid']]}"
     texts = {}
     for u in units:  # content hash per unit: re-indexing only touches units whose text changed
         if u["path"] not in texts:

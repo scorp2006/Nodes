@@ -97,7 +97,7 @@ def _calls(n, out: set):
 
 
 def extract(rel: str, src: bytes, lang: str, repo: str):
-    """Units and outgoing call names for one file. Units: file, class, function, region (imports / module@N)."""
+    """Units and outgoing call names for one file. Units: file, class, function, region (imports / module@<n-th block>)."""
     tree = get_parser(lang).parse(src)
     lines = src.count(b"\n") + 1
     units = [{"uid": f"file:{repo}:{rel}", "kind": "file", "path": rel, "symbol": "", "qualname": "", "lang": lang,
@@ -110,12 +110,15 @@ def extract(rel: str, src: bytes, lang: str, repo: str):
                       "start": node.start_point[0] + 1, "end": node.end_point[0] + 1, "file": "", "line": 0})
         return uid
 
+    ordinal = [0]  # module blocks are numbered by order, not line: an edit elsewhere never renames them
+
     def walk(node, prefix: str, top: bool):
         imports, run = [], []
 
         def flush():
             if run:
-                add("region", f"module@{run[0].start_point[0] + 1}", _span(run), "region")
+                ordinal[0] += 1
+                add("region", f"module@{ordinal[0]}", _span(run), "region")
                 run.clear()
         for c in node.children:
             t = c.type

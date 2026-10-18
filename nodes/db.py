@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import contextvars
 import json
 import statistics
 import threading
@@ -17,6 +18,8 @@ from collections import defaultdict, deque
 
 from falkordb import FalkorDB
 from redis.exceptions import ResponseError
+
+TRACE = contextvars.ContextVar("trace_id", default="")  # set by the server around each traced call
 
 LABELS = ["Principal", "Session", "Unit", "Intent", "Decision", "Fact", "Source", "Request", "Commitment"]
 MANDATORY = [("Fact", "source_uid"), ("Decision", "reason"), ("Decision", "verdict"), ("Session", "principal")]
@@ -86,6 +89,8 @@ class Store:
     def event(self, kind: str, agent: str | None, **data) -> None:
         """Append to the workspace event log and notify the agents it concerns."""
         payload = {"kind": kind, "agent": agent or "", "t": time.time(), **data}
+        if TRACE.get():
+            payload["trace"] = TRACE.get()  # the dashboard links each event to its raw call, response and Cypher
         t0 = time.perf_counter()
         self.r.xadd(f"ws:{self.ws}:events", {"e": json.dumps(payload)}, maxlen=100000, approximate=True)
         for who in data.get("notify", []):

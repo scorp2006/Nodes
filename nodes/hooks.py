@@ -255,3 +255,77 @@ def register(server, reg) -> None:
     server.custom_route("/", methods=["GET"])(index)
     server.custom_route("/api/state", methods=["GET"])(state)
     server.custom_route("/api/before_acting", methods=["POST"])(http_gate)
+
+    # ------------------------------------------------------------------ live dashboard v1 -------
+    def _ws(request):
+        names = sorted(n.decode() if isinstance(n, bytes) else n for n in reg.r.hkeys("nodes:workspaces"))
+        return request.query_params.get("ws") or (names[0] if names else "")
+
+    async def stream(request: Request) -> Response:
+        """Server-sent events: every workspace event as it is appended (Redis XREAD BLOCK, no polling)."""
+        import redis.asyncio as aioredis
+        from starlette.responses import StreamingResponse
+        ws = _ws(request)
+        last = request.query_params.get("from", "$")
+
+        async def gen():
+            r = aioredis.Redis(host=reg.host, port=reg.port)
+            nonlocal last
+            try:
+                yield ": connected\n\n"
+                while not await request.is_disconnected():
+                    got = await r.xread({f"ws:{ws}:events": last}, block=15000, count=100)
+                    if not got:
+                        yield ": keepalive\n\n"
+                        continue
+                    for _, entries in got:
+                        for eid, fields in entries:
+                            last = eid.decode() if isinstance(eid, bytes) else eid
+                            e = json.loads(fields.get(b"e") or fields.get("e"))
+                            yield f"id: {last}\ndata: {json.dumps(e | {'id': last})}\n\n"
+            finally:
+                await r.aclose()
+        return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
+
+    async def all_events(request: Request) -> Response:
+        """The whole event history (oldest first), for the timeline slider and replays."""
+        ws = _ws(request)
+        rows = reg.r.xrange(f"ws:{ws}:events", count=int(request.query_params.get("limit", "5000")))
+        return JSONResponse([json.loads(f.get("e") or f.get(b"e")) | {"id": i.decode() if isinstance(i, bytes) else i}
+                             for i, f in rows])
+
+    async def trace(request: Request) -> Response:
+        """One traced call: raw request, response and every Cypher query it ran, with timings."""
+        ws, tid = _ws(request), request.query_params.get("id", "")
+        ws = json.loads(reg.r.hget("nodes:workspaces", ws) or "{}").get("replay_of", ws)  # replays share the source trace
+        p = reg.trace_dir / f"{ws}.trace.jsonl"
+        if tid and p.exists():
+            with p.open(encoding="utf-8") as fh:
+                for line in fh:
+                    if f'"id": "{tid}"' in line:
+                        return JSONResponse(json.loads(line))
+        return JSONResponse({"error": "not found"}, 404)
+
+    async def graph(request: Request) -> Response:
+        """The active neighborhood only: units leased or recently touched, their direct dependencies, the agents."""
+        ws = _ws(request)
+        st = reg.store(ws)
+        active = st.q("dash.active", """
+            MATCH (u:Unit) WHERE u.lease_owner IS NOT NULL OR (:Intent)-[:TOUCHES]->(u) OR (:Decision)-[:CITES]->(u)
+            OPTIONAL MATCH (o:Session {uid: u.lease_owner})
+            RETURN u.uid, u.kind, u.symbol, u.path, o.name LIMIT 60""", ro=True)
+        uids = [a[0] for a in active]
+        nbr = st.q("dash.neighbors", """
+            UNWIND $u AS id MATCH (a:Unit {uid: id})-[d:DEPENDS_ON]-(b:Unit)
+            RETURN DISTINCT a.uid, b.uid, b.kind, b.symbol, b.path, d.resolved_by LIMIT 120""", {"u": uids}, ro=True)
+        nodes = {u: {"id": u, "kind": k, "label": s or p, "owner": o} for u, k, s, p, o in active}
+        for a, b, k, s, p, by in nbr:
+            nodes.setdefault(b, {"id": b, "kind": k, "label": s or p, "owner": None, "context": True})
+        edges = [{"a": a, "b": b, "by": by} for a, b, *_, by in nbr]
+        return JSONResponse({"nodes": list(nodes.values()), "edges": edges})
+
+    async def replay_page(request: Request) -> Response:
+        return FileResponse(Path(__file__).with_name("web") / "index.html")
+
+    for path, fn in (("/api/stream", stream), ("/api/events", all_events), ("/api/trace", trace), ("/api/graph", graph)):
+        server.custom_route(path, methods=["GET"])(fn)

@@ -102,6 +102,7 @@ def import_git(store, root: Path, units: list[dict], batch: int = 500) -> dict:
             MERGE (p:Principal {uid: 'person:' + c.email}) ON CREATE SET p.kind = 'human', p.name = c.author
             MERGE (r:Revision {uid: 'rev:' + c.sha})
             ON CREATE SET r.sha = c.sha, r.at = c.at, r.message = c.message, r.pr = c.pr, r.is_merge = size(c.parents) > 1
+            SET r.files_changed = size(c.files)
             MERGE (p)-[:AUTHORED]->(r)
             WITH r, c UNWIND c.files AS f
             MATCH (u:Unit {kind: 'file', path: f})
@@ -113,7 +114,8 @@ def import_git(store, root: Path, units: list[dict], batch: int = 500) -> dict:
                 "MERGE (r)-[:MERGED_PR]->(p)", {"rows": prs})
     # file co-change over ALL imported history (recomputed from the graph, so incremental imports stay exact)
     hist = store.q("git.history", "MATCH (r:Revision)-[:CHANGED]->(u:Unit {kind: 'file'}) "
-                   "WITH r, collect(u.path) AS fs WHERE size(fs) <= $max RETURN fs", {"max": MAX_FILES_PER_COMMIT}, ro=True)
+                   "WHERE r.files_changed <= $max "  # commit size counts every file, not just indexed ones
+                   "WITH r, collect(u.path) AS fs RETURN fs", {"max": MAX_FILES_PER_COMMIT}, ro=True)
     single, pairs = Counter(), Counter()
     for (fs,) in hist:
         single.update(set(fs))

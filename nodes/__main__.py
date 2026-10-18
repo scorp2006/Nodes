@@ -213,6 +213,34 @@ def cmd_watch(a):
                       f"{json.dumps(extra)[:160]}", flush=True)
 
 
+def cmd_replay(a):
+    """Re-emit a recorded workspace's events into <ws>-replay at their original pace (no agents, no LLM).
+    The replay graph is a copy of the source graph's final state; only the event stream is time-shifted."""
+    src = Store(a.workspace, a.db_host, a.db_port)
+    dst_name = a.into or f"{a.workspace}-replay"
+    r = src.r
+    rows = r.xrange(f"ws:{a.workspace}:events")
+    if not rows:
+        raise SystemExit(f"no recorded events in {a.workspace}")
+    r.delete(f"ws:{dst_name}:events")
+    if r.exists(f"ws:{dst_name}"):
+        r.execute_command("GRAPH.DELETE", f"ws:{dst_name}")
+    r.execute_command("GRAPH.COPY", f"ws:{a.workspace}", f"ws:{dst_name}")
+    info = json.loads(r.hget("nodes:workspaces", a.workspace) or "{}")
+    r.hset("nodes:workspaces", dst_name, json.dumps(info | {"replay_of": a.workspace}))
+    print(f"replaying {len(rows)} events from {a.workspace} into {dst_name} at {a.speed}x "
+          f"(open /?ws={dst_name})", flush=True)
+    time.sleep(a.wait)
+    prev = None
+    for _, f in rows:
+        e = json.loads(f.get("e") or f.get(b"e"))
+        if prev is not None:
+            time.sleep(min(max(e["t"] - prev, 0) / a.speed, a.max_gap))
+        prev = e["t"]
+        r.xadd(f"ws:{dst_name}:events", {"e": json.dumps(e | {"t": time.time(), "recorded_t": e["t"]})})
+    print("replay done", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser(prog="nodes")
     ap.add_argument("--db-host", default="localhost")
@@ -246,9 +274,15 @@ def main():
     m.add_argument("--workspace", required=True)
     w = sub.add_parser("watch")
     w.add_argument("--workspace", required=True)
+    p = sub.add_parser("replay", help="re-emit a recorded run's events at original timing into <ws>-replay")
+    p.add_argument("--workspace", required=True)
+    p.add_argument("--into", help="target workspace (default: <workspace>-replay)")
+    p.add_argument("--speed", type=float, default=1.0)
+    p.add_argument("--max-gap", type=float, default=3.0, help="cap idle gaps, in seconds")
+    p.add_argument("--wait", type=float, default=0.0, help="seconds to wait before the first event (open the page)")
     a = ap.parse_args()
     {"up": cmd_up, "init": cmd_init, "join": cmd_join, "watch": cmd_watch,
-     "import-sessions": cmd_import_sessions}[a.cmd](a)
+     "import-sessions": cmd_import_sessions, "replay": cmd_replay}[a.cmd](a)
 
 
 if __name__ == "__main__":

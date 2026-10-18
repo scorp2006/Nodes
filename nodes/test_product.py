@@ -80,7 +80,7 @@ def test_imports_and_module_blocks_are_leasable_units(ws):
     st, _ = ws
     kinds = dict(st.q("t", "MATCH (u:Unit) RETURN u.uid, u.kind", ro=True))
     assert kinds["region:t:pkg/m.py#imports"] == "region"
-    assert kinds["region:t:pkg/m.py#module@4"] == "region"
+    assert kinds["region:t:pkg/m.py#module@1"] == "region"
     assert kinds["region:t:pkg/m.py#Editor.__body__"] == "region"
     assert indexer.units_for_lines(st, "pkg/m.py", {1}) == ["region:t:pkg/m.py#imports"]
 

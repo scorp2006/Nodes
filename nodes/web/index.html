@@ -5,88 +5,238 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nodes live</title>
 <style>
-:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6e6e73;--line:#e3e3e0;--ok:#1f8a4c;--warn:#b25000;--bad:#c62828;--accent:#3b5bdb}
-@media (prefers-color-scheme:dark){:root{--bg:#111113;--card:#1c1c1f;--ink:#f2f2f2;--mute:#9a9aa0;--line:#2c2c30;--ok:#4cc38a;--warn:#ffb057;--bad:#ff6b6b;--accent:#8ea2ff}}
+:root{--bg:#f6f6f3;--card:#fff;--ink:#1c1c1e;--mute:#6b6b70;--line:#e2e2de;--go:#1f8a4c;--wait:#c27100;--block:#c62828;
+  --hand:#2f5bd8;--shadow:0 1px 2px rgba(0,0,0,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--card:#1b1b1e;--ink:#f1f1f1;--mute:#9a9aa1;--line:#2b2b30;
+  --go:#4cc38a;--wait:#ffb24d;--block:#ff6b6b;--hand:#8ea7ff;--shadow:none}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
-header{padding:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-h1{font-size:20px;margin:0}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 18px}
+h1{font-size:20px;margin:0;letter-spacing:-.01em}
 .mute{color:var(--mute);font-size:13px}
-main{display:grid;gap:12px;padding:0 16px 24px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
-.wide{grid-column:1/-1}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
-.row{border-top:1px solid var(--line);padding:8px 0}.row:first-of-type{border-top:0}
-.name{font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font:12px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
-.dec{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em}
-.proceed{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
-.handoff{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
-.defer{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
-.escalate{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
-.path{margin-top:4px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-word}
-.edge{color:var(--mute)}
+select,button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 10px}
+button{cursor:pointer}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mute)}.dot.on{background:var(--go);box-shadow:0 0 0 3px color-mix(in srgb,var(--go) 25%,transparent)}
+.counters{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.ctr{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 10px;box-shadow:var(--shadow)}
+.ctr b{font-size:17px;margin-right:4px}
+main{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;padding:0 18px 12px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);min-width:0}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);margin:0 0 8px}
+#feed{max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:6px}
+.story{border-left:4px solid var(--line);padding:6px 10px;border-radius:6px;background:color-mix(in srgb,var(--line) 25%,transparent);cursor:pointer}
+.story:hover{background:color-mix(in srgb,var(--line) 55%,transparent)}
+.story.go{border-color:var(--go)}.story.wait{border-color:var(--wait)}.story.block{border-color:var(--block)}.story.hand{border-color:var(--hand)}
+.story .t{font-size:12px;color:var(--mute);float:right;margin-left:8px}
+.story.new{animation:pop .6s ease}@keyframes pop{from{transform:translateX(-6px);opacity:0}to{transform:none;opacity:1}}
+.lanes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.lane{border:1px solid var(--line);border-radius:10px;padding:8px 10px;border-top:4px solid var(--c)}
+.lane .who{font-weight:650}.lane .holds{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.chip{font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:999px;padding:0 7px;background:var(--bg)}
+#graph{width:100%;height:300px;display:block}
+.gnode{transition:fill .5s ease}.gnode.flash{animation:flash 1.2s ease}
+@keyframes flash{0%{stroke-width:9;stroke-opacity:.9}100%{stroke-width:0;stroke-opacity:0}}
+.badge{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+.b-ok{background:color-mix(in srgb,var(--go) 18%,transparent);color:var(--go)}
+.b-ext{background:color-mix(in srgb,var(--hand) 18%,transparent);color:var(--hand)}
+.b-bad{background:color-mix(in srgb,var(--block) 18%,transparent);color:var(--block)}
+.fact{padding:5px 0;border-top:1px solid var(--line)}.fact:first-child{border-top:0}
+footer{padding:0 18px 18px}
+.timeline{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.timeline input{flex:1}
+#drawer{position:fixed;inset:auto 0 0 0;max-height:60vh;overflow:auto;background:var(--card);border-top:1px solid var(--line);
+  box-shadow:0 -8px 24px rgba(0,0,0,.15);padding:14px 18px;transform:translateY(105%);transition:transform .25s ease;z-index:5}
+#drawer.open{transform:none}
+pre{white-space:pre-wrap;word-break:break-word;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--bg);
+  border:1px solid var(--line);border-radius:8px;padding:8px;margin:4px 0 10px}
+table{border-collapse:collapse;width:100%;font-size:12px}td{border-top:1px solid var(--line);padding:3px 4px;vertical-align:top}
 .empty{color:var(--mute);font-style:italic}
-table{width:100%;border-collapse:collapse;font-size:13px}td{padding:2px 4px;border-top:1px solid var(--line)}
-select{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:2px 6px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 </style>
 </head>
 <body>
 <header>
-  <h1>Nodes <span class="mute">live team graph</span></h1>
-  <span class="mute"><select id="ws"></select> <span id="meta">connecting…</span></span>
+  <h1>Nodes</h1>
+  <select id="ws" aria-label="workspace"></select>
+  <span class="live"><span class="dot" id="dot"></span><span id="mode">connecting</span></span>
+  <div class="counters">
+    <span class="ctr" title="defer + escalate"><b id="c-conf">0</b>conflicts prevented</span>
+    <span class="ctr"><b id="c-hand">0</b>hand-offs</span>
+    <span class="ctr"><b id="c-rej">0</b>unverified facts rejected</span>
+    <span class="ctr" title="median server time of the action gate"><b id="c-lat">–</b>ms gate p50</span>
+  </div>
 </header>
 <main>
-  <section class="wide"><h2>Action gate: every edit passes through the graph first</h2><div id="decisions"></div></section>
-  <section><h2>Agents and what they own (lease epoch)</h2><div id="sessions"></div></section>
-  <section><h2>Hand-offs and waits</h2><div id="handoffs"></div></section>
-  <section><h2>Facts, checked against their source</h2><div id="facts"></div></section>
-  <section><h2>Event log</h2><div id="events"></div></section>
-  <section><h2>FalkorDB latency per query (this server)</h2><div id="latency"></div></section>
+  <section>
+    <h2>What happened, in plain words</h2>
+    <div id="feed"></div>
+    <div class="legend"><span><i style="background:var(--go)"></i>go ahead</span><span><i style="background:var(--wait)"></i>wait</span>
+      <span><i style="background:var(--block)"></i>blocked</span><span><i style="background:var(--hand)"></i>hand-off</span>
+      <span>click any line to see the raw call, response and Cypher</span></div>
+  </section>
+  <div style="display:grid;gap:14px;min-width:0">
+    <section><h2>Agents</h2><div class="lanes" id="lanes"></div></section>
+    <section><h2>The code they are touching (live, active neighborhood only)</h2><svg id="graph" role="img" aria-label="active code graph"></svg>
+      <div class="mute" id="glegend">Color = who holds it. A ring flashes when it is touched.</div></section>
+    <section><h2>Shared facts and their trust</h2><div id="facts"></div></section>
+  </div>
 </main>
+<footer>
+  <div class="timeline"><button id="play">▶ replay</button><input type="range" id="slider" min="0" value="0" aria-label="timeline">
+    <span class="mute" id="pos">live</span><button id="golive">live</button></div>
+</footer>
+<div id="drawer"><button id="close" style="float:right">close</button><div id="raw"></div></div>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const pathHtml = p => esc(p).replace(/(-[A-Z_]+-&gt;)/g, '<span class="edge">$1</span>');
-const short = u => esc(String(u).replace(/^(fn|region|file):[^:]+:/, ""));
-let ws = new URLSearchParams(location.search).get("ws") || "";
-function render(s) {
-  if (!ws && s.workspace) ws = s.workspace;
-  $("ws").innerHTML = (s.workspaces || []).map(w => `<option ${w === ws ? "selected" : ""}>${esc(w)}</option>`).join("");
-  $("meta").textContent = `${(s.sessions || []).length} agents · updated ${new Date().toLocaleTimeString()}`;
-  $("decisions").innerHTML = (s.decisions || []).map(d => `<div class="row">
-      <span class="dec ${esc(d.verdict)}">${esc(d.verdict)}</span> <span class="name">${esc(d.agent)}</span>
-      <span class="mute">${esc(d.reason)}</span><div class="path">${pathHtml(d.path)}</div></div>`).join("")
-    || '<div class="empty">No action has passed the gate yet.</div>';
-  $("sessions").innerHTML = (s.sessions || []).map(a => `<div class="row"><span class="name">${esc(a.name)}</span>
-      <span class="mute">${esc(a.status)}${a.commit ? " · done at " + esc(a.commit) : ""}${a.task ? " · " + esc(a.task) : ""}</span>
-      <div class="chips">${a.owns.filter(o => o.uid).map(o => `<span class="chip">${short(o.uid)} · e${esc(o.epoch)}</span>`).join("")
-      || '<span class="empty">owns nothing</span>'}</div></div>`).join("") || '<div class="empty">No agent has joined.</div>';
-  const hand = (s.decisions || []).filter(d => d.verdict === "handoff");
-  $("handoffs").innerHTML = hand.map(d => `<div class="row"><span class="dec handoff">handoff</span>
-      <span class="name">${esc(d.agent)}</span><div class="path">${pathHtml(d.path)}</div>
-      <div class="mute">snapshot ${esc(d.snapshot)}</div></div>`).join("")
-    + (s.waits || []).map(w => `<div class="row"><span class="dec defer">waiting</span>
-      <span class="name">${esc(w.from)}</span> waits for <span class="name">${esc(w.to)}</span> on <span class="chip">${short(w.unit)}</span></div>`).join("")
-    || '<div class="empty">No hand-offs or waits.</div>';
-  $("facts").innerHTML = (s.facts || []).map(f => `<div class="row">
-      <span class="dec ${f.status === "source-checked" ? "proceed" : "escalate"}">${esc(f.status)}</span>
-      <span class="name">${esc(f.by)}</span> <span class="mute">${esc(f.source)}</span><div>${esc(f.text)}</div></div>`).join("")
-    || '<div class="empty">No facts posted.</div>';
-  $("events").innerHTML = (s.events || []).slice(0, 15).map(e => `<div class="row"><span class="mute">
-      ${new Date(e.t * 1000).toLocaleTimeString()}</span> <span class="name">${esc(e.agent)}</span> ${esc(e.kind)}
-      <span class="mute">${esc(e.verdict || e.unit || e.commit || "")}</span></div>`).join("") || '<div class="empty">No events.</div>';
-  $("latency").innerHTML = `<table>${Object.entries(s.latency || {}).map(([k, v]) =>
-      `<tr><td>${esc(k)}</td><td>${v.n}×</td><td>p50 ${v.p50_ms} ms</td><td>p99 ${v.p99_ms} ms</td></tr>`).join("")}</table>`;
+const PALETTE = ["#2f5bd8","#c2410c","#7c3aed","#0f766e","#be185d","#4d7c0f","#b45309","#0369a1"];
+let ws = new URLSearchParams(location.search).get("ws") || "", events = [], live = true, cursor = 0, es = null,
+    state = {}, gnodes = [], gedges = [], colors = {}, playing = null;
+const short = u => { if (!u) return ""; const m = String(u).match(/#(.+)$/), f = String(u).split(":").pop().split("#")[0].split("/").pop();
+  if (!m) return f; const s = m[1]; return s === "imports" ? `imports of ${f}` : s.startsWith("module@") ? `module block ${s.slice(7)} of ${f}`
+  : s.endsWith(".__body__") ? `${s.slice(0, -9)} fields` : s; };
+const color = a => colors[a] ??= PALETTE[Object.keys(colors).length % PALETTE.length];
+const nameOf = a => String(a || "").replace(/-[0-9a-f]{6}(-[0-9a-f]{4})?$/, m => m.length > 7 ? " (subagent)" : "");
+
+function story(e, prev) {          // one event -> {cls, text} in plain language, or null to skip
+  const p = (e.path || "").split(" "), A = nameOf(e.agent);
+  if (e.kind === "decision") {
+    if (e.verdict === "proceed") { const what = (e.path || "").split("-HOLDS-> ")[1] || "its change";
+      const units = what.split(", ").map(short).join(", ");
+      return {cls: "go", text: prev[e.agent] === "defer" ? `${A} moved on to ${units}.` : `${A} went ahead with ${units}.`}; }
+    if (e.verdict === "defer") return {cls: "wait", text: `${A} tried to edit ${short(p[2])}. ${nameOf(p[4])} is working on it, so Nodes told ${A} to wait.`};
+    if (e.verdict === "handoff") return {cls: "hand", text: `${nameOf(p[0])} finished (commit ${String(p[2]).slice(0, 7)}). Nodes handed ${short(p[4])} to ${nameOf(p[6])}, who merges ${nameOf(p[0])}'s work first.`};
+    if (e.verdict === "escalate") return (e.path || "").includes("RELIES_ON")
+      ? {cls: "block", text: `${A} wanted to act on a claim the code doesn't back up. Nodes blocked it and asked a human.`}
+      : {cls: "block", text: `${nameOf(p[0])} and ${nameOf(p[2])} were each waiting for the other. Nodes stopped and asked a human to decide.`};
+  }
+  if (e.kind === "fact") return e.status === "source-checked" ? {cls: "go", text: `${A} shared a fact, and Nodes checked it against the code.`}
+    : e.status === "extracted" ? null : {cls: "block", text: `${A} posted a claim Nodes could not verify, so it is marked unverified.`};
+  if (e.kind === "done") return {cls: "hand", text: `${A} finished and committed ${String(e.commit || "").slice(0, 7)}. Its code can now be handed on.`};
+  if (e.kind === "subagent-start") return {cls: "", text: `${A} started working.`};
+  if (e.kind === "join") return {cls: "", text: `${A} joined the team.`};
+  if (e.kind === "intent") return {cls: "", text: `${A} said what it plans to change.`};
+  if (e.kind === "merge-snapshot") return {cls: "hand", text: `${A} is merging; Nodes saved a snapshot of the graph first.`};
+  if (e.kind === "stale-write") return {cls: "block", text: `${A} edited code it no longer held; Nodes warned it.`};
+  return null;
 }
-async function tick() {
-  try { render(await (await fetch("/api/state" + (ws ? "?ws=" + encodeURIComponent(ws) : ""))).json()); }
-  catch (e) { $("meta").textContent = "server not reachable, retrying…"; }
-  setTimeout(tick, 1500);
+
+function rebuild(n) {             // state after the first n events: lanes, holds, counters, feed
+  const holds = {}, last = {}, prevVerdict = {}, done = {}, feed = []; let conf = 0, hand = 0, rej = 0;
+  for (const e of events.slice(0, n)) {
+    const s = story(e, prevVerdict); if (s) feed.push({...s, e});
+    if (e.kind === "decision") {
+      prevVerdict[e.agent] = e.verdict; last[e.agent] = s ? s.text : e.verdict;
+      if (e.verdict === "defer" || e.verdict === "escalate") conf++;
+      if (e.verdict === "handoff") hand++;
+      const units = e.verdict === "proceed" ? ((e.path || "").split("-HOLDS-> ")[1] || "").split(", ")
+        : e.verdict === "handoff" ? [(e.path || "").split(" ")[4]] : [];
+      for (const u of units.filter(Boolean)) { for (const a in holds) holds[a].delete(u); (holds[e.agent] ??= new Set()).add(u); }
+    }
+    if (e.kind === "fact" && e.status === "unverified") rej++;
+    if (e.kind === "done") done[e.agent] = e.commit;
+    if (e.kind === "release" || e.kind === "session-end") holds[e.agent]?.clear();
+    if (!(e.agent in last) && e.agent) last[e.agent] = "";
+  }
+  return {holds, last, done, feed, conf, hand, rej};
 }
-$("ws").onchange = e => { ws = e.target.value; };
-tick();
+
+function render(flashUnits = []) {
+  const n = live ? events.length : cursor; const s = rebuild(n); state = s;
+  $("c-conf").textContent = s.conf; $("c-hand").textContent = s.hand; $("c-rej").textContent = s.rej;
+  $("feed").innerHTML = s.feed.slice().reverse().map((f, i) => `<div class="story ${f.cls}${i === 0 && live ? " new" : ""}" data-trace="${esc(f.e.trace || "")}">
+      <span class="t">${new Date(f.e.t * 1000).toLocaleTimeString()}</span>${esc(f.text)}</div>`).join("") || '<div class="empty">Nothing has happened yet.</div>';
+  const agents = Object.keys(s.last).filter(a => a && a !== "importer");
+  $("lanes").innerHTML = agents.map(a => `<div class="lane" style="--c:${color(a)}"><div class="who">${esc(nameOf(a))}
+      ${s.done[a] ? `<span class="badge b-ok">done</span>` : ""}</div><div class="mute">${esc(laneTask[a] || "")}</div>
+      <div class="holds">${[...(s.holds[a] || [])].map(u => `<span class="chip">${esc(short(u))}</span>`).join("") || '<span class="mute">holds nothing</span>'}</div>
+      <div class="mute">${esc(s.last[a] || "")}</div></div>`).join("") || '<div class="empty">No agent yet.</div>';
+  drawGraph(flashUnits);
+  $("pos").textContent = live ? "live" : `${n} / ${events.length} events`;
+}
+
+let laneTask = {}, lat = null;
+async function refreshSide() {
+  try {
+    const st = await (await fetch(`/api/state?ws=${encodeURIComponent(ws)}`)).json();
+    laneTask = Object.fromEntries((st.sessions || []).map(x => [x.name, x.task]));
+    $("ws").innerHTML = (st.workspaces || []).map(w => `<option ${w === ws ? "selected" : ""}>${esc(w)}</option>`).join("");
+    const g = (st.latency || {})["gate.lease"]; $("c-lat").textContent = g ? g.p50_ms : "–";
+    $("facts").innerHTML = (st.facts || []).map(f => `<div class="fact"><span class="badge ${f.status === "source-checked" ? "b-ok" : f.status === "extracted" ? "b-ext" : "b-bad"}">
+      ${f.status === "unverified" ? "unverified (rejected)" : esc(f.status)}</span> ${esc(nameOf(f.by))} <span class="mute">${esc(f.source)}</span><div>${esc(f.text)}</div></div>`).join("")
+      || '<div class="empty">No facts shared yet.</div>';
+    const gr = await (await fetch(`/api/graph?ws=${encodeURIComponent(ws)}`)).json();
+    mergeGraph(gr);
+  } catch (e) { /* server restarting */ }
+}
+
+// --- a tiny force layout for the active neighborhood -------------------------------------------------------------
+const W = () => $("graph").clientWidth || 600, H = 300;
+function mergeGraph(gr) {
+  const old = Object.fromEntries(gnodes.map(n => [n.id, n]));
+  gnodes = gr.nodes.map(n => Object.assign(old[n.id] || {x: W() / 2 + (Math.random() - .5) * 200, y: H / 2 + (Math.random() - .5) * 120, vx: 0, vy: 0}, n));
+  const ids = new Set(gnodes.map(n => n.id)); gedges = gr.edges.filter(e => ids.has(e.a) && ids.has(e.b));
+  for (let i = 0; i < 80; i++) step(); drawGraph();
+}
+function step() {
+  const byId = Object.fromEntries(gnodes.map(n => [n.id, n]));
+  for (const a of gnodes) for (const b of gnodes) if (a !== b) { const dx = a.x - b.x, dy = a.y - b.y;
+    const d2 = (dx / 3) ** 2 + dy * dy + .01;  // labels run right: nodes need ~3x more room sideways than vertically
+    if (d2 < 3000) { a.vx += dx / d2 * 60; a.vy += dy / d2 * 160; } }
+  for (const e of gedges) { const a = byId[e.a], b = byId[e.b]; const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) + .01, f = (d - 70) * .02;
+    a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f; }
+  for (const n of gnodes) { n.vx += (W() / 2 - n.x) * .004; n.vy += (H / 2 - n.y) * .006; n.x += n.vx *= .6; n.y += n.vy *= .6;
+    n.x = Math.max(24, Math.min(W() - 120, n.x)); n.y = Math.max(18, Math.min(H - 18, n.y)); }
+}
+function ownerAt(u) { for (const a in state.holds || {}) if (state.holds[a].has(u)) return a; return null; }
+function drawGraph(flash = []) {
+  const byId = Object.fromEntries(gnodes.map(n => [n.id, n]));
+  $("graph").innerHTML = gedges.map(e => `<line x1="${byId[e.a].x}" y1="${byId[e.a].y}" x2="${byId[e.b].x}" y2="${byId[e.b].y}"
+      stroke="var(--line)" stroke-width="1.5" ${e.by === "name-match" ? 'stroke-dasharray="4 3"' : ""}/>`).join("")
+    + gnodes.map(n => { const o = ownerAt(n.id); const c = o ? color(o) : "var(--card)";
+      return `<g><circle class="gnode${flash.includes(n.id) ? " flash" : ""}" cx="${n.x}" cy="${n.y}" r="${n.kind === "file" ? 7 : 10}" fill="${c}"
+        stroke="${o ? c : "var(--mute)"}" stroke-width="${flash.includes(n.id) ? 9 : 1.5}" stroke-opacity="${flash.includes(n.id) ? .9 : 1}">
+        <title>${esc(n.id)}${o ? "\nheld by " + esc(nameOf(o)) : ""}</title></circle>
+        <text x="${n.x + 13}" y="${n.y + 4}" font-size="11" fill="var(--${n.context ? "mute" : "ink"})">${esc(short(n.id))}</text></g>`; }).join("");
+}
+
+// --- live stream + timeline ----------------------------------------------------------------------------------------
+async function connect() {
+  if (es) es.close();
+  events = await (await fetch(`/api/events?ws=${encodeURIComponent(ws)}`)).json();
+  $("slider").max = events.length; $("slider").value = events.length; cursor = events.length;
+  await refreshSide(); render();
+  const lastId = events.length ? events[events.length - 1].id : "$";
+  es = new EventSource(`/api/stream?ws=${encodeURIComponent(ws)}&from=${encodeURIComponent(lastId)}`);
+  es.onopen = () => { $("dot").classList.add("on"); $("mode").textContent = "live"; };
+  es.onerror = () => { $("dot").classList.remove("on"); $("mode").textContent = "reconnecting"; };
+  es.onmessage = async m => { const e = JSON.parse(m.data); events.push(e); $("slider").max = events.length;
+    if (live) { $("slider").value = events.length; await refreshSide();
+      const touched = e.kind === "decision" ? ((e.path || "").match(/(fn|region|file|class):[^ ,]+/g) || []) : [];
+      render(touched); } };
+}
+$("ws").onchange = e => { ws = e.target.value; history.replaceState(null, "", `?ws=${encodeURIComponent(ws)}`); connect(); };
+$("slider").oninput = e => { cursor = +e.target.value; live = cursor >= events.length; render(); };
+$("golive").onclick = () => { live = true; cursor = events.length; $("slider").value = cursor; if (playing) clearInterval(playing); playing = null; $("play").textContent = "▶ replay"; render(); };
+$("play").onclick = () => { if (playing) { clearInterval(playing); playing = null; $("play").textContent = "▶ replay"; return; }
+  live = false; cursor = 0; $("play").textContent = "❚❚ pause";
+  playing = setInterval(() => { if (cursor >= events.length) { clearInterval(playing); playing = null; $("play").textContent = "▶ replay"; return; }
+    cursor++; $("slider").value = cursor; const e = events[cursor - 1];
+    render(e.kind === "decision" ? ((e.path || "").match(/(fn|region|file|class):[^ ,]+/g) || []) : []); }, 900); };
+$("feed").onclick = async ev => { const el = ev.target.closest(".story"); if (!el) return; const id = el.dataset.trace;
+  $("raw").innerHTML = id ? "loading…" : '<p class="empty">This event came from a run recorded before raw-call tracing existed.</p>';
+  $("drawer").classList.add("open"); if (!id) return;
+  const r = await (await fetch(`/api/trace?ws=${encodeURIComponent(ws)}&id=${id}`)).json();
+  $("raw").innerHTML = `<h2>${esc(r.kind)} · ${esc(r.name)} · ${esc(r.ms)} ms · ${esc(nameOf(r.agent))}</h2>
+    <div class="mute">request</div><pre>${esc(JSON.stringify(r.request, null, 1))}</pre>
+    <div class="mute">response</div><pre>${esc(JSON.stringify(r.response, null, 1))}</pre>
+    <div class="mute">FalkorDB queries behind it</div><table>${(r.queries || []).map(q => `<tr><td>${esc(q[0])}</td><td>${esc(q[1])} ms</td>
+      <td><pre style="margin:0">${esc(q[2] || "")}</pre></td></tr>`).join("")}</table>`; };
+$("close").onclick = () => $("drawer").classList.remove("open");
+(async () => { if (!ws) { const st = await (await fetch("/api/state")).json(); ws = st.workspace || ""; } connect(); })();
 </script>
 </body>
 </html>
