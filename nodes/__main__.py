@@ -189,6 +189,16 @@ def cmd_join(a):
     print(token if a.quiet else f"agent {a.agent} joined {a.workspace} as {sid}\nNODES_TOKEN={token}")
 
 
+def cmd_import_sessions(a):
+    """Opt-in (never automatic): past Claude Code transcripts of this repo -> rationale facts at 'extracted' trust."""
+    from .sessions_import import import_sessions
+    st = Store(a.workspace, a.db_host, a.db_port)
+    info = json.loads(st.r.hget("nodes:workspaces", a.workspace) or "{}")
+    if not info.get("git_common_dir"):
+        raise SystemExit(f"unknown workspace {a.workspace}; run nodes init first")
+    print(json.dumps(import_sessions(st, info["git_common_dir"])))
+
+
 def cmd_watch(a):
     r = Store(a.workspace, a.db_host, a.db_port).r
     last = "$"
@@ -232,10 +242,13 @@ def main():
     j.add_argument("--worktree")
     j.add_argument("--branch")
     j.add_argument("--quiet", action="store_true", help="print only the token")
+    m = sub.add_parser("import-sessions", help="opt-in: rationale from past Claude Code transcripts (local only)")
+    m.add_argument("--workspace", required=True)
     w = sub.add_parser("watch")
     w.add_argument("--workspace", required=True)
     a = ap.parse_args()
-    {"up": cmd_up, "init": cmd_init, "join": cmd_join, "watch": cmd_watch}[a.cmd](a)
+    {"up": cmd_up, "init": cmd_init, "join": cmd_join, "watch": cmd_watch,
+     "import-sessions": cmd_import_sessions}[a.cmd](a)
 
 
 if __name__ == "__main__":

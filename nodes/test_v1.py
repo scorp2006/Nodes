@@ -124,3 +124,25 @@ def test_redaction():
                         "tokens_used": 3, "cmd": "curl -H 'Authorization: Bearer abcdefghijkl'"})
     assert "nds_" not in json.dumps(out) and "sk-ant" not in json.dumps(out) and "abcdefghijkl" not in json.dumps(out)
     assert out["tokens_used"] == 3
+
+
+def test_import_sessions_extracts_rationale_with_source_line(repo, tmp_path_factory):
+    from nodes.sessions_import import import_sessions
+    st, root = repo
+    home = tmp_path_factory.mktemp("home")
+    proj = home / ".claude" / "projects" / "x"
+    proj.mkdir(parents=True)
+    lines = [{"type": "user", "cwd": str(root), "message": {"content": "go"}},
+             {"type": "assistant", "cwd": str(root), "message": {"content": [{"type": "text", "text":
+              "I used a lease instead of a lock because a crashed agent would block everyone forever. "
+              "Token was sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUV because tests needed it. Done."}]}}]
+    (proj / "s1.jsonl").write_text("\n".join(json.dumps(x) for x in lines), encoding="utf-8")
+    common = subprocess.run(["git", "-C", str(root), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                            capture_output=True, text=True).stdout.strip()
+    identity.git_common_dir.cache_clear()
+    out = import_sessions(st, common, home=home)
+    assert out == {"transcripts": 1, "rationale_facts": 2}
+    facts = dict(st.q("t", "MATCH (f:Fact {status: 'extracted'})-[:SOURCED_FROM]->(s:Source) RETURN f.text, s.uid", ro=True))
+    assert facts["I used a lease instead of a lock because a crashed agent would block everyone forever."] == \
+        "transcript:s1.jsonl#L2"
+    assert all("sk-ant" not in t for t in facts)                                             # redacted
