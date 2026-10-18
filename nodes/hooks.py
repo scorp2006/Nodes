@@ -223,7 +223,7 @@ def register(server, reg) -> None:
             FOREACH (_ IN CASE WHEN fresh THEN [1] ELSE [] END |
                 CREATE (s)-[:HELD {epoch: u.lease_epoch, from: $now, until: $until}]->(u))
             RETURN u.uid, fresh OR (owner = $me AND granted IS NOT NULL AND u.lease_epoch = granted
-                                    AND NOT (s.status = 'done' AND coalesce(s.done_at, 0) > $gated_at))""",
+                                    AND NOT (s.status = 'done' AND coalesce(s.done_at, 0) >= $gated_at))""",
             {"u": units, "me": sess["session"], "now": now, "until": now + ops.LEASE_TTL_MS,
              "ticket": [[k, v] for k, v in ticket["epochs"].items()] if ticket else [], "gated_at": ticket["t"] if ticket else 0})
         stale = [u for u, ok in rows if not ok]
