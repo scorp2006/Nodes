@@ -113,7 +113,7 @@ def build(g, workspace: Path, log_dir: Path | None = None) -> MCPServer:
     return server
 
 
-def serve_web(g, port: int, workspace: Path | None = None) -> ThreadingHTTPServer:
+def serve_web(g, port: int, workspace: Path | None = None, host: str = "127.0.0.1") -> ThreadingHTTPServer:
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):  # noqa: N802
             path = self.path.split("?")[0]
@@ -155,19 +155,20 @@ def serve_web(g, port: int, workspace: Path | None = None) -> ThreadingHTTPServe
         def log_message(self, *a):
             pass
 
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    httpd = ThreadingHTTPServer((host, port), Handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd
 
 
-def run(team: str, workspace: Path, db_host="localhost", db_port=6379, port=8780, web_port=8781,
+def run(team: str, workspace: Path, db_host="localhost", db_port=6379, port=8780, web_port=8781, host="127.0.0.1",
         log_dir: Path | None = None, transport="streamable-http"):
     from mcp.server.transport_security import TransportSecuritySettings
 
     g = FalkorDB(host=db_host, port=db_port).select_graph(team)
     if transport == "stdio":
         return build(g, workspace, log_dir).run("stdio")
-    serve_web(g, web_port, workspace)
+    serve_web(g, web_port, workspace, host)
     hosts = [f"{h}:{port}" for h in ("127.0.0.1", "localhost", "host.docker.internal")]
     security = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts, allowed_origins=[])
-    build(g, workspace, log_dir).run("streamable-http", host="127.0.0.1", port=port, transport_security=security)
+    # host 0.0.0.0 only inside a container; the compose file publishes the ports on the host's 127.0.0.1
+    build(g, workspace, log_dir).run("streamable-http", host=host, port=port, transport_security=security)

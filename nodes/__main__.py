@@ -18,14 +18,18 @@ from . import core, server
 IMAGE = "falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a"
 
 
-def ensure_db(port: int) -> None:
+def ensure_db(host: str, port: int) -> None:
     def up():
         try:
-            return FalkorDB(host="localhost", port=port).connection.ping()
+            return FalkorDB(host=host, port=port).connection.ping()
         except Exception:  # noqa: BLE001
             return False
-    if up():
-        return
+    for _ in range(30 if host != "localhost" else 1):  # another host (compose): just wait for it
+        if up():
+            return
+        time.sleep(1)
+    if host != "localhost":
+        raise SystemExit(f"FalkorDB at {host}:{port} is not reachable")
     name = f"nodes-falkordb-{port}"
     if subprocess.run(["docker", "start", name], capture_output=True).returncode != 0:
         subprocess.run(["docker", "run", "-d", "--name", name, "-p", f"127.0.0.1:{port}:6379", IMAGE], check=True)
@@ -61,7 +65,10 @@ def main():
     u.add_argument("--workspace", type=Path, default=Path.cwd())
     u.add_argument("--package", type=Path, help="Python package dir to graph (default: the workspace)")
     u.add_argument("--team", help="graph name (default: nodes_<workspace name>)")
+    u.add_argument("--db-host", default="localhost", help="FalkorDB host (started in Docker only if localhost)")
     u.add_argument("--db-port", type=int, default=6379)
+    u.add_argument("--host", default="127.0.0.1", help="bind address for MCP and the web view")
+    u.add_argument("--log-dir", type=Path, help="tool-call log directory (default: <workspace>/.nodes)")
     u.add_argument("--port", type=int, default=8780)
     u.add_argument("--web-port", type=int, default=8781)
     u.add_argument("--keep", action="store_true", help="keep the existing team graph (plans, claims, board)")
@@ -75,8 +82,8 @@ def main():
         return
     ws = a.workspace.resolve()
     team = a.team or "nodes_" + re.sub(r"[^A-Za-z0-9_]", "_", ws.name)
-    ensure_db(a.db_port)
-    g = FalkorDB(host="localhost", port=a.db_port).select_graph(team)
+    ensure_db(a.db_host, a.db_port)
+    g = FalkorDB(host=a.db_host, port=a.db_port).select_graph(team)
     if not a.keep:
         t0 = time.perf_counter()
         stats = core.load_repo(g, (a.package or ws).resolve())
@@ -86,9 +93,10 @@ def main():
     if not a.stdio:
         print(f"MCP:  http://127.0.0.1:{a.port}/mcp   web: http://127.0.0.1:{a.web_port}/", flush=True)
         print(f'add an agent:  claude mcp add --transport http nodes http://127.0.0.1:{a.port}/mcp --header "X-Agent: alice"', flush=True)
-    log_dir = ws / ".nodes"
-    log_dir.mkdir(exist_ok=True)
-    server.run(team, ws, db_port=a.db_port, port=a.port, web_port=a.web_port, log_dir=log_dir,
+    log_dir = a.log_dir or ws / ".nodes"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    server.run(team, ws, db_host=a.db_host, db_port=a.db_port, port=a.port, web_port=a.web_port, host=a.host,
+               log_dir=log_dir,
                transport="stdio" if a.stdio else "streamable-http")
 
 

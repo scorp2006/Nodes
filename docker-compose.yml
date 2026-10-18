@@ -1,0 +1,18 @@
+# One command:  docker compose up --build      then open http://127.0.0.1:8781/
+# Your own repo: NODES_REPO=/path/to/repo NODES_PACKAGE=src/yourpkg docker compose up --build
+services:
+  falkordb:
+    image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a  # v4.22.1
+    ports:
+      - "127.0.0.1:${FALKORDB_PORT:-6379}:6379"   # Redis protocol, for your own queries
+      - "127.0.0.1:${BROWSER_PORT:-3000}:3000"    # FalkorDB Browser
+  nodes:
+    build: .
+    depends_on: [falkordb]
+    environment:
+      NODES_PACKAGE: ${NODES_PACKAGE:-}
+    volumes:
+      - ${NODES_REPO:-./nodes}:/repo:ro
+    ports:
+      - "127.0.0.1:8780:8780"   # MCP: http://127.0.0.1:8780/mcp
+      - "127.0.0.1:8781:8781"   # live view and replays
