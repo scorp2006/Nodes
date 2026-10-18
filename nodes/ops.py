@@ -153,7 +153,8 @@ def declare_intent(store, sess: dict, task: str, summary: str, touches: list[dic
                  for a, u, v in near]
     first = same[0][1] if same else None
     suggested = {"owner": first, "handoff_order": [first, sess["name"]]} if first else {}
-    store.event("intent", sess["name"], intent=iid, notify=sorted({o["agent"] for o in overlaps}))
+    store.event("intent", sess["name"], intent=iid, notify=sorted({o["agent"] for o in overlaps}),
+                units=[r["uid"] for r in rows][:20])
     nxt = (f"{first} declared these units first: let them own the shared units. Work on your other units, and "
            f"call before_acting before every edit." if first else "No same-unit overlap. Call before_acting before every edit.")
     return envelope({"intent_uid": iid, "touches": [r["uid"] for r in rows], "overlaps": overlaps,

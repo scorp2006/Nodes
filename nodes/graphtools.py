@@ -64,7 +64,7 @@ def impact_of(store, sess: dict, unit: str, max_hops: int = 3) -> dict:
     held = [x for x in hits if x["held_by"] and x["held_by"] != sess["name"]]
     summary = f"impact of {uid}: {len(hits)} unit(s) within {h} hops" + (f", {len(held)} held by teammates" if held else "")
     return _done(store, sess, "impact_of", {"unit": uid, "max_hops": h, "impact": hits, "held_by_teammates": held},
-                 [cypher], [uid] + [x["unit"] for x in held[:10]], summary,
+                 [cypher], [uid] + [x["unit"] for x in hits[:30]], summary,  # everything it reached: the live view draws rays
                  "Units held by teammates are where your change could reach their work: coordinate before editing.")
 
 

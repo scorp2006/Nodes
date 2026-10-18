@@ -1,12 +1,13 @@
 // Nodes dashboard. Live from SSE; the graph view is FalkorDB's own canvas (vendored @falkordb/canvas 0.3.3).
 import "/static/vendor/falkordb-canvas/falkordb-canvas.js";
+import {Live} from "/static/live.js";
+import {animalSVG, colorFor} from "/static/animals.js";
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const q = s => encodeURIComponent(s);
-const AGENT_COLORS = ["#ff6b6b", "#4dabf7", "#ffd43b", "#ff922b", "#3bc9db", "#e9ecef", "#94d82d"];  // no purple, by request
 const colors = {};
-const color = a => colors[a] ??= AGENT_COLORS[Object.keys(colors).length % AGENT_COLORS.length];
+const color = a => colors[a] ??= colorFor(a);  // one cheerful colour (and animal) per agent, in order of appearance
 const nameOf = a => String(a || "").replace(/-[0-9a-f]{6}(-[0-9a-f]{4})?$/, m => m.length > 7 ? " (subagent)" : "");
 const short = u => { if (!u) return ""; const m = String(u).match(/#(.+)$/), f = String(u).split(":").pop().split("#")[0].split("/").pop();
   if (!m) return f; const s = m[1]; return s === "imports" ? `imports of ${f}` : s.startsWith("module@") ? `${f} block ${s.slice(7)}`
@@ -82,7 +83,7 @@ function renderOverview(fresh) {
       <div class="art"><div class="win"><span class="label">Workspace</span><div style="margin-top:12px;display:flex;gap:10px">${["proceed", "defer", "handoff"].map(v =>
       `<span class="tag t-${VERDICT[v]}">${v}</span>`).join("")}</div></div></div></div>`;
   $("lanes").innerHTML = agents.map(a => `<div class="agent" style="--c:${color(a)}">
-      <div class="top"><span class="who">${esc(nameOf(a)[0]?.toUpperCase() || "?")}</span><span class="nm">${esc(nameOf(a))}</span>${state.done[a] ? '<span class="tag t-go">done</span>' : ""}
+      <div class="top"><span class="who">${animalSVG(a, 30)}</span><span class="nm">${esc(nameOf(a))}</span>${state.done[a] ? '<span class="tag t-go">done</span>' : ""}
       <span class="task">${esc(laneTask[a] || "")}</span></div>
       <div class="chips">${[...(state.holds[a] || [])].map(u => `<span class="chip"><i></i>${esc(short(u))}</span>`).join("") || '<span class="muted" style="font-size:13px">holds nothing</span>'}</div>
       ${state.last[a] ? `<div class="last">${esc(state.last[a])}</div>` : ""}</div>`).join("")
@@ -423,6 +424,19 @@ $("gsource").onclick = async e => { const b = e.target.closest("button"); if (!b
     : "Your code as FalkorDB stores it, coloured by kind. A ring shows which agent holds it.";
   if (source === "raw") { await loadGraphList(); await loadRaw(); } else { renderGraph(); renderGside(); } };
 
+// ---------------------------------------------------------------- live view: agents at work on a floor plan
+const liveView = new Live($("live"), {esc, color, nameOf, short, animalSVG});
+let liveApplied = -1;  // how many events the scene reflects; -1 = not built yet
+function renderLive() {
+  if (!$("v-live").classList.contains("on")) return;
+  const n = live ? events.length : cursor;
+  if (liveView.graphSize !== graph.nodes.length) liveApplied = -1;                       // the map changed: rebuild
+  if (liveApplied >= 0 && n === liveApplied + 1) liveView.apply(events[n - 1], true);  // one step: animate it
+  else if (n !== liveApplied) liveView.replay(graph, events.slice(0, n));            // a jump: rebuild, no animation
+  liveApplied = n;
+}
+$("lvfull").onclick = () => document.fullscreenElement ? document.exitFullscreen() : $("live").requestFullscreen?.();
+
 // ---------------------------------------------------------------- facts
 function renderFacts() {
   $("facts").innerHTML = facts.map(f => `<div class="fact"><div class="meta"><span class="tag ${f.status === "source-checked" || f.status === "observed" ? "t-go" : f.status === "extracted" ? "t-hand" : "t-block"}">${esc(f.status === "unverified" ? "unverified" : f.status)}</span>
@@ -461,12 +475,13 @@ async function refreshState() {
 }
 function render(fresh = false) {
   state = rebuild(live ? events.length : cursor);
-  renderOverview(fresh); renderSpark(); renderGraph(); if (source === "code" && !document.querySelector("#gside .kv, #gside .props")) renderGside();
+  renderOverview(fresh); renderSpark(); renderGraph(); renderLive(); if (source === "code" && !document.querySelector("#gside .kv, #gside .props")) renderGside();
   $("mode").textContent = live ? "live" : `${cursor} / ${events.length}`;
   $("dot").classList.toggle("on", live && !!es);
 }
 async function connect() {
   if (es) es.close();
+  liveApplied = -1;
   $("crumb-ws").textContent = ws || "–"; $("ws-avatar").textContent = (ws[0] || "N").toUpperCase(); shape = ""; selCall = null;
   if (source === "raw") { $("rawsel").value = `ws:${ws}`; loadGraphList().then(loadRaw); }
   events = await (await fetch(`/api/events?ws=${q(ws)}`)).json();
@@ -486,7 +501,7 @@ async function connect() {
 $("nav").onclick = ev => { const b = ev.target.closest("button"); if (!b) return;
   document.querySelectorAll("#nav button").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === `v-${b.dataset.view}`));
-  $("crumb-view").textContent = b.textContent.trim(); if (b.dataset.view === "graph") setTimeout(() => canvas.zoomToFit?.(.85), 60); };
+  $("crumb-view").textContent = b.textContent.trim(); if (b.dataset.view === "live") { liveApplied = -1; setTimeout(renderLive, 30); } if (b.dataset.view === "graph") setTimeout(() => canvas.zoomToFit?.(.85), 60); };
 $("ws").onchange = e => { ws = e.target.value; history.replaceState(null, "", `?ws=${q(ws)}`); connect(); };
 $("more").onclick = () => { showAll = !showAll; renderOverview(); };
 $("cfilter").onclick = e => { const b = e.target.closest("button"); if (!b) return; callFilter = b.dataset.f;
