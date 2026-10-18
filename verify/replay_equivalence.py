@@ -7,6 +7,9 @@ the product's own FalkorDB :6380, a fresh workspace per run). For each call we c
   - recorded fields from the original run logs: HiddenBench final board posts; CooperBench resolved names,
     conflict flag, claim winners/losers, owned-function counts, role step
   - leakage: no product reply contains a briefing fact that nobody had posted at that point
+Timing: logs are in response order. A live declare_plan waited server-side (up to 60 s) for the partner's plan, so
+when the caller is alone and the partner's declare_plan is logged within 60 s, the partner's plan is applied first
+(in both systems). Nothing else is reordered.
 Only the harness runs whose code matches the frozen harness are replayed: HiddenBench board runs (dev1, test1,
 hb_sonnet) and CooperBench cb1b graph runs (45). Older dev CooperBench logs used earlier tool versions.
 
@@ -95,16 +98,33 @@ def cooperbench(log: Path, plan: dict):
     store.setup()
     indexer.index(store, repo_dir, pkg, repo)
     sess = {}
-    for i, c in enumerate(json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()):
+    entries = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+
+    def session(name):
+        if name not in sess:
+            _, sid = ops.join(store, name, task="cooperbench", client="harness")
+            sess[name] = {"session": sid, "name": name}
+        return sess[name]
+
+    for i, c in enumerate(entries):
         agent, tool = c["agent"], c["tool"]
-        if agent not in sess:
-            _, sid = ops.join(store, agent, task="cooperbench", client="harness")
-            sess[agent] = {"session": sid, "name": agent}
-        s = sess[agent]
+        s = session(agent)
         g.query("MERGE (:Agent {id: $a})", {"a": agent})  # the harness's who() does this on every call
         if tool == "declare_plan":
             found, problems = ct.resolve_names(g, c["functions"])
             ct.set_plan(g, agent, found)
+            harness.set_plan(store, s, harness.resolve_names(store, c["functions"])[0])
+            # The live server answered declare_plan only after the partner's plan arrived (it waits up to 60 s), and
+            # the log records calls in RESPONSE order. So if this caller is alone and the partner's declare_plan is
+            # logged within 60 s, apply the partner's plan first, in both systems, exactly as the wait did.
+            if len(ct.planners(g)) < 2:
+                nxt = next((e for e in entries[i + 1:] if e["tool"] == "declare_plan" and e["agent"] != agent), None)
+                if nxt and nxt["t"] - c["t"] <= 60:
+                    g.query("MERGE (:Agent {id: $a})", {"a": nxt["agent"]})
+                    ct.set_plan(g, nxt["agent"], ct.resolve_names(g, nxt["functions"])[0])
+                    harness.set_plan(store, session(nxt["agent"]),
+                                     harness.resolve_names(store, nxt["functions"])[0])
+                    counts["waits_modeled"] = counts.get("waits_modeled", 0) + 1
             text = ct.status_text(g, agent)
             if len(ct.planners(g)) < 2:
                 text = "Your partner has not declared a plan yet; call coordination_status again before editing.\n" + text
@@ -157,6 +177,7 @@ def main():
     print(f"reply text identical (harness vs product): {counts['text_equal']}/{counts['calls']}")
     print(f"recorded fields matched: {counts['recorded_equal']}/{counts['recorded_checks']}")
     print(f"leaks (an unposted briefing fact in a product reply): {counts['leaks']}")
+    print(f"declare_plan partner waits modeled (see docstring): {counts.get('waits_modeled', 0)}")
     print(f"mismatches: {len(mismatches)}   ({time.time() - t0:.0f} s)")
     for m in mismatches[:40]:
         print(json.dumps(m)[:1200])

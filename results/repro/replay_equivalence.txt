@@ -1,0 +1,7 @@
+HiddenBench board runs replayed: 83 (4670 tool calls)
+CooperBench cb1b graph runs replayed: 45 (246 tool calls)
+reply text identical (harness vs product): 4916/4916
+recorded fields matched: 566/566
+leaks (an unposted briefing fact in a product reply): 0
+declare_plan partner waits modeled (see docstring): 45
+mismatches: 0   (737 s)

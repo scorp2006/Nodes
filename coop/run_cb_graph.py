@@ -161,6 +161,29 @@ def patch_adapter(mode: str, world_graph: str, log_path: str) -> None:
     adapter._build_claude_command = build_claude_command
 
 
+def patch_adapter_product(mode: str, port: int, tokens: dict) -> None:
+    """Reproduction stage 2: the same `code_graph` tools, served by the Nodes product (harness-coop profile).
+    Identity is each agent's bearer token instead of the harness's X-Agent header."""
+    from cooperbench.agents.claude_code import adapter
+
+    original_instruction = adapter.build_instruction
+    original_command = adapter._build_claude_command
+
+    def build_instruction(*args, **kwargs):
+        return original_instruction(*args, **kwargs) + PROMPTS[mode]
+
+    def build_claude_command(*args, extra_flags: str = "", coop_env=None, **kwargs):
+        agent_id = (coop_env or {}).get("COOP_AGENT_ID", "agent")
+        mcp = {"mcpServers": {"code_graph": {
+            "type": "http", "url": f"http://host.docker.internal:{port}/mcp",
+            "headers": {"Authorization": f"Bearer {tokens[agent_id]}"}}}}
+        extra_flags += f"--mcp-config {shlex.quote(json.dumps(mcp))} "
+        return original_command(*args, extra_flags=extra_flags, coop_env=coop_env, **kwargs)
+
+    adapter.build_instruction = build_instruction
+    adapter._build_claude_command = build_claude_command
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--condition", choices=["coop", "protocol", "graph"], required=True)
@@ -169,12 +192,27 @@ def main() -> None:
     ap.add_argument("--src", help="package dir inside the repo, e.g. src/click")
     ap.add_argument("--tool-log")
     ap.add_argument("--effort", help="Claude Code --effort for every agent (low|medium|high|xhigh|max)")
+    ap.add_argument("--product-port", type=int, default=0, help="serve the graph tools from the Nodes product")
     ap.add_argument("cooperbench_args", nargs=argparse.REMAINDER)
     args = ap.parse_args()
 
     patch_container_cleanup()
     patch_effort(args.effort)  # applied first, so every condition gets exactly the same flag
-    if args.condition != "coop":
+    if args.condition == "graph" and args.product_port:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from nodes import indexer, ops
+        from nodes.db import Store
+
+        st = Store(args.world_graph)
+        st.reset()
+        st.setup()
+        print(f"product workspace {args.world_graph}: {indexer.index(st, Path(args.repo_dir), args.src, args.world_graph)}",
+              flush=True)
+        st.r.hset("nodes:workspaces", args.world_graph, json.dumps(
+            {"root": args.repo_dir, "repo": args.world_graph, "package": args.src, "team_size": 2}))
+        tokens = {a: ops.join(st, a, task="cooperbench", client="harness")[0] for a in ("agent1", "agent2")}
+        patch_adapter_product(args.condition, args.product_port, tokens)
+    elif args.condition != "coop":
         t0 = time.perf_counter()
         funcs, calls, stats = parse_repo(Path(args.repo_dir) / args.src)
         load(args.world_graph, funcs, calls)  # fresh graph: no claims or plans from earlier runs

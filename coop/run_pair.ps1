@@ -12,6 +12,7 @@ param(
     [string]$Model = "anthropic/claude-haiku-5-5",
     [string]$Effort = "",
     [switch]$Remember,
+    [int]$ProductPort = 0,  # reproduction stage 2: route the graph tools to the Nodes product (harness-coop profile)
     [switch]$NoEval   # batch mode: skip CooperBench's per-pair auto-eval; evaluate everything at the end (no peeking)
 )
 $ErrorActionPreference = "Stop"
@@ -66,6 +67,7 @@ if ($Condition -ne "coop") {
     $world = "cbw_" + $Condition + "_" + ($Repo -replace "_task", "") + "_" + $Task + "_" + ($Features -replace ",", "_")
     $launcher += @("--world-graph", $world, "--repo-dir", $repoDir, "--src", $src,
                    "--tool-log", (Join-Path $logDir "$Name.tool_calls.jsonl"))
+    if ($ProductPort) { $launcher += @("--product-port", $ProductPort) }
 }
 $cbArgs = @("run", "-n", $Name, "-r", $Repo, "-t", $Task, "-f", $Features, "-m", $Model, "-a", "claude_code",
             "--setting", "coop", "--git", "--backend", "docker", "-c", "1", "--redis", "redis://localhost:6379/1",

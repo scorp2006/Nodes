@@ -39,6 +39,11 @@ from claude_client import ClaudeCLIClient
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "external" / "HiddenBench_ICML" / "data"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from nodes import harness as nodes_harness  # noqa: E402  (reproduction stage 2)
+from nodes.db import Store  # noqa: E402
+PRODUCT_PORT = 8791  # `python -m nodes up --profile harness-board --port 8791`
+
 SPLITS = json.loads((Path(__file__).with_name("splits.json")).read_text(encoding="utf-8"))
 TOOLS = {"graph": ["share_fact", "shared_facts", "who_has_not_shared"],
          "graph_unverified": ["post_claim", "shared_claims", "who_has_not_posted"],
@@ -118,7 +123,22 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
     work = out_dir / "work" / args.condition / f"t{task.id}_d{dup}"
     graph = None
     try:
-        if tools:
+        if tools and args.server == "product":  # reproduction stage 2: the Nodes product, harness-board profile
+            work.mkdir(parents=True, exist_ok=True)
+            agents, assignments = instantiate_agents(task, client, args.profile, prompts, random.Random(seed),
+                                                     extra_prompt=extra, special_agent_ratio=1.0)
+            store = Store(f"repro-{out_dir.name}-t{task.id}-d{dup}")
+            store.reset()
+            store.setup()
+            sessions = nodes_harness.seed_board(store, assignments)
+            graph = store
+            for agent in agents:
+                cfg = work / f"{agent.name.replace(' ', '_')}.mcp.json"
+                cfg.write_text(json.dumps({"mcpServers": {"board": {
+                    "type": "http", "url": f"http://127.0.0.1:{PRODUCT_PORT}/mcp",
+                    "headers": {"Authorization": f"Bearer {sessions[agent.name]['token']}"}}}}), encoding="utf-8")
+                client.mcp_for_system[agent.history[0]["content"]] = str(cfg)
+        elif tools:
             work.mkdir(parents=True, exist_ok=True)
             (work / "tool_calls.jsonl").unlink(missing_ok=True)
             # Same seed + same call order as run_scenario, so these are the exact agents it will build.
@@ -145,7 +165,19 @@ def run_one(task, task_index, dup, args, prompts, out_dir: Path):
 
     run.update(condition=args.condition, model=args.model,
                usage=usage_summary(client.calls) | {"wall_seconds": round(time.time() - started, 1)})
-    if graph:
+    if graph and args.server == "product":
+        ids = {t: f"s{i}" for i, t in enumerate(task.shared_information)} |               {t: f"h{i}" for i, t in enumerate(task.hidden_information)}
+        trace = Path(".nodes/traces") / f"{graph.ws}.trace.jsonl"
+        recs = [json.loads(line) for line in trace.read_text(encoding="utf-8").splitlines()] if trace.exists() else []
+        run["board"] = {
+            "graph": f"ws:{graph.ws}",
+            "posts": [[n, ids.get(t, t)] for n, t in graph.q("x", "MATCH (s:Session)-[a:ASSERTED]->(f:Fact) "
+                                                             "RETURN s.name, f.text ORDER BY a.seq", ro=True)],
+            "claims": [],
+            "tool_calls": [{"t": r["t"], "agent": r["agent"], "tool": r["name"], **r["request"]}
+                           for r in recs if r["kind"].startswith("tool")],
+        }
+    elif graph:
         g = graph_tools.connect(graph)
         log = work / "tool_calls.jsonl"
         run["board"] = {
@@ -179,7 +211,7 @@ def main():
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--no-peek", action="store_true", help="print progress counts only, never results")
-    ap.add_argument("--server", choices=["stdio", "http"], default="stdio",
+    ap.add_argument("--server", choices=["stdio", "http", "product"], default="stdio",
                     help="stdio: new tool process per call (dev1/test1); http: one long-lived server")
     ap.add_argument("--digest", action="store_true", help="push the board into every turn")
     args = ap.parse_args()

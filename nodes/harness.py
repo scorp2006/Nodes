@@ -26,8 +26,8 @@ def seed_board(store, fact_assignments: list[dict]) -> dict[str, dict]:
     """One Session per participant, each BRIEFED with its numbered facts. Returns {name: session dict}."""
     sessions = {}
     for a in fact_assignments:
-        _, sid = ops.join(store, a["agent"], task="hiddenbench", client="harness")
-        sessions[a["agent"]] = {"session": sid, "name": a["agent"]}
+        token, sid = ops.join(store, a["agent"], task="hiddenbench", client="harness")
+        sessions[a["agent"]] = {"session": sid, "name": a["agent"], "token": token}
     rows = [{"sid": sessions[a["agent"]]["session"], "num": n, "uid": "briefing:" + ops.h(text), "text": text}
             for a in fact_assignments for n, text in enumerate(a["visible_facts"], start=1)]
     store.q("harness.seed_board", """
