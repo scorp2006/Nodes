@@ -35,15 +35,45 @@ def rationale(message: str, pr: int | None) -> str:
 
 def commits(root: Path, since: str | None) -> list[dict]:
     rng = [f"{since}..HEAD"] if since else ["HEAD"]
-    out = git(root, "log", f"-n{MAX_COMMITS}", "--name-only", "--format=%x1e%H%x1f%an%x1f%ae%x1f%at%x1f%P%x1f%B%x1f",
-              *rng)
-    res = []
-    for block in out.split("\x1e")[1:]:
-        sha, name, email, at, parents, body, files = block.split("\x1f", 6)
+    prefix = git(root, "rev-parse", "--show-prefix").removesuffix("\n")
+    out = git(root, "log", f"-n{MAX_COMMITS}", "--name-only", "--no-relative", "-z", "--no-show-signature",
+              "--format=%x00%H%x00%an%x00%ae%x00%at%x00%P%x00%B", *rng)
+    if not out:
+        return []
+    if not out.endswith("\0"):
+        raise ValueError("Malformed git log: missing NUL terminator")
+    fields = out.split("\0")
+    res, i = [], 0
+    # Each commit starts with an empty token and six NUL-terminated metadata fields.
+    # Git inserts one LF before its first filename; filenames themselves are raw with -z.
+    # Empty tokens delimit commits because Git paths cannot be empty or contain NUL.
+    while i < len(fields) - 1:
+        if fields[i] != "" or len(fields) < i + 8:
+            raise ValueError("Malformed git log: expected six metadata fields")
+        sha, name, email, at, parents, body = fields[i + 1:i + 7]
+        if any(not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", s) for s in [sha, *parents.split()]):
+            raise ValueError("Malformed git log: invalid commit ID")
+        try:
+            timestamp = int(at)
+        except ValueError as exc:
+            raise ValueError("Malformed git log: invalid author timestamp") from exc
+        i += 7
+        files = []
+        if fields[i]:
+            if not fields[i].startswith("\n") or fields[i] == "\n":
+                raise ValueError("Malformed git log: expected filename after formatting newline")
+            files.append(fields[i][1:])
+            i += 1
+            while i < len(fields) - 1 and fields[i]:
+                files.append(fields[i])
+                i += 1
+        files_changed = len(files)  # Keep the repository-wide size guard before filtering to the indexed subtree.
+        if prefix:
+            files = [f[len(prefix):] for f in files if f.startswith(prefix)]
         m = PR.search(body)
         pr = int(next(g for g in m.groups() if g)) if m else None
-        res.append({"sha": sha, "author": name, "email": email.lower(), "at": int(at), "parents": parents.split(),
-                    "message": body.strip()[:2000], "pr": pr, "files": [f for f in files.strip().splitlines() if f]})
+        res.append({"sha": sha, "author": name, "email": email.lower(), "at": timestamp, "parents": parents.split(),
+                    "message": body.strip()[:2000], "pr": pr, "files": files, "files_changed": files_changed})
     return res
 
 
@@ -87,9 +117,15 @@ def import_git(store, root: Path, units: list[dict], batch: int = 500) -> dict:
     meta = store.r.hget("nodes:git", store.ws)
     since = meta.decode() if isinstance(meta, bytes) else meta
     try:
-        git(root, "rev-parse", "HEAD")
+        git(root, "rev-parse", "--git-dir")
     except subprocess.CalledProcessError:
         return {"git": "not a git repository"}
+    try:
+        git(root, "rev-parse", "--verify", "HEAD")
+    except subprocess.CalledProcessError:
+        if not git(root, "rev-list", "--all", "--max-count=1").strip():
+            return {"git": "no commits"}
+        raise
     try:
         if since:
             git(root, "cat-file", "-e", f"{since}^{{commit}}")
@@ -102,7 +138,7 @@ def import_git(store, root: Path, units: list[dict], batch: int = 500) -> dict:
             MERGE (p:Principal {uid: 'person:' + c.email}) ON CREATE SET p.kind = 'human', p.name = c.author
             MERGE (r:Revision {uid: 'rev:' + c.sha})
             ON CREATE SET r.sha = c.sha, r.at = c.at, r.message = c.message, r.pr = c.pr, r.is_merge = size(c.parents) > 1
-            SET r.files_changed = size(c.files)
+            SET r.files_changed = c.files_changed
             MERGE (p)-[:AUTHORED]->(r)
             WITH r, c UNWIND c.files AS f
             MATCH (u:Unit {kind: 'file', path: f})
