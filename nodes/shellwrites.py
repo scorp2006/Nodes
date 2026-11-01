@@ -12,7 +12,7 @@ import re
 import shlex
 from pathlib import Path
 
-HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1(?P<tail>[^\n]*)\n(.*?)\n\s*\2\s*(?:\n|$)", re.S)
+HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1(?P<tail>[^\n]*)\n(?P<body>.*?)\n\s*\2\s*(?:\n|$)", re.S)
 WRITES = re.compile(r"open\([^)]*['\"][wax+]b?['\"]|write_text|write_bytes|\.write\(|writeFile|appendFile|"
                     r"shutil\.(copy|move)|os\.(replace|rename)|File\.write|IO\.write")
 PATHLIKE = re.compile(r"[\w./\\-]+\.\w{1,5}")
@@ -60,7 +60,7 @@ def _script_paths(code: str) -> tuple[list[str], bool]:
 def write_targets(cmd: str, cwd: Path | None = None) -> tuple[list[str], bool]:
     """(paths the command writes, as written in it; opaque: it writes files we could not name)."""
     cwd = cwd or Path(".")
-    bodies = [m.group(3) for m in HEREDOC.finditer(cmd)]
+    bodies = [m.group("body") for m in HEREDOC.finditer(cmd)]
     cmd = HEREDOC.sub(lambda m: "<<HEREDOC" + m.group("tail") + "\n", cmd)
     targets, opaque = [], False
     for line in cmd.splitlines():
